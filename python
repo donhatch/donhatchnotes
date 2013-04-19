@@ -1,7 +1,3 @@
-TODO: merge python.fromhome with python.fromwork
-
-
-
 GOOD INTERESTING READING AND REFS:
     http://www.secnetix.de/~olli/Python 
     http://www.secnetix.de/~olli/Python/doclinks.hawk
@@ -38,8 +34,6 @@ GOOD INTERESTING READING AND REFS:
             as true/false values. The bool type was introduced in (by memory)
             Python 2.2 or 2.3, so very old code may fail, or worse, silently do the
             wrong thing if you use "is True". 
-
-
 
 GOTCHAS:
     - --x does not increment x !!!  it returns -(-x)). Likewise for ++x, etc.
@@ -81,20 +75,61 @@ GOTCHAS:
     - bizarre symlink behavior when importing-- follows the symlink
       and looks for the imported files there.
 
-    - lambda scopes are broken:
-        >> fs = [(lambda n: i + n) for i in range(10)]
-        >> [f(4) for f in fs]
-        [13, 13, 13, 13, 13, 13, 13, 13, 13, 13]
-      workaround:
-        >> fs = [(lambda n,i=i: i + n) for i in range(10)]
-        >> [f(4) for f in fs]
-        [4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
-      see:
-          http://math.andrej.com/2009/04/09/pythons-lambda-is-broken/
+    - Generator functions are NOT "tuple comprehension"!
+      E.g.
+          (10**i for i in xrange(3))
+      behaves differently from
+          [10**i for i in xrange(3)]
+      as follows:
+          >>>foo = [10**i for i in xrange(3)]
+          >>> print [x for x in foo]
+          [1, 10, 100]
+          >>> print [x for x in foo]
+          [1, 10, 100]
+          >>> print [x for x in foo]
+          [1, 10, 100]
+
+          >>> bar = (10**i for i in xrange(3))
+          >>> print [x for x in bar]
+          [1, 10, 100]
+          >>> print [x for x in bar]
+          []
+          >>> print [x for x in bar]
+          []
+       XXX give example from work
+      
+
+    - XXX MERGE THE FOLLOWING TWO GRIPES
+        - lambda contexts don't work sanely, apparently.
+            >>> print [f() for f in [lambda:range(n) for n in range(4)]]
+            [[0, 1, 2], [0, 1, 2], [0, 1, 2], [0, 1, 2]]
+            funlist = []
+            for i in [0,1,2]:
+                funlist.append(lambda:i)
+            funlist[0](), funlist[1](), funlist[2]()
+            (2,2,2)
+            This page discusses the same thing:
+                http://www.enricozini.org/2007/tips/python-scoping.html
+            Oh!  And it gives a trick for solving it!
+                print [f() for f in [lambda n=n:range(n) for n in range(4)]]
+            similarly for the other one.
+
+        - lambda scopes are broken:
+            >> fs = [(lambda n: i + n) for i in range(10)]
+            >> [f(4) for f in fs]
+            [13, 13, 13, 13, 13, 13, 13, 13, 13, 13]
+          workaround:
+            >> fs = [(lambda n,i=i: i + n) for i in range(10)]
+            >> [f(4) for f in fs]
+            [4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+          see:
+              http://math.andrej.com/2009/04/09/pythons-lambda-is-broken/
 
     - 1==True and 13==True evaluate to False, but
       bool(1)==True and bool(13)==True evaluate to True
 
+
+     
 
 THINGS I DIDN'T SEE AT FIRST:
     - for ... else   what a waste of my time having to research what this means
@@ -106,11 +141,12 @@ THINGS I DIDN'T SEE AT FIRST:
       Although it would be even more useful, maybe, if
       it had an optional special-case-for-only-one-item parameter too...
     - == is deep, "is" is shallow (pointer compare)
+        but wait: a = 1+1; b = 2; a is b
+        returns True??? Then I don't understand what "is" means.
 
     - from http://www.norvig.com/python-iaq.html but without the trailing " ":
             import sys
             def printf(format, *args): sys.stdout.write(format%args)
-
 TRICKS:
     - from http://www.norvig.com/python-iaq.html:
       To avoid typing quotes around key names:
@@ -120,7 +156,13 @@ TRICKS:
       and there's a similar thing for objects.
     - to get a local variable inside a lambda, use a helper lambda inside,
        which declares the desired variable as a param with default value.
+       From http://p-nand-q.com/python/stupid_lambda_tricks.html:
+           f = lambda x: (lambda result=range(20):do_something(result,x))()
+           As mentioned above, local variables are best used in a list,
+           because that way you can use [].__setitem__ for data assignments.
+       (what the hell did the last sentence mean?)
     - for key, value in os.environ.iteritems():
+
 
 TO EXPERIMENT WITH:
     - generator functions: see http://www.secnetix.de/~olli/Python/examples.hawk
@@ -145,10 +187,23 @@ TO EXPERIMENT WITH:
     - experiment with, and understand, the iaq's version
       of ternary ?:
     - try the iaq guy's .python startup file
+FEATURES TO KEEP IN MIND:
+    - time.clock()
+    - documentation strings (if first statement of a
+      module, class, or function is a string)
+    - string concatenation by just putting the strings side-by-side
+    - to undefine a variable, use del
+    - can do singleton pattern, see the iaq. (note,
+      it uses a totally non-obvious semantic of default args)
       
 
 
 QUESTIONS (most recent first):
+    Q: beazley p.16 it says "s1" u "s2" can be different from u"s1s2" ...
+       what's an example of this? (It says details in Ch.4 and Appendix A)
+    Q: beazley p.16 says raw strings can't end in a single backslash--
+       why, for heaven's sake?? Backslashes aren't even treated specially,
+       otherwise!
 
     Q: what are the utilities for converting an arg list
        to a properly quoted shell command, and back?
@@ -220,6 +275,11 @@ QUESTIONS (most recent first):
     Q: Why would I want to use a tuple instead of a list? (Faster for const?)
 
 ANSWERED QUESTIONS (most recent first):
+    Q: beazley p.17 says "..." is used in extended slicing operations,
+       but I don't see that on p.24?
+    A: see p.33.  E.g. a[i:j:stride], a[i:j, n:m], or a[..., i:j]
+       But I still have no idea what the last one is supposed to mean,
+       and it gives an error in the interpreter!?
 
     Q: running other programs?
     A: os.system('date')
@@ -270,7 +330,6 @@ ANSWERED QUESTIONS (most recent first):
        and seems to have a resolution of 1/100 second-- so,
        execute something like max(range(1e6)) and afterwards it will show
        a different value.
-
     Q: can I have local variables and compound statements in a lambda function?
     A: no but can work around using dirty tricks,
        see "Lambda Limitations" section of:
@@ -326,7 +385,10 @@ PYTHON PROS AND CONS:
       This encourages sloppiness and bugs.
       (even if a "strict" mode were introduced,
       the usefulness would be limited because
-      of the lack of block structure for scoping variables.)
+      of the lack of block structure for scoping variables--
+      no wait, that's not true, a block is an indentation level.
+      yeah I think that makes sense-- I want the scope of a variable
+      to be the indented block it's defined in)
     CON: commands.getoutput() strips the final newline, if any.
       so when I care about that, I have to use something more complicated--
       what a pain.  perl does this right, i.e. it retains the newline
@@ -348,11 +410,19 @@ PYTHON PROS AND CONS:
       (most complete discussion of this is in the iaq,
       which might actually give something that really works
       but is just a little obscure... need to read it)
-      (trick for delayed execution is to use a simple lambda
-      without arguments)
-        (lambda:c,lambda:b)[bool(a)]()
+      Trick for delayed execution is to use a simple lambda without arguments:
+          [lambda:b, lambda:c][not not a]()
+      or:
+          (a and (lambda:b) or (lambda:c))()
     CON: print seems awkward, the way I can't put parens around its args
-      without changing the meaning-- maybe I'll get used to that.
+      without changing the meaning (e.g. print 1,2 is different from print(1,2))
+      Maybe I'll get used to that.
+      (turns out everyone hates print, even the author of python)
+      alternative (from the iaq):
+        def printf(format, *args): print format % args,
+      but that puts a space at the end.  So use this intead:
+        import sys
+        def printf(format, *args): sys.stdout.write(format % args)
     PRO: function declarations are MUCH more readable than perl,
       and the named arguments and default arguments are great for useability
       (although I try not to use default arguments very often,
@@ -374,7 +444,8 @@ PYTHON PROS AND CONS:
     PRO: functional programming (with correct semantics for nested scopes).
       Anonymous functions are concise and readable-- nice.
       see http://www.secnetix.de/~olli/Python/lambda_functions.hawk
-      (although-- can I have local variables and compound statements?)
+      (although-- can I have local variables and compound statements?
+       no, see workarounds above)
     PRO: have to use "this" or "self" explicitly-- right on,
       makes code much more readable.
     CON: can treat non-bools as bools.  this encourages bugs.
