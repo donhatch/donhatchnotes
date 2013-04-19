@@ -43,7 +43,7 @@ a list.  When we are reporting progress, we want to report how many items
 we've processed so far.  If we report progress at the beginning
 of every iteration, we would naturally report the number of items done
 *before* the current item, which is effectively using 0-based indexing.
-If we report progress at the end of every iteration, we would natureally
+If we report progress at the end of every iteration, we would naturally
 report the number of items done *including* the current item,
 which is effectively using 1-based indexing.  Neither really makes sense...
 what does make sense is to realize that we are labeling
