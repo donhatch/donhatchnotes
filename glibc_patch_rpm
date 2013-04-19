@@ -1,0 +1,303 @@
+Roughly following what I did in icecream_rpm_patch
+
+Good docs:
+    http://bradthemad.org/tech/notes/patching_rpms.php
+    http://wiki.centos.org/HowTos/RebuildSRPM
+    http://www.owlriver.com/tips/patching_srpms/
+
+Diary of what I did to make a patched glibc RPM
+
+1. Get the source RPM I want to work from.
+
+   In my case, that was from:
+       http://vault.centos.org/6.3/updates/Source/SPackages/ 
+   (originally found it here:
+       http://rpm.pbone.net/index.php3/stat/3/srodzaj/2/search/glibc-2.12-1.80.el6_3.7.src.rpm
+    contents are same, but that's packaged and signed by redhat, not centos)
+   Local copies (not complete):
+        On 03/19/2013 05:51 PM, Thomas Chan wrote:
+        >
+        > SRPMS:
+        > /dept/srd/mirror/centos-vault/6.3/os/Source/SPackages/
+        > /dept/srd/mirror/centos-vault/6.3/updates/Source/SPackages/
+        >
+        > RPMS:
+        > /dept/sio/linux/os/centos/6/repos/
+
+   Downloaded it to ~/downloads.
+
+2. Make an rpm "sandbox" in my home directory,
+   so I don't need to be root.
+   From http://snippets.dzone.com/posts/show/1715 (don't need to make the subdirs explicitly):
+       % mkdir -p /var/tmp/doNotRemove/dhatch/rpmbuild1/{BUILD,RPMS,SOURCES,SPECS,SRPMS} # actually not necessary, they will all be created on demand
+       % echo "%_topdir /var/tmp/doNotRemove/dhatch/rpmbuild1" > ~/.rpmmacros
+   (rpmbuild1 is because rpmbuild alread existed)
+
+3. Extract it into there:
+	% rpm -ivh ~/downloads/glibc-2.12-1.80.el6_3.7.src.rpm
+   That put stuff (.tar.bz2 and .patch files) into /var/tmp/doNotRemove/dhatch/rpmbuild1/SOURCES, and glibc.spec into SPECS.
+
+4. Prep, build, install, build binary package, build source package (see man rpmbuild for other options)
+        % cd /var/tmp/doNotRemove/dhatch/rpmbuild1
+        % script    # to log everything into typescript
+        % rpmbuild -ba SPECS/glibc.spec
+
+        note, there was some scary stuff like:
+            make[2]: Entering directory `/var/tmp/doNotRemove/dhatch/rpmbuild1/BUILD/glibc-2.12-2-gc4ccff1/iconvdata'
+            Testing ASCIIcommon_objpfx=/var/tmp/doNotRemove/dhatch/rpmbuild1/BUILD/glibc-2.12-2-gc4ccff1/build-x86_64-linuxnptl/: Command not found.
+            objpfx=/var/tmp/doNotRemove/dhatch/rpmbuild1/BUILD/glibc-2.12-2-gc4ccff1/build-x86_64-linuxnptl/iconvdata/: Command not found.
+            charset=ASCII: Command not found.
+            charmap=ANSI_X3.4-1968: Command not found.
+            common_objpfx: Undefined variable.
+             *** FAILED ***
+        but it continued on.
+
+    weird, it made rpms that didn't match the source rpm name:
+        % find SRPMS RPMS
+            SRPMS/
+            SRPMS/glibc-2.12-1.80.el6.7.src.rpm
+            RPMS/
+            RPMS/x86_64/
+            RPMS/x86_64/glibc-static-2.12-1.80.el6.7.x86_64.rpm
+            RPMS/x86_64/glibc-utils-2.12-1.80.el6.7.x86_64.rpm
+            RPMS/x86_64/glibc-debuginfo-2.12-1.80.el6.7.x86_64.rpm
+            RPMS/x86_64/glibc-common-2.12-1.80.el6.7.x86_64.rpm
+            RPMS/x86_64/glibc-devel-2.12-1.80.el6.7.x86_64.rpm
+            RPMS/x86_64/nscd-2.12-1.80.el6.7.x86_64.rpm
+            RPMS/x86_64/glibc-headers-2.12-1.80.el6.7.x86_64.rpm
+            RPMS/x86_64/glibc-debuginfo-common-2.12-1.80.el6.7.x86_64.rpm
+            RPMS/x86_64/glibc-2.12-1.80.el6.7.x86_64.rpm
+    I think this comes out of the following in the spec:
+        Release: 1.80%{?dist}.7
+    Do these come out of my ~/.rpmmacros??
+    Let's try building just the source package:
+        % script typescript2
+        % rpmbuild -bs SPECS/glibc.spec
+            Wrote: /var/tmp/doNotRemove/dhatch/rpmbuild1/SRPMS/glibc-2.12-1.80.el6.7.src.rpm
+        % rpm -q -i -p /var/tmp/doNotRemove/dhatch/rpmbuild1/SRPMS/glibc-2.12-1.80.el6.7.src.rpm
+            Name        : glibc                        Relocations: (not relocatable)
+            Version     : 2.12                              Vendor: (none)
+            Release     : 1.80.el6.7                    Build Date: Tue 19 Mar 2013 07:31:50 PM PDT
+            Install Date: (not installed)               Build Host: r7c1320.lucasfilm.com
+            Group       : System Environment/Libraries   Source RPM: (none)
+            Size        : 18667126                         License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
+            Signature   : (none)
+            URL         : http://sources.redhat.com/glibc/
+            Summary     : The GNU libc libraries
+            Description :
+            The glibc package contains standard libraries which are used by
+            multiple programs on the system. In order to save disk space and
+            memory, as well as to make upgrading easier, common system code is
+            kept in one place and shared between programs. This particular package
+            contains the most important sets of shared libraries: the standard C
+            library and the standard math library. Without these two libraries, a
+            Linux system will not function.
+    whereas the original is:
+        % rpm -q -i -p ~/downloads/glibc-2.12-1.80.el6_3.7.src.rpm
+            Name        : glibc                        Relocations: (not relocatable)
+            Version     : 2.12                              Vendor: CentOS
+            Release     : 1.80.el6_3.7                  Build Date: Thu 31 Jan 2013 03:07:54 AM PST
+            Install Date: (not installed)               Build Host: c6b9.bsys.dev.centos.org
+            Group       : System Environment/Libraries   Source RPM: (none)
+            Size        : 18667126                         License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
+            Signature   : RSA/SHA1, Thu 31 Jan 2013 02:13:49 PM PST, Key ID 0946fca2c105b9de
+            Packager    : CentOS BuildSystem <http://bugs.centos.org>
+            URL         : http://sources.redhat.com/glibc/
+            Summary     : The GNU libc libraries
+            Description :
+            The glibc package contains standard libraries which are used by
+            multiple programs on the system. In order to save disk space and
+            memory, as well as to make upgrading easier, common system code is
+            kept in one place and shared between programs. This particular package
+            contains the most important sets of shared libraries: the standard C
+            library and the standard math library. Without these two libraries, a
+            Linux system will not function.
+    so, there's a difference:
+            Vendor
+            Release
+            Build Date
+            Build Host
+            Signature
+            Packager
+    Evidently I *could* get the name to match by putting the following in my ~/.rpmmacros:
+        %dist .el6_3
+    But really I'm wanting to append something anyway, so,
+    modifying the spec file as follows:
+        % cp -a SPECS/glibc.spec SPECS/glibc.spec.orig
+        % vi SPECS/glibc.spec
+                changed: Release: 1.80%{?dist}.7
+                     to: Release: 1.80.el6_3.7._dl_sort_fini_fix0.0
+                appended to Description:
+                    ILM PATCH: This package also contains a patch for the runtime linker,
+                    which fixes slowness in _dl_sort_fini when there are many DSOs
+                    at exit time (e.g. when running zeno).  See changelog for details.
+                prepended to changelog:
+                    * Tue Mar 19 2013 <dhatch@ilm.com> - 2.12-1.80.el6_3.7._dl_sort_fini_fix0.0
+                    - _dl_sort_fini is now O(n) instead of O(n^3), fixing slow exits
+                      of various programs such as zeno
+                    - _dl_sort_fini now gives proper precedence to static dependencies
+                      over dynamic ones.
+                    - fixed freed memory read in _dl_sort_fini when running under valgrind,
+                      mtrace, etc.
+
+
+    All right now I think it's the way I want it...
+        % script    # to log everything into typescript
+        % rpmbuild -ba SPECS/glibc.spec
+
+5. Make a snapshot of the original source directory (the original will get clobbered)
+   and another copy of the source directory for me to work in,
+   that won't get clobbered by each rebuild.
+        % cd /var/tmp/doNotRemove/dhatch/rpmbuild1/BUILD
+        % ( cd glibc-2.12-2-gc4ccff1/build-x86_64-linuxnptl/ && make && make clean)
+
+        % cp -a glibc-2.12-2-gc4ccff1 glibc-2.12-2-gc4ccff1.orig.madeclean
+        % cp -a glibc-2.12-2-gc4ccff1 glibc-2.12-2-gc4ccff1.sandbox
+        % cd glibc-2.12-2-gc4ccff1.sandbox/build-x86_64-linuxnptl/
+        % make
+        % make objdir=`pwd` subdir=elf -C ../elf check
+        ... make some changes ...
+                7 changed files:
+                        elf/dl-close.c
+                        elf/dl-deps.c
+                        elf/dl-fini.c
+                        elf/dl-libc.c
+                        elf/ldsodefs.h
+                        elf/Makefile
+                        malloc/set-freeres.c
+                8 new files:
+                        elf/order3.c
+                        elf/order3mod1.c
+                        elf/order3mod21.c
+                        elf/order3mod2.c
+                        elf/order3mod32.c
+                        elf/order3mod3.c
+                        elf/order3mod43.c
+                        elf/order3mod4.c
+        % make objdir=`pwd` subdir=elf -C ../elf check
+
+6. Make the patch file
+        % cd /var/tmp/doNotRemove/dhatch/rpmbuild1/BUILD
+        % (cd glibc-2.12-2-gc4ccff1.sandbox/build-x86_64-linuxnptl/ && make clean)
+        % diff -uNr glibc-2.12-2-gc4ccff1.orig.madeclean glibc-2.12-2-gc4ccff1.sandbox > ../SOURCES/glibc-dl_sort_fini.patch
+   hmm, that didn't work, there was still crap in both build dirs.
+   so, no point in doing the previous clean, just do the following:
+        % \rm -rf glibc-2.12-2-gc4ccff1.orig.madeclean/build-x86_64-linuxnptl/ glibc-2.12-2-gc4ccff1.sandbox/build-x86_64-linuxnptl/
+        % diff -uNr glibc-2.12-2-gc4ccff1.orig.madeclean glibc-2.12-2-gc4ccff1.sandbox > ../SOURCES/glibc-dl_sort_fini.patch
+   (and when I want to make again, have to cp -a
+   the build-x86_64-linuxnptl dir from the built one to the sandbox again,
+   and type "make clean" and the "make" to get re-started)
+
+
+7. Add the patch file (and other stuff) to the spec file
+        % cd ../SPECS
+        % mv glibc.spec glibc.spec.0.0
+        % cp -p glibc.spec.0.0 glibc.spec.0.1
+        % vi glibc.spec.0.1
+                - look for the Patch0, Patch1, etc. lines, and add my own
+                - look for the %patch0, %patch1, etc. lines, and add my own;
+                      need to say -p1 (i.e. strip off one level of directories)
+                      since I did the diff from above the top level of the source tree
+                - bumped Release to 1.80.el6_3.7._dl_sort_fini_fix0.1
+                - also added this:
+                        %define originalRelease 1.80.el6_3.7
+                  and changed all uses of %{release} in "Requires:" directives
+                  to use %{originalRelease} instead
+                - also added this, after the other Provides:'s of the main package:
+                        # added the following to try to make me interchangeable with the original
+                        Provides: glibc = %{version}-%{originalRelease}
+                        Provides: glibc(x86-64) = %{version}-%{originalRelease}
+                - already added entry to change log earlier
+
+
+8. rebuild from the spec file
+        % cd /var/tmp/doNotRemove/dhatch/rpmbuild1
+        % rpmbuild -ba SPECS/glibc.spec.0.1
+
+9. copy results to a safe place
+        cp -a RPMS SRPMS ~/.
+    and the originals there too:
+        cp /dept/sio/linux/os/centos/6.3/repos/centos.updates/x86_64/Packages/glibc-2.12-1.80.el6_3.7.x86_64.rpm ~/RPMS/x86_64/.
+        cp ~/downloads/glibc-2.12-1.80.el6_3.7.src.rpm ~/SRPMS/.
+
+
+10. Okay now let's see, I want to install on r7c1320...
+   The currently installed thing containing the runtime linker is:
+        glibc-2.12-1.80.el6_3.7.x86_64
+   My new one is:
+        /var/tmp/doNotRemove/dhatch/rpmbuild1/RPMS/x86_64/glibc-2.12-1.80.el6_3.7._dl_sort_fini_fix0.1.x86_64.rpm
+
+   First of all, replace the original ld.so on the system, from me messing with it...
+        # cd /lib64
+        # /bin/rm ld-linux-x86-64.so.2 && orig/ld-2.12.so /bin/ln -s ld-2.12.so ld-linux-x86-64.so.2
+        # /bin/rm ld-2.12.so.dhatchtest
+        # /bin/rm ld-2.12.so && orig/ld-2.12.so /bin/cp orig/ld-2.12.so ld-2.12.so
+   Next ponder, are there any issues about clobbering the runtime linker when installing glibc?
+   Yes, I think I should install it in single-user mode.
+
+   Question is, can I even boot into single-user mode?
+   I don't seem to be able to, but I can switch to it,
+   maybe that's the best I can do.  "init s" doesn't
+   seem to do it, but this does:
+        # /sbin/init 1
+   Then... put rescue rpm in /var/tmp/doNotRemove, I think?
+        cp ~/RPMS/x86_64/glibc-2.12-1.80.el6_3.7._dl_sort_fini_fix0.1.x86_64.rpm /var/tmp/.
+        cp /dept/sio/linux/os/centos/6.3/repos/centos.updates/x86_64/Packages/glibc-2.12-1.80.el6_3.7.x86_64.rpm /var/tmp/.
+
+
+note added to SQ188833:
+===================================================================
+Made a patched glibc RPM, installed it on lecpc0493
+(the machine in Mike Jutan's office, next to Stephen Bowline's office).
+Seems fine.  Please test!  (and admire how quickly zeno exits)
+
+I haven't installed it on my own machine r7c1320 yet
+because my machine is on a teradici setup
+and I don't know how to get into single-user mode there
+(and I think it would be unsafe to reinstall glibc,
+including runtime linker, in multi-user mode... could be wrong though, I'm not sure).
+
+Here are the instructions for installing it, ***ON A NON-TERADICI MACHINE***:
+    First copy the patched glibc rpm to /usr/tmp on the target machine
+    (along with the original glibc rpm, in case some sort of rescue is needed):
+        % cp ~dhatch/RPMS/x86_64/glibc-2.12-1.80.el6_3.7._dl_sort_fini_fix0.1.x86_64.rpm /var/tmp/.
+        % cp ~dhatch/RPMS/x86_64/glibc-2.12-1.80.el6_3.7.x86_64.rpm /var/tmp/.
+        % sudo /sbin/init 1
+    That should put the machine in single user mode.
+    (You may need to hit ctrl-alt-F1 to get to the console
+    in which you can see the root prompt.)
+        # rpm -Uvh /var/tmp/glibc-2.12-1.80.el6_3.7._dl_sort_fini_fix0.1.x86_64.rpm
+    Sanity check: that should fail with:
+            error: Failed dependencies:
+                glibc-common = 2.12-1.80.el6_3.7._dl_sort_fini_fix0.1 is needed by glibc-2.12-1.80.el6_3.7._dl_sort_fini_fix0.1.x86_64
+    However, you don't really need to reinstall glibc-common and all the rest--
+    they are effectively identical to the ones that are already on the machine.
+    So re-run it with the --nodeps flag:
+        # rpm -Uvh --nodeps /var/tmp/glibc-2.12-1.80.el6_3.7._dl_sort_fini_fix0.1.x86_64.rpm
+        # init 6
+    That should reboot the machine back up to normal multi-user level.
+
+--daysRemaining == 3,
+++daysSpent == 7
+===================================================================
+
+glibc-2.12-1.80.el6_3.7._dl_sort_fini_fix0.0.x86_64.rpm - doesn't really have fix
+glibc-2.12-1.80.el6_3.7._dl_sort_fini_fix0.1.x86_64.rpm - has fix
+glibc-2.12-1.80.el6_3.7._dl_sort_fini_fix0.2.x86_64.rpm - also fudged the "Requires" to require the originals, so no --nodeps needed when installing any more
+glibc-2.12-1.80.el6_3.7._dl_sort_fini_fix0.2.x86_64.rpm - also fudged the "Provides" to match the original.  I think this only fudged the main glibc rpm (not any other auxiliary ones)
+
+
+I built a new revision (0.3) of the patched glibc rpm,
+which doesn't require the "--nodeps" thing,
+so the installation instructions got simpler....
+
+To install the patch on your centos6.3 system
+(do this when your machine is relatively quiet):
+    % cp ~dhatch/RPMS/x86_64/glibc-2.12-1.80.el6_3.7.x86_64.rpm /var/tmp/.
+    % cp ~dhatch/RPMS/x86_64/glibc-2.12-1.80.el6_3.7._dl_sort_fini_fix0.3.x86_64.rpm /var/tmp/.
+    % sudo rpm -Uvh /var/tmp/glibc-2.12-1.80.el6_3.7._dl_sort_fini_fix0.3.x86_64.rpm
+    reboot your machine.
+To uninstall it:
+    % sudo rpm -Uvh --oldpackage /var/tmp/glibc-2.12-1.80.el6_3.7.x86_64.rpm
+    reboot your machine.
+

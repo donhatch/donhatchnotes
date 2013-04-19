@@ -1,0 +1,11 @@
+Q: how to delete all messages with "mathgroup" in the "To:" field?
+A: well...
+        ^T
+            Untag messages matching: .
+        T
+            Tag messages matching: ~C mathgroup
+                (means mathgroup is in To: or cc:)
+        ;d  (; means "for all tagged things do")
+        $   (synchronize)
+
+  apparently '/' searches in subject?

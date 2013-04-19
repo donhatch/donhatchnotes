@@ -1,0 +1,4 @@
+To use a windows machine remotely on linux:
+
+    rdesktop -f -d lucas lecpc0345
+    ctrl-shift-enter to get out of full-screen mode

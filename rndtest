@@ -1,0 +1,166 @@
+From message from Zou Yan 2012/10/03 7:08pm:
+
+ll `whichpy zenoBase_ecoWrapperLib.py`
+    lrwxrwxrwx 1 dhatch gfx 28 Oct 10 15:48 ./python/zenoBase_ecoWrapperLib.py -> zenoBase_ecoWrapperLib.py#11
+ll `whichpy zeno_ecoWrapperLib.py`
+    lrwxrwxrwx 1 zyan gfx 69 Oct  3 18:47 ./python/zeno_ecoWrapperLib.py -> /sww/proj/rndtest/lib64/python2.5/versions/zeno_ecoWrapperLib.py#80.0
+ll `whicheco zeno`
+    lrwxrwxrwx 1 zyan     gfx     63 Oct  3 18:47 /san/show/rndtest/eco/zeno.global.environment.eco -> /sww/proj/rndtest/eco/versions/zeno.global.environment.eco#41.0
+
+
+
+
+
+
+===========================================================================
+Message-ID: <506E4060.8040808@ilm.com>
+Date: Thu, 4 Oct 2012 19:05:20 -0700
+From: Don Hatch <dhatch@ilm.com>
+User-Agent: Thunderbird 2.0.0.24 (X11/20100428)
+To: Alberto Arenas <aarenas@lucasfilm.com>
+CC: Nick Rasmussen <nick@ilm.com>, Matthew Parrott <mparrott@ilm.com>, Zou Yan
+	<Zou.Yan@lucasfilm.com>, Roberto Renzetti <rrenzetti@ilm.com>, "James
+ Bartolome" <jbartolome@ilm.com>, Adam Ferrall-Nunge <aferrall@ilm.com>,
+	"Rachel Rose" <rrose@ilm.com>, Eric Schafer <eschafer@ilm.com>, Marissa
+ Martinez <marissamartinez@ilm.com>, Chryssa Sanders <csanders@ilm.com>, Ed
+ Hanway <ehanway@ilm.com>
+Subject: Re: cleaning up rndtest
+References: <3CE6784C4A562442B09C12CA8C457EC79382509A@mailbox10.lucas.alllucas.com> <3CE6784C4A562442B09C12CA8C457EC7938250E6@mailbox10.lucas.alllucas.com> <506E2ACE.7050603@ilm.com> <3CE6784C4A562442B09C12CA8C457EC79382E678@mailbox10.lucas.alllucas.com> <506E36BD.2050300@ilm.com> <20121005012620.GF29093@maxima.lucasfilm.com> <AFB0671D5E81414AB08DC6B5AB0D6EAB040A7F22@MAILBOX15s.lucas.alllucas.com>
+In-Reply-To: <AFB0671D5E81414AB08DC6B5AB0D6EAB040A7F22@MAILBOX15s.lucas.alllucas.com>
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
+MIME-Version: 1.0
+
+That works, so I'll go with it.  Thanks!
+
+q didn't work for me-- I did Plugins -> "Shot Log", and created a shot 
+dhatch0 with tasktype anim,
+but evidently I didn't walk the maze correctly so now I can't get to it 
+with the "shot" command.
+(I didn't try roberto's map through the maze, but if I'm going to need a 
+map,
+I don't see the point in using the gui at all-- the command-line voodoo 
+appears to work.)
+
+Thanks.
+Don
+
+On 10/04/2012 06:39 PM, Alberto Arenas wrote:
+> Hey,
+>
+> If you want a console command, ZouYan suggested me this one. I already use it to create the tst0000 shot 
+>
+> 	newtaskdir --show rndtest --seq tst --testshot tst0000
+>
+> You can change the number of the shot to 0010 for your shot
+>
+> /Alberto
+>
+>
+> -----Original Message-----
+> From: Nick Rasmussen [mailto:nick@ilm.com] 
+> Sent: Friday, October 05, 2012 9:26 AM
+> To: Don Hatch
+> Cc: Matthew Parrott; Alberto Arenas; Zou Yan; Roberto Renzetti; James Bartolome; Adam Ferrall-Nunge; Rachel Rose; Eric Schafer; Marissa Martinez; Chryssa Sanders; Ed Hanway
+> Subject: Re: cleaning up rndtest
+>
+> Open a 'Shot Log' page - the button will be on the upper right.
+>
+> -nick
+>
+> On Thu, 04 Oct 2012, Don Hatch wrote:
+>
+>   
+>> Trying to follow your instructions, but not getting very far.
+>> In a new shell:
+>>    % showenv rndtest
+>>    % which q
+>>        /sww/gfx/bin/q
+>>    % q
+>> it brings up something with "Queue 1.28.7 (user:dhatch)" in the title 
+>> bar, with 4 menus File, Plugins, Reports, Help.
+>> I don't see an option "create new test taskdir" under any of those menus.
+>> ?
+>> Don
+>>
+>> On 10/04/2012 06:12 PM, Matthew Parrott wrote:
+>>     
+>>> Hey Don!
+>>>
+>>> You can create new test shots by running:
+>>>
+>>> q
+>>>
+>>>       
+>> >from rndtest. Then, select the option the 'create new test taskdir.' 
+>>     
+>>> It will build a new shot (which takes a few minutes).
+>>> Then, you can use the 'shot' command to navigate to the new location.
+>>>
+>>> To test your files in the shot, run:
+>>>
+>>> get_version python:zeno_ecoWrapperLib.py#80.0
+>>> eco:zeno.global.environment.eco#41
+>>>
+>>> Once you're done testing, just run:
+>>>
+>>> get_version --off
+>>>
+>>> to remove the links.
+>>>
+>>> Hope that helps!
+>>>
+>>> Thanks,
+>>> matthew
+>>> ---------------------------------------------------------------------
+>>> ---
+>>> *From:* Don Hatch
+>>> *Sent:* Thursday, October 04, 2012 5:33 PM
+>>> *To:* Matthew Parrott
+>>> *Cc:* Nick Rasmussen; Alberto Arenas; Zou Yan; Roberto Renzetti; 
+>>> James Bartolome; Adam Ferrall-Nunge; Rachel Rose; Eric Schafer; 
+>>> Marissa Martinez; Chryssa Sanders; Ed Hanway
+>>> *Subject:* Re: cleaning up rndtest
+>>>
+>>> Hey Matthew (or anyone who knows),
+>>>
+>>> So, what exactly is the new per-shot workflow?
+>>> I.e. I guess I'm asking, how precisely do I create an area
+>>> ("shot") within rndtest,
+>>> to test a particular version of the wrapper or pieces thereof?
+>>>
+>>> For example, say I want to test zeno_ecoWrapperLib.py#80.0 and 
+>>> zeno.global.environment.eco#41.
+>>>
+>>> Don
+>>>
+>>>
+>>> On 10/01/2012 11:41 AM, Matthew Parrott wrote:
+>>>       
+>>>> this is done. thanks!
+>>>> --------------------------------------------------------------------
+>>>> ----
+>>>> *From:* Matthew Parrott
+>>>> *Sent:* Monday, October 01, 2012 11:34 AM
+>>>> *To:* Nick Rasmussen; Alberto Arenas; Zou Yan; Roberto Renzetti; 
+>>>> James Bartolome; Adam Ferrall-Nunge; Rachel Rose; Eric Schafer; 
+>>>> Marissa Martinez
+>>>> *Cc:* Chryssa Sanders; Don Hatch; Ed Hanway
+>>>> *Subject:* cleaning up rndtest
+>>>>
+>>>> Hi everyone!
+>>>>
+>>>> Quick heads up that I'm cleaning out the trymes from rndtest. It 
+>>>> sounds like it might be easier for everyone to do wrapper testing on 
+>>>> a per-shot basis.
+>>>>
+>>>> So, wrapper developers, please use the --tryme flag when releasing 
+>>>> your work for testing. Then, please pass along the get_version 
+>>>> command to run to QA for testing purposes. I can help out with both 
+>>>> steps if you have any questions.
+>>>>
+>>>> Thanks!
+>>>> Matthew
+>>>>         
+
+

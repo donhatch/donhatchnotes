@@ -1,0 +1,10 @@
+The following are useful distinctions to keep in mind:
+    prescriptive/descriptive
+    intent/extent
+    logical/physical
+    specification/implementation
+    public/private
+    is-a/has-a
+Lots of arguments / bugs / unmaintainable code / suffering
+arises from people taking something that's the RHS and assuming it is,
+or should be treated as, the LHS.

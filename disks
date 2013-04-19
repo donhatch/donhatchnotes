@@ -1,0 +1,9 @@
+Partitioning and formatting disk drives
+
+To format (repartition) disk:
+
+        fdisk
+
+To make a file system on it:
+
+        mkfs

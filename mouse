@@ -1,0 +1,16 @@
+Someone keeps resetting my mouse!
+To get the mouse settings:
+    xset q | grep acceleration
+When hyper:
+      acceleration:  5/1    threshold:  10
+When normal:
+      acceleration:  2/1    threshold:  10
+
+To fix it:
+    xset m[ouse] 2/1 10
+
+To see who's been running jobs on your machine:
+    /net/dlogs/<your machine name>/obaq.log
+It will show up shortly after the mouse settings got changed (I think).
+
+

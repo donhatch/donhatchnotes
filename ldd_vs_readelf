@@ -1,0 +1,37 @@
+
+Subject: fyi: ldd can be misleading-- use "readelf -d" to find out the real deal
+From: Don Hatch <dhatch@ilm.com>
+Date: Wed, 29 Feb 2012 12:57:48 -0800
+To: David Lenihan <dlenihan@ilm.com>, Jianmin Zhao <jzhao@ilm.com>
+CC: ILM rnd <rnd@ilm.com>
+
+If you're using ldd to find out the DSO dependencies of an executable or DSO,
+you can be misled by the fact that ldd recurses.
+For years, I thought the compiler/linker puts the transitive closure of the -l's into the executable's or DSO's dependency list,
+but it turns out it doesn't-- I was misled by ldd into thinking that.
+If you want to see only what is referred to in the immediate executable or DSO itself, use "readelf -d" instead of ldd.
+
+To demonstrate, create an executable "baz" (or shared library libbaz.so)
+that directly depends on libbar.so, which in turn depends on libfoo.so:
+   echo "" > foo.cpp
+   echo "" > bar.cpp
+   echo "int main(){}" > baz.cpp
+   g++ foo.cpp       -shared -fPIC -L. -Wl,-rpath,. -o libfoo.so
+   g++ bar.cpp -lfoo -shared -fPIC -L. -Wl,-rpath,. -o libbar.so
+   g++ baz.cpp -lbar -shared -fPIC -L. -Wl,-rpath,. -o libbaz.so
+   g++ baz.cpp -lbar               -L. -Wl,-rpath,. -o baz
+
+Then look at the dependencies using ldd (which shows the indirect dependency on libfoo.so, as well as the direct one on libbar.so):
+   % ldd libbaz.so
+       libbar.so => ./libbar.so (0x00007f0dfa527000)
+       libfoo.so => ./libfoo.so (0x00007f0df9806000)
+   % ldd baz
+       libbar.so => ./libbar.so (0x00007ff7cbab5000)
+       libfoo.so => ./libfoo.so (0x00007ff7cad94000)
+and then using readelf -d (which only shows the direct dependency):
+   % readelf -d libbaz.so
+       0x0000000000000001 (NEEDED)             Shared library: [libbar.so]
+   % readelf -d baz
+       0x0000000000000001 (NEEDED)             Shared library: [libbar.so]
+
+Don

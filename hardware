@@ -1,0 +1,6 @@
+To find out cpus, memory, graphics card, graphics driver, monitor:
+    /dept/rnd/bin/linux/whatami
+
+Also (not sure how these relate):
+    hinv
+    machinfo

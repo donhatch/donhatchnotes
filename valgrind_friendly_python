@@ -1,0 +1,63 @@
+Here are the source rpms:
+(same thing in both places)
+    /dept/sio/linux/os/centos/5.3/packages/rnd/python2.6/SRPM/python2.6-2.6.4-lecl.src.rpm
+    /dept/rnd/packages/RHEL5_AMD64/SRPMS/python2.6/python2.6-2.6.4-lecl.src.rpm
+
+Here's what I did:
+
+1. Copy the source rpm to ~/rpmbuild/SRPMS.orig/
+   My goal is to make python2.6-2.6.4-lecl.valgrindfriendly.src.rpm.
+
+2. Make an rpm "sandbox",
+   so I don't need to be root.
+   From http://snippets.dzone.com/posts/show/1715:
+        % mkdir -p /var/tmp/doNotRemove/dhatch/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+        % echo "%_topdir /var/tmp/doNotRemove/dhatch/rpmbuild" > ~/.rpmmacros
+
+3. Extract it into there:
+        % cd /var/tmp/doNotRemove/dhatch/rpmbuild/SRPMS.orig/
+        % rpm -ivh python2.6-2.6.4-lecl.src.rpm
+   That put stuff (.tar.bz2, patches, other stuff) into /var/tmp/doNotRemove/dhatch/rpmbuild/{SOURCES,SPECS}.
+
+4. prep, build, install, build binary and source package
+        % cd /var/tmp/doNotRemove/dhatch/rpmbuild
+        % script # to log everything into typescript
+        % cp -a SPECS/python.spec SPECS/python.spec.orig
+        % rpmbuild -ba SPECS/python.spec
+   bleah, takes a long time, mostly building docs
+
+5. tweak SPECS/python.spec and do it again
+        % vi SPECS/python.spec
+            - changed lecl to lecl.valgrindfriendly in the version
+            - add "--without-pymalloc" to the "configure" line
+        % rpmbuild -ba SPECS/python.spec
+
+6. install it on my machine!
+        % cd /var/tmp/doNotRemove/dhatch/rpmbuild/RPMS/x86_64
+        % sudo rpm -Uvh ./python2.6-2.6.4-lecl.valgrindfriendly.x86_64.rpm
+            error: Failed dependencies:
+                python2.6 = 2.6.4-lecl is needed by python2.6-devel-2.6.4-lecl.x86_64
+                python2.6 = 2.6.4-lecl is needed by (installed) python2.6-libs-2.6.4-lecl.x86_64
+                python2.6 = 2.6.4-lecl is needed by (installed) tkinter2.6-2.6.4-lecl.x86_64
+                python2.6 = 2.6.4-lecl is needed by (installed) python2.6-test-2.6.4-lecl.x86_64
+                python2.6 = 2.6.4-lecl is needed by (installed) python2.6-devel-2.6.4-lecl.x86_64
+                python2.6 = 2.6.4-lecl is needed by (installed) python2.6-tools-2.6.4-lecl.x86_64
+        (that failed... better instructions are below)
+
+INSTRUCTIONS:
+    To install valgrind-friendly python2.6 (on rhel5):
+        % cd /gtmp/superbee/doNotRemove/dhatch/rpmbuild/RPMS/x86_64
+        % sudo rpm -Uvh ./*-2.6.4-lecl.valgrindfriendly.x86_64.rpm
+    To revert to non-valgrind-friendly python2.6:
+        % cd /gtmp/superbee/doNotRemove/dhatch/rpmbuild/RPMS/x86_64
+        % sudo rpm -Uvh --oldpackage ./*-2.6.4-lecl.x86_64.rpm
+
+
+7. Now to mess around...
+   Just change stuff in the .c files, and type "make" in BUILD/Python-2.6.4.
+   It helps to do the following in the top-level Makefile:
+       - remove the "-DNDEBUG -O2"
+   Tried this:
+       - add -DPy_TRACE_REFS to CFLAGS
+   but it didn't work, things failed with:
+       ImportError: /usr/lib64/python2.6/lib-dynload/readline.so: undefined symbol: Py_InitModule4_64

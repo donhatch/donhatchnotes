@@ -1,0 +1,270 @@
+Simplest possible real-life example:
+Say we have a gaussian distribution with unknown mean and variance,
+and two random samples are drawn from it, and they turn out to be 100,101.
+What is the probability that the next sample will be < 105?
+
+By symmetry (scale and translational invariance),
+the answer will be the same if 100,101,105 are replaced
+by any constants c0,c1,c2 such that c0<c1 and c2=c0+5*(c1-c0).
+
+
+So really we are asking what the probability is that x2 < x0+5*(x1-x0),
+given that x0,x1,x2 are 3 random samples all from the same normal distribution
+and x0<x1.
+Now it is obvious that the answer is the same for all normal distributions,
+so w.l.o.g. we can ask the question for just one normal distribution,
+the canonical one with mu=0 and sigma=1.
+
+We can answer the question easily by Monte Carlo simulation:
+repeatedly take 3 samples x0,x1,x2 from the canonical normal distribution,
+throwing away the cases when x0>=x1,
+and then counting what fraction of the remaining times it happens
+that x2 < x0+5*(x1-x0), and that is the answer.
+
+I did this, and graphed the result, for various values of the factor x
+(x=5 in the above example), and the answer is
+that the PDF is (some translation and dilation of) 1/(1+x^2),
+and the CDF is atan(x).
+
+
+Note that that is Student's T-distribution with 1 degree of freedom.
+I've verified with a Monte Carlo simulation program that,
+in general, with A old samples and B new samples,
+the distribution of the mean of the new samples is
+(some translation and dilation of) Student's T-distribution with A-1
+degrees of freedom, and this distribution of the new sample's mean
+is independent of B.
+I don't yet know the dilation constant of the distribution
+of the mean of the new samples given A.
+I also don't know how to describe the distribution of the
+standard deviation of the new samples (meaningful when B >= 2),
+though I can graph it from the output of the simulation program.
+(and it should be log-symmetric, by symmetry of the situation,
+if number of old and new samples is equal-- oh,
+not log symmetric, but log symmetric with appropriate normalization
+scaling, namely by the derivative of log, = 1/x)
+
+In fact, I don't even know how to describe the distribution
+of the standard deviation of the underlying normal distribution...
+it's not a simple log-normal nor a log-T-distribution--
+in fact, it's not log-symmetric (that is, the graph of
+f(exp(x)) is clearly visibly non-symmetric).
+Although, if the number of old and new samples is the same,
+it should be log-symmetric (actually log symmetric
+with appropriate normalization scaling at each point,
+namely by the derivative of log, = 1/x)
+Namely... if the new sample stddev and its pdf are in fields 1 and 5,
+we plot this in gnuplot by:
+    plot "OUT2_2" using 1:5
+    plot "OUT2_2" using ($1):($5)
+then, to transform it by log, we do this:
+    plot "OUT2_2" using (log($1)):($5*$1)
+hmm, it seems to be a student's t with 3 or 4 degrees of freedom,
+not sure which.
+The spooky thing is that:
+    plot "OUT3_3" using (log($1)):($5*$1), t(6,x*1.3)*1.3
+seems to match EXACTLY.
+However,  t(7,x*1.3)*1.3 seems to work too, it's really 
+hard to tell the difference at this level.
+
+
+
+In mathematica:
+    g[x_] := 1/Sqrt[2 Pi] Exp[-x^2/2]
+    Plot[g[x],{x,-3,3}]
+    Integrate[g[x]g[y]g[z], {x,-Infinity,Infinity},{y,-Infinity,Infinity},{z,-Infinity,x+Q*(y-x)}]
+although it can't figure it out.
+
+Gnuplot:
+    g(x) = exp(-x*x/2)/sqrt(2*pi)
+    t(n,x) = gamma((n+1)*.5)/(sqrt(n*pi)*gamma(n*.5))*(1+1.*x*x/n)**-((n+1)*.5)
+
+
+
+OH! It's a prediction interval: http://en.wikipedia.org/wiki/Prediction_interval
+The constant is:
+    2_1 : sqrt(2/3.)  2_2: sqrt(4/4.)  2_3: sqrt(6/5.)
+    3_1 : sqrt(3/4.)  3_2: sqrt(6/5.)  3_3: sqrt(9/6.)
+    4_1 : sqrt(4/5.)  4_2: sqrt(8/6.)  4_3: sqrt(12/7.)
+    5_1 : sqrt(5/6.)  5_2: sqrt(10/7.) 5_3: sqrt(15/8.)
+Woohoo!
+So in general:
+    o_n: sqrt(o*n / (o+n))
+
+
+Given mean Mn and stddev Sn of the first n samples from a normal distr,
+the distribution on the next sample x_(n+1) is:
+    p(x_(n+1)) = t_(n-1)( (x_(n+1)-Mn)/(Sn*sqrt((n+1.)/n)) ) / (Sn*sqrt((n+1.)/n))
+
+
+So we can figure it out on the next two samples.
+Assuming Mn=0, Sn=1, x_(n+1)=x, x_(n+2)=y,
+
+    p_n(x,y) = t_(n-1)(x/sqrt((n+1.)/n))*t_n( (y - x/(n+1.))/(sqrt(( n-1 - n/(n+1.)*x*x)/n)*sqrt((n+1.)/n)) ) / (sqrt(( n-1 - n/(n+1.)*x*x)/n)*sqrt((n+2.)/n))
+in gnuplot:
+    p(n,x,y) = t(n-1., x/sqrt((n+1.)/n))*t(n, (y - x/(n+1.))/(sqrt(( n-1 + n/(n+1.)*x*x)/n)*sqrt((n+2.)/(n+1.))) ) / (sqrt(( n-1 + n/(n+1.)*x*x)/n)*sqrt((n+2.)/n))
+
+    p2(x,y) = t(1, x/sqrt(3/2.))*t(2, (y-x/3.)/(sqrt((1+2/3.*x*x)/2.)*sqrt(4./3.))) / (sqrt((1+2/3.*x*x)/2.)*sqrt(4./2.))
+
+
+Ultimately what I want is the probability of a given difference in means
+and ratio of stddevs,
+given number of old and new samples from the canonical normal distribution...
+because that's all there is.
+(hmm... maybe there's a little more... have to think about this)
+
+
+
+
+
+=========================================================================
+
+THOUGHTS ON CONJECTURES / WEATHERMAN
+
+The case of 2 old samples and 1 new sample
+can be simulated and the conjecture that the function is 1/(1+x^2)
+can be verified to any desired degree of accuracy
+by a Monte Carlo simulation.
+
+But a conjecture for the cases of more samples than that
+will not be so straightforward.
+In general, let's say I have written an explicit formula that I think
+gives the value of CDF(c5|c0,c1,c2,c3,c4),
+i.e. the conditional probability that the random sample x5 will be < c5,
+given that x0=c0, x1=c1, x2=c2, c3=c3, x4=c4.
+
+How do we test whether my formula is correct?
+Every experiment will consist of taking random samples x0,x1,x2,x3,x4,x5,
+drawing the graph of CDF(x|x0,x1,x2,x3,x4,x5), seeing where x5 lands
+on that graph, and seeing how surprised we are.  For each point x,
+if the graph says that x5 has probability P% of being < x,
+then it should actually be < x P% of the time.
+
+
+
+I.e. repeat a million times:
+    you give me the initial conditions
+    I draw the PDF for the weather tomorrow
+    the weather happens
+    we analyze the weather and my PDF and accumulate it into my predictive power score somehow.
+    we shouldn't see any systematic biases...
+    e.g. the mean of any random partition of the samples
+    should be the mean of my PDFs, etc.... or something like that.
+
+
+Okay maybe this will help...
+given a fixed size,
+is every sample set of that size, with a given sample mean and sample stddev,
+as likely (in some sense) as every other?  If that's true,
+then we don't need to consider specific cases at all.
+In fact, we can just decree it, by taking no information
+into account other than the num samples, sample mean, and sample variance.
+
+Ah, good, this is something that can be answered using Monte Carlo...
+what percentage of the time is the new sample > Q stddevs away from the mean
+of the prev samples?  That's easy.
+Although, we may be throwing some information away...
+one way to verify that would be to throw away samples
+that don't satisfy some artificial criterion (a criterion that we suspect
+might bias the answer) and see if we get the same CDF empirically.
+
+But, can we do away with that using a thought experiment?
+That is... given a finite sample set from a normal distribution
+(with unknown mean and variance)... does the number of samples, mean, and variance
+COMPLETELY characterize our knowledge of the distribution?  I.e.
+can we throw away all other information about the specific sample values?
+That would be a very powerful stepping stone.
+And the answer is YES... because ultimately the underlying normal distr
+is characterized solely by its mean and stddev...
+no matter what specific samples led up to the population mean and stddev so far,
+the effect on subsequent estimates of the pop mean and stddev
+will be the same.  COOL.  This makes it simpler.
+
+
+===========================================================================
+Refs:
+
+    "Copula methods vs Canonical Multivariate Distributions; the multivariate
+    Student T distribution with general degrees of freedom"
+    (has some pictures of 2d pdfs, not sure quite how it relates
+    to what I'm doing, but what I'm doing might be a special case)
+    http://www.mth.kcl.ac.uk/~shaww/web_page/papers/MultiStudentc.pdf
+
+    and that refers to a book which I'm ordering:
+    Multivariate T-Distributions and Their Applications - Samuel Kotz, Saralees Nadarajah, 2004, cambridge press
+
+    http://en.wikipedia.org/wiki/Normal_distribution
+    http://en.wikipedia.org/wiki/Quantile_function
+    http://en.wikipedia.org/wiki/Student%27s_t-distribution
+    http://en.wikipedia.org/wiki/Prediction_interval
+
+============================================================================
+Q: How to interpret a 2d gaussian pdf as a 1d pdf of distance from center?
+A: Well, p(r) should be the integral around the circle of radius r
+   of g(x)*g(y) (where g is the gaussian function).
+   But that value is constant and equal to g(r)*g(0), so it's
+        p(r) = 2*pi*r*g(r)*g(0)
+   Weird that it starts at 0.
+Q: How to figure out inverse CDF of 2d gaussian?
+   E.g. what is the r such that we have 95% probability
+   of being within distance r of the mean?
+
+
+
+To: paperbunny
+Subject: found the answer to my statistics question
+
+Evidently the thing I was talking about is called a "prediction interval"
+rather than a "confidence interval", according to this page:
+    http://en.wikipedia.org/wiki/Prediction_interval
+which clears up the terminology and goes on to describe exactly
+the canonical example that I was talking about--
+namely, find the pdf of the n+1'st sample, given n samples, all from
+the same normal distribution with hidden mean and variance.
+
+I knew from Monte Carlo testing that the answer was
+going to be (some dilation of) Student's t-distribution
+with n-1 degrees of freedom,
+but I didn't know what the dilation constant was...
+the page tells what it is (although I should try to work through its
+"it is fairly routine to show that"
+part if I want to really understand why it works).
+
+The answer is that the pdf of the n+1st sample, given n samples
+(with everything scaled for simplicity so that the sample mean is 0
+and the sample variance is 1), is:
+    p(x) = t_(n-1)(x*sqrt(n/(n+1))) * sqrt(n/n+1)
+where t_n(x) denotes Student's t-distribution with n degrees of freedom.
+
+With that knowledge, I found and empirically verified (with more Monte Carlo)
+a generalization of that formula, namely:
+given o old samples with mean 0 and variance 1,
+and n new samples, all from the same hidden normal distribution,
+the pdf of the new sample mean is:
+    p(x) = t_(o-1)(x*sqrt(o*n/(o+n))) * sqrt(o*n/(o+n))
+
+I still need to try to understand some other things about this problem,
+such as the distribution of the new sample's variance (not just its mean),
+But now I'm past one roadblock, I think.
+
+My ultimate goal is to be able to answer the (seemingly) simple question
+"how surprised should I be to see a particular new sample mean and variance,
+given a particular old sample mean and variance, if they
+are all from the same hidden normal distribution?",
+where "surprised" should probably be expressed in terms of a quantile
+of some sort (although the concept of a quantile of a bivariate distribution
+seems to be a subtle business).
+Note that there are exactly 6 inputs:
+    number of old samples
+    old sample mean
+    old sample variance
+    number of new samples
+    new sample mean
+    new sample variance
+and the problem seems to be symmetric in "old" vs. "new",
+so it would be nice to phrase it precisely
+in such a way that the answer remains the same when
+"old" and "new" are interchanged.
+
+Don
+

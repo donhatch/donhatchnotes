@@ -1,0 +1,12 @@
+great page on X clipboard:
+http://www.freedesktop.org/wiki/Specifications/ClipboardsWiki
+
+
+Still tons of mysteries.  I don't like not knowing what's going on.
+For example...
+
+Q: copy something from a cmd or console2 on windows...
+   can paste it back,
+   but can NOT paste it into thunderbird on linux (through synergy).
+   but, can paste it into gnome-terminal on linux (through synergy),
+   then copy-paste it from there to thunderbird.  what the fuck??

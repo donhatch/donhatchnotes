@@ -1,0 +1,684 @@
+Git resources:
+
+    http://git-scm.com/book/en/Git-Basics-Viewing-the-Commit-History
+    looks like this is part of a pretty good book!
+
+    http://osteele.com/posts/2008/05/my-git-workflow
+    http://robotics.usc.edu/~ampereir/wordpress/?p=487
+    http://nvie.com/posts/a-successful-git-branching-model/
+
+    http://www.sonassi.com/knowledge-base/our-magento-git-guide-and-work-flow/
+        (in particular "quick and dirty restore points")
+
+    http://randyfay.com/content/rebase-workflow-git
+    http://randyfay.com/node/103
+
+    http://andyjeffries.co.uk/articles/25-tips-for-intermediate-git-users
+
+    http://steveko.wordpress.com/2012/02/24/10-things-i-hate-about-git/
+    http://think-like-a-git.net/
+    http://schacon.github.io/git/howto-index.html (with link to linus's "revert a faulty merge")
+    https://git.wiki.kernel.org/index.php/Git_FAQ
+
+Awesome interactive cheatsheet:
+    http://www.ndpsoftware.com/git-cheatsheet.html
+
+
+Huh? slideshow? http://sbecker.github.com/intro_to_git/#29
+
+Aliases I might start using:
+    alias gc git checkout
+    alias gb git branch
+    alias gs git status
+    alias gd git difftool -y
+    alias gl git log --color --graph --stat --decorate --date-order
+        Other useful options:
+            -<n>  limit to last n
+            --all
+            --oneline
+            --pretty=[oneline|short|medium|full|fuller]  (default is medium)
+
+THINGS IT WOULD BE NICE TO HAVE A HELPER WRAPPER FOR MAYBE:
+    - the stats from "git filelog --stat" are cool but a bit brain dead,
+      can't they show changed lines in yellow, in addition to deleted lines in red
+      and added lines in green?
+      See: 
+          http://stackoverflow.com/questions/9933325/is-there-a-way-of-having-git-show-lines-added-lines-deleted-and-lines-removed
+      It's nice but:
+        - the patterns aren't quite right, e.g. when adding a line that begins with spaces
+        - need to take it a step further and produce the little stat picture.
+          Instead of:
+                NEWS |    10 ++++++----
+                1 files changed, 6 insertions(+), 4 deletions(-)
+          we'd have:
+                NEWS |    8 ++++cc--
+                1 files changed, 4 insertions(+), 2 changes (c), 2 deletions(-)
+                
+        - is there a way to replace all git diff stat pictures with this? (git diff --stat, git log --stat, ...)
+
+    - git log graph is still wicked confusing (even with --date-order).
+      can I get exactly one dedicated column per branch?
+      hmm, I'm getting the feeling a branch is just a (moving) label for a commit...
+      so after it gets moved (vie git reset), I lose the record of where it was before, is that right?
+      yeah, that's right :-(
+      I'm getting more of a handle on this, by tagging branch heads that I delete or move
+      and by making empty commits at the beginning of each branch (see BEST PRACTICES below)
+
+    - Pisses me off when quitting out of git log makes tcsh say "Broken Pipe" which makes the top line scroll
+      off the top of the terminal
+      (furthermore I have a precmd that prints an extra line on nonzero exit status,
+      further exacerbating the problem).
+      I made a little wrapper to avoid this:
+
+            #!/bin/bash
+
+            # Little wrapper for git.
+            #
+            # This is a quick hack to make "git log" not print "Broken pipe"
+            # nor provoke my precmd that prints a line when a command fails.
+            # Actually, do this with all git commands, not just log... most of them
+            # go through the pager and will have the same issue.
+
+            #/usr/bin/git "$@"
+            /san/dept/rnd/bin/linux64/git "$@"
+            status=$?
+            if [ "$status" = "141" ]; then
+                # empirically this is what happens when it dies due to broken pipe.
+                # turn it into exit status 0
+                status=0
+            fi
+            exit $status
+
+    - I'm working on a clone of a central repository,
+      and I currently have about 10 topic branches
+      on top of my local master and each other.
+      Some of these topic branches are logically topics, containing code changes,
+      while others are just unions of various subsets of the topics.
+      (e.g. work = stuffNeededToMakeBuildWork + freedMemoryReadFix + newTest1 + newTest2 + sortRefactor + sortFix;
+       where sortFix is on top of sortRefactor)
+
+      Each time I pull from remote/master to local master,
+      I then have to rebase all of these individual topic branches,
+      using something like:
+            git rebase master topic1
+            git rebase master topic2
+            ...
+      and then I blow away and re-create each of the "union" topic branches, e.g.
+            git branch -f -b union1248 master
+            git merge topic1 topic2 topic4 topic8
+      And for the case where I have one non-automatically-generated topic (sortFix)
+      on top of another (sortRefactor), I manually do something that gets them right again:
+            git tag sortRefactor-old sortRefactor    # put a bookmark on the old sortRefactor
+            git rebase master sortRefactor           # do first rebase
+            git rebase --onto sortRefactor sortRefactor-old sortFix # do second rebase, as explicitly as possible
+            git tag -d sortRefactor-old              # delete the bookmark
+      Original:
+            * master
+             \
+              *---*---* sortRefactor
+                       \
+                        *---* sortFix
+       After pull:
+            *---*---*---* master
+             \
+              *---*---* sortRefactor
+                       \
+                        *---* sortFix
+       After tagging and "git rebase master sortRefactor":
+            *---*---*---* master
+             \           \
+              \           *---*---* sortRefactor
+               \
+                *---*---* sortRefactor-old
+                         \
+                          *---* sortFix
+       After "git rebase --onto sortRefactor sortRefactor-old sortFix":
+            *---*---*---* master
+             \           \
+              \           *---*---* sortRefactor
+               \                   \
+                \                   *---* sortFix
+                 *---*---* sortRefactor-old
+                          \
+                           *---* (inaccessible)
+        (Possibly the second rebase could be done with just
+        "git rebase sortRefactor sortFix", but that relies
+        on it automagically figuring out which diffs
+        are shared between the two paths,
+        and I'm pretty sure that would be more likely to come out wrong--
+        better to be explicit since I know exactly which diffs I want to be applied).
+
+      I have a script that does all of the above,
+      hard-coded for the particular branch structure I'm keeping,
+      but it seems to me that this shouldn't be necessary...
+      shouldn't it be possible to automatically figure out
+      exactly what needs to be done after a pull?
+      I.e. master head got updated,
+      so all nodes downstream from the original master head
+      should get rebased to the new master head,
+      *in such a way that the new nodes are in the same relationship
+       to each other that the old nodes were.*
+
+      Is there a command to do that?
+      Was asked here, no good answer:
+        http://git.661346.n2.nabble.com/Q-rebasing-moving-a-whole-tree-not-just-one-branch-td6186003.html
+      seems to me that people should want to do this all the time, no?
+
+      Probably safest way to do it is make temp copies of each branch,
+      do the rebasing among all the temp copies,
+      then if it all works, reset all original branches to the temp copies
+      and delete the temp copies.
+
+      Oh wait... does this do it?
+        git rebase --root --preserve-merges
+      No it doesn't.  I think root just refers
+      to past the first commit, which
+      wouldn't be expressible otherwise.
+      --preserver-merges seems to do it,
+      but only if everything culminates in one final commit.
+      So, what if I merge everything together
+      into one artificial commit,
+      and then do "git rebase --preserve-merges" on that?
+      Hmm, how bout this? https://github.com/nornagon/git-rebase-all/blob/master/git-rebase-all
+      AHA!
+        http://stackoverflow.com/questions/9407234/git-maintaining-many-topic-branches-on-a-frequently-moving-base
+      so, he's got his own tool for it??
+                https://github.com/nornagon/git-rebase-all
+      Hmm, making it into git, see some posts there... --rewrite-{refs,heads,tags}
+      Oh!  It does exactly what I was thinking!
+      Hmm, it's foiled by my branch aliases... remove them, then it gets farther.
+      Fooey!
+
+    - Seems like whenever I change something,
+      I want my branches that depend on it (rebase, merge) to get updated.
+      Can I express this using a Makefile??
+      Or some other file expressing how branches should be automatically regenerated from other branches??
+      Hmm, maybe StGit is the thing?  Not sure.
+          http://www.procode.org/stgit/
+
+    - show currently checked out branch in prompt or title?
+
+    - make a trivial little branch switcher?
+      just shows output of "git branch", single-click switches branches (using "git checkout")
+      also uses fam to notice when anything changes in the refs directory
+
+BEST PRACTICES:
+    - when deleting a branch with -D, or resetting it,
+      if you don't want it to disappear, tag it first:
+          git tag myBranch-about-to-delete-2013-01-01
+
+    - when creating a new branch, I like to always make an empty commit:
+          git branch B A
+          git checkout B
+          git commit --allow-empty -m "Create branch 'B' from A"
+      this makes 'git log --graph' much easier to read!
+
+    - hmm, empty commit at root of repo?  yeah, I think so.
+          http://stackoverflow.com/questions/645450/git-how-to-insert-a-commit-as-the-first-shifting-all-the-others
+
+          mkdir myNewRepo
+          cd myNewRepo
+          git init
+          git commit --allow-empty -m "Initial empty commit"
+
+    - hmm! maybe don't use aliases for branches.  I think it breaks various scripts
+      that aren't expecting the output of "git branch" to contain that stuff
+
+
+
+QUESTIONS:
+
+    Q: p4 filelog?
+    A: git log dl-fini.c
+       git log --color --graph --stat --decorate --date-order
+            -<n>  limit to last n
+            --all
+            --oneline
+            --pretty=[oneline|short|medium|full|fuller]  (default is medium)
+
+    Q: p4 describe?
+    A: git show 28363b
+
+    Q: p4 describe -s?
+
+    Q: p4diff?
+    A: git show 28363b dl-fini.c
+       git difftool -y 59ba27a 28363b dl-fini.c
+    Q: how to suppress the list of possible difftools?
+
+    Q: diff against previous?
+       git difftool -y 28363b~{1,0} dl-fini.c
+
+    Q: where are ~ and ^ documented?
+    A: https://www.kernel.org/pub/software/scm/git/docs/gitrevisions.html
+       TODO: read it
+
+    Q: p4annotate?
+    A: git blame dl-fini.c
+       git blame 28363b dl-fini.c
+
+    Q: p4 print -q?  (at given commit)
+    A: git show head:path/to/file
+       (path must be relative to depo root,
+        not current dir??)
+
+    Q: gui?
+    A: gitk, git gui
+
+    Q: what's the difference between git fetch and git pull?
+    A: git pull = git fetch + git merge
+       git pull --rebase = git fetch + git rebase
+
+    Q: remove untracked files?
+
+    Q: what the hell does --mirror mean in practice?  what the hell is a bare repository in practice?
+    PA: bare seems to mean it doesn't have the working files
+
+    Q: backup?
+    PA:  (this might not be quite right... weird that it mixes in the git directory with the contents...? maybe don't use --mirror? maybe don't use --bare? push --mirror seems to want bare, but I don't understand its logic.  non-bare is nice since then I can actually see the files)
+
+            git remote -v # check existing remotes
+            git remote add --mirror=push backup /dept/rnd/home/dhatch/backup/glibc.git
+            git config --add alias.backup "push --mirror backup"
+
+            mkdir -p /dept/rnd/home/dhatch/backup/glibc.git
+            cd /dept/rnd/home/dhatch/backup/glibc.git
+            git init --bare   # and if I append .git, all files go into there??  weird
+
+    Q: all right then, how to diff against a version in a remote repo? (e.g. the backup)
+    PA: hmm, these seem to talk about it, but it doesn't work:
+        http://stackoverflow.com/questions/1800783/compare-local-git-branch-with-remote-branch
+        http://stackoverflow.com/questions/5162800/git-diff-between-cloned-and-original-remote-repository
+        I tried:
+            git diff master backup/master
+                fatal: ambiguous argument 'backup/master': unknown revision or path not in the working tree.
+                Use '--' to separate paths from revisions
+
+--------------------
+Subject: git question: diff against remote files?
+
+If anyone here cares to admit to being knowledgeable about git,
+I have a question for you.
+
+I've created a git repo in /gtmp/r71c320/doNotRemove/dhatch/glibc/git/glibc,
+by executing:
+    % mkdir -p /gtmp/r71c320/doNotRemove/dhatch/glibc/git
+    % cd !$
+    % git clone git://sourceware.org/git/glibc.git
+
+Since this location doesn't get backed up automatically,
+I created a second repo, mirroring the first,
+in a directory that *does* get backed up:
+
+    % mkdir -p /dept/rnd/home/dhatch/backup/glibc.git
+    % cd /dept/rnd/home/dhatch/backup/glibc.git
+    % git init --bare
+
+    % cd /gtmp/r71c320/doNotRemove/dhatch/glibc/git/glibc
+    % git remote -v # check existing remotes
+    % git remote add --mirror=push backup /dept/rnd/home/dhatch/backup/glibc.git
+    % git config --add alias.backup "push --mirror backup"
+
+Then, to back up my work every once in a while, I run "git backup",
+which appears to be working correctly.
+
+My question is, how do I diff files
+against the ones in the backup repo?
+I googled it and several sources seem to say the following should work,
+for starters:
+    % git diff backup/master master
+But it doesn't; it gives the following error:
+        fatal: ambiguous argument 'backup/master': unknown revision or path not in the working tree.
+        Use '--' to separate paths from revisions
+
+So, how do I get these diffs?
+My backup repo is of limited usefulness to me if I can't diff against it.
+
+Don
+--------------------
+
+
+
+    Q: make a tmp branch to hold changes I don't mean to check in anywhere?
+    A: git branch tmp
+    Q: okay how to I make a branch from a particular commit?
+    A: git branch tmp <commit>
+
+    Q: dry run push/pull/fetch/merge?
+    PA: some discussion in http://stackoverflow.com/questions/3636914/how-can-you-see-what-you-are-about-to-push-with-git
+       also here: http://stackoverflow.com/questions/822811/differences-in-git-branches
+       see Eric Anderson's answer, seems like a nice way to try out the merge
+       in a throw-away branch
+
+    Q: why is "git status" not showing files ending in .orig?
+    A: it's listed in .gitignore
+
+    Q: git log is coming out in baffling order, wtf?
+    A: I don't think the commits are shown in reverse chronological order
+       like the help page claims; I think they are in topo order.
+       can fix them using --date-order.
+
+    Q: whoa, git log graph is still wicked confusing.
+       can I get exactly one dedicated column per branch?
+       (see IDEAS section)
+
+    Q: how to get git log to show the *whole* graph, with *all*
+       commits?
+    PA:
+       nothing on the web works; stuff without branches pointing at them aren't shown
+       (i.e. nodes that became inaccessible from any branch,
+       via "git reset" or "git branch -D")
+            http://think-like-a-git.net/epic.html
+                git log --oneline --abbrev-commit --branches=* --graph --decorate --color
+            or, in non-epic version, different but effectively the same):
+                git log --oneline --abbrev-commit --all --graph --decorate --color
+
+       For example:
+           mkdir scratch
+           cd scratch
+           git init
+           touch foo
+           git add foo
+           git commit -m "adding empty foo"
+           echo "appending a line to foo" >> foo
+           git commit foo -m "appending a line to foo"
+           git reset --hard HEAD^
+
+
+       This seems to work, but relies on the reflog entries,
+       which disappear if a "git gc" is done after 90 days:
+           git log --color --graph --oneline --decorate --all --date-order `git reflog | sed 's/ .*//'`
+       This may be a bit better, since it doesn't rely on the reflog:
+           git log --color --graph --oneline --decorate --all --date-order `git fsck --lost-found --no-reflogs | sed 's/.* //'`
+       ouch, but http://gitready.com/advanced/2009/01/17/restoring-lost-commits.html
+       says lost&found will be deleted by git gc??
+
+            git reflog expire --expire=now
+            git gc --prune=now
+       Yup, that branch is GONE.  Wtf?  That's scary.
+       Even if it's not reachable, it is history.
+       We never lose that stuff in perforce, right?
+
+       Idea: whenever doing one of:
+           git branch -d
+           git reset
+       store it as a tag, e.g.
+           topicA-deleted-2013-01-01
+       yeah that works nicely I think!
+
+    Q: can I express "git log --branches=<all but *-work>" ?
+    A: not directly, I think... it's a glob pattern.
+       but the following works, assuming it's run from the root of the repo:
+           git log `cd .git/refs/heads && /bin/ls | grep -v .-work`
+
+    Q: can I switch to previous branch I was on?
+    A: git checkout -
+       also "@{-N}" for N-th last branch
+
+    Q: where's that stored?
+    PA: it's just using reflogs probably. (verify that)
+
+    Q: can I push and pop current branch?
+
+    Q: switching branches (using git checkout) updates the timestamps
+       on all files that differ between the two branches,
+       causing unnecessary building.
+       can I merge between branches without calling git checkout?
+    PA: there's some discussion here:
+        http://stackoverflow.com/questions/4156957/merging-branches-without-checkout
+       someone recommended doing the edits in a different repo from the builds.
+       also here: http://stackoverflow.com/questions/1402993/git-checkout-and-merge-without-touching-working-tree
+       see djpohly's answer, although I don't fully understand it yet.
+
+    Q: how to show all the diffs between two branches?
+    A: some discussion here: http://stackoverflow.com/questions/822811/differences-in-git-branches
+            git diff --name-status master..work
+            git diff --stat master..work
+    Q: how bout just a particular file, between two branches?
+    A: git diff --stat master:foo work:foo
+
+    Q: all right I just did a merge (actually rebase) that I totally didn't want,
+       by mistake.  one branch now has a bunch of changed files
+       that shouldn't be changed.  how to fix it?
+    A: git reset --hard?  (not clear what that does)
+       git revert
+       (actually haven't tried them, I hadn't quite done what I thought I did)
+
+    Q: how to "p4 integ" or "p4 copy" files from one branch to another? or from a previous state?
+    PA: I don't understand this, but http://stackoverflow.com/questions/307579/how-do-i-copy-a-version-of-a-single-file-from-one-git-branch-to-another
+       seems to say:
+                git checkout otherbranch myfile.txt
+                git checkout otherbranch:otherfile myfile.txt
+                git checkout <rev> -- myfile.txt
+       argh, but that loses track of where it came from??
+
+       wait, see here I think:
+           http://andyjeffries.co.uk/articles/25-tips-for-intermediate-git-users
+       in the section "Resetting changes"
+
+
+    Q: branch aliases?
+    A:
+            git symbolic-ref refs/heads/m refs/heads/master
+            git symbolic-ref refs/heads/s refs/heads/stuffNeededToMakeTestsWork
+            git symbolic-ref refs/heads/f refs/heads/freedMemoryReadFix
+            git symbolic-ref refs/heads/d refs/heads/dlSortFiniFix
+            git symbolic-ref refs/heads/work refs/heads/dlSortFiniFix-work
+            git symbolic-ref refs/heads/w refs/heads/work
+        BUT beware! don't use the alias for "merge" commands,
+        the alias will show up in the commit message, confusing everyone!
+        If that happens, see "how to change a commit message"
+        Also, to delete one of these, just delete the file--
+        do NOT say "git branch -d w"... actually not sure what that does!
+
+    Q: how to change a commit message?
+    PA:
+        git commit --amend -c <commit ID>
+       general advice on web is "don't ever change history after you've pushed"... but,
+       maybe that's for the more-complicated commands that people suggested?
+       seems to work okay if do the above and then push (at least, to a mirror bare repo).
+       ARGH! that didn't actually work-- it created a new commit! fuck!
+       That's fine except that anything deriving from it isn't any more.
+       So, need to rebase the whole tree,
+       everything that came on top of master,
+       we want to now come after the new master.
+       Is here a rebase --tree option or something?
+       Actually need this in general, since I maintain a whole tree of stuff that depends on each other.
+
+    Q: woops! committed to the wrong branch!
+    A: git reset --hard <previous commit>
+       (back up any files first, not sure what will happen to them)
+        
+
+    Q: diff committed against index?
+    A: git diff --cached <file>
+    Q: diff index against unstaged?
+    A: git diff <file>
+    Q: diff committed against unstaged?
+    A: git diff HEAD <file>
+
+
+    Q: how come sometimes when I have edited but not staged a file,
+       it lets me switch branches, but sometimes not?
+    A: it lets me switch if the two branches' versions
+       of the file are identical.
+       (sometimes it lets me switch anyway,
+       as long as there are no merge conflicts when switching)
+
+
+    Q: Okay say I've got a branch called branch12,
+       and I want to split it into two branches branch1 and branch2
+       (their diffs from master don't conflict... branch1's changes
+       are to completely different files from branch2's).
+
+       Okay say I've got a branch called AB,
+       and I want to split it into two branches A and B
+       (their diffs from master don't conflict... A's changes
+       are to completely different files from B's).
+
+             1  AB
+            /
+           0  master
+
+       Method 1:
+           I first create branch A from AB:
+                git checkout AB
+                git branch A
+                git checkout A
+                git checkout master <filesRelatedToB>
+                git commit <filesRelatedToB>
+           Now it looks like this:
+                   2  A
+                  /
+                 1  AB
+                /
+               0  master
+
+           Now I want to create branch B,
+           hopefully automatically by cherry-picking or rebasing
+           (rather than doing it by hand again).
+           The contents of B can be expressed as either of:
+                master + (AB - A) (i.e. apply to master the patch leading from A to AB)
+                AB + (master - A) (i.e. apply to AB the patch leading from A to master)
+           but both of these patches are "back in time" so I don't think
+           they can be expressed by a cherry-pick or rebase ... ?
+
+       Method 2:
+           First create branch A from master:
+                git checkout master
+                git branch A
+                git checkout A
+                git checkout AB <filesRelatedToA>
+                git commit <filesRelatedToA>
+           Now it looks like this:
+                 1  AB
+                /
+               0  master
+                \
+                 2  A
+           Now I want to create branch B,
+           hopefully automatically by cherry-picking or rebasing.
+           Again, the contents of B can be expressed as:
+                master + (AB - A) (i.e. apply to master the patch leading from A to AB)
+                AB + (master - A) (i.e. apply to AB the patch leading from A to master)
+           Oh hmm, maybe i can do it as follows:
+                git rebase A AB
+                 1
+                /
+               0  master
+                \
+                 2  A
+                  \
+                   3  AB
+           (so AB has same contents as before, but comes after A)
+           and then:
+                git branch -b B AB
+                git rebase --onto master A
+           Yeah! I think that will work!
+                 1   B
+                /   /
+               0----  master
+                \      
+                 2 A 
+                  \
+                   3 AB
+            This is actually nice since now both A and B
+            look like they came directly from master.
+
+            But, what if I want the final one to look like this instead?:
+                      2  A
+                     /
+                    1  AB
+                   / \
+                  /   3  B
+                 /
+                0 master
+
+            Possibly relevant:
+            http://www.jukie.net/bart/blog/20081112150409
+
+         Oh wait... I don't think I want it to look like that!!
+         That will cause problems, if I try to make a work branch
+         that's the union of A and B and other stuff...
+                git checkout master
+                git branch -b work
+                git merge A
+                git merge B
+         merging B will incorporate the changes that led from AB to B...
+         i.e. it will lose A's changes!  Sa I think we don't want that!
+
+    Q: so if I have that, how do I rearrange things
+       so it's straight from master?
+    A: squash?
+
+
+     Q:  ARGH! okay, work was a union of 4 things...
+         I split one of those things into 2 things,
+         so I want work to be a union of 5 things now.
+         How the hell do I do that??
+
+    Q: pisses me off when quitting out of git log says "Broken Pipe" which makes the top line scroll.
+       what to do about it?
+    A: made a little wrapper:
+
+            #!/bin/bash
+
+            # Little wrapper for git.
+            #
+            # This is a quick hack to make "git log" not print "Broken pipe"
+            # nor provoke my precmd that prints a line when a command fails.
+            # Actually, do this with all git commands, not just log... most of them
+            # go through the pager and will have the same issue.
+
+            #/usr/bin/git "$@"
+            /san/dept/rnd/bin/linux64/git "$@"
+            status=$?
+            if [ "$status" = "141" ]; then
+                # empirically this is what happens when it dies due to broken pipe.
+                # turn it into exit status 0
+                status=0
+            fi
+            exit $status
+
+    Q: I've got 5 branches that I keep flowing into each other
+       in various set ways.  How do I keep track
+       of what needs to be merged? (Is this what a "tracking branch" means?)
+    A: I just wrote a shell script that does the appropriate rebasing every time something is pulled from remote/master
+
+    Q: I have some changes in a branch "stuffNeededToMakeTestsWork".
+       I want to try different versions of master... what's the quickest way to get this
+       rebased on top of each of them?
+    A: maybe:
+            git branch old-master master
+            git branch old-master-work old-master
+            git checkout old-master-work
+            git commit --allow-empty -m "Create branch 'old-master-work' from old-master"
+            git merge stuffNeededToMakeTestsWork
+        Then repeatedly:
+            git reset --hard old-master <whatever>
+            git rebase old-master old-master-work
+        BLEAH! not quite right.
+        Okay how about:
+
+            git branch -f old-master <whatever>
+            git checkout master
+            git branch -f old-master-work s
+            git rebase --onto old-master master old-master-work
+
+    Q: is it maybe possible to have a "symbolic union" branch?
+       so that when I "git checkout" it, I'm really checking out stuff from a bunch of branches.
+       that would keep me from having to keep all my union branches updated.
+
+    Q: after a big merge with a conflict, my workarea seems to be in a mess state that I don't understand.
+       it's asking me to resolve the conflict, and commit, but then what?
+       what if I want to abort the merge instead?
+
+    Q: tcsh completions? (maybe base them on bash completions?)
+    PA:
+        https://github.com/git/git/tree/master/contrib/completion
+        http://marc.info/?l=git&m=135456897811682&w=2
+        but it needs a more recent version of tcsh, or something?
+        holey moley! too ambitious.
+
+
+

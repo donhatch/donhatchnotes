@@ -1,0 +1,5 @@
+Nice example of window-level UI:
+    setgamma -win
+
+Nice illustration of effect of various gammas:
+    kcontrol -> Peripherals -> Display -> Monitor Gamma

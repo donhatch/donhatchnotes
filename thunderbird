@@ -1,0 +1,29 @@
+to get date in thunderbird replies, e.g. "On sep 18 1984, Joe Bloe wrote:",
+look here: http://seamonkey.ilias.ca/mailnewsfaq/Replyintro
+    % cd ~/.thunderbird/rg3oo31t.default
+    % cp prefs.js user.js
+    % vi user.js
+        erase all the contents (okay that was lame)
+        add this, which means do the non-retarded date thing:
+            user_pref("mailnews.reply_header_type", 2);
+
+
+
+    IMAP Performance issues FAQ
+    http://lucasnet/dept/it/it-downloads/IMAP-Performance-Issues.pdf#zoom=100
+
+    Tips & Tricks for Thunderbird
+    http://lucasnet/dept/it/it-downloads/Tips-T-Bird.pdf#zoom=100
+
+    Outlook Web Access User Guide
+    http://lucasnet/dept/it/it-downloads/Outlook-Web-Access.pdf#zoom=100
+
+
+Q: it's claiming it's in use, wtf
+A: look for ~/.thunderbird/rg3oo31t.default/lock
+   it was a symlink:
+       lrwxrwxrwx  1 dhatch gfx 16 Sep  3 14:31 lock -> 10.74.0.93:29741
+   remove it!
+
+Q: how to turn on and off threaded view?
+A: the leftmost button on the bar above the message headers

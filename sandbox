@@ -1,0 +1,108 @@
+To make a brand new sandbox:
+    - Make the directory
+    - Copy an existing .mkrc into it, and customize to your liking.
+      My partial one looks like this:
+          SRC_ROOT=.
+          #TARGET_ROOT=/dept/rnd/home/dhatch/targetroots/dhatch_zeno0
+          TARGET_ROOT=/var/tmp/dhatch/targetroots/dhatch_zeno0
+          BUILD_ROOT=default
+          SUSE_IA32_BUILD_TYPE=DEBUG
+          SUSE_IA32_PREBUILT_ROOT=zeno2
+          USE_DISTCC=true
+          DISTCC_HOSTS=localhost rnd01 rnd02 rnd03 rnd04
+      My full one looks like this:
+          SRC_ROOT=.
+          #TARGET_ROOT=/var/tmp/dhatch_zeno2
+          TARGET_ROOT=/dept/rnd/home/dhatch/targetroots/dhatch_zeno2
+          BUILD_ROOT=default
+          SUSE_IA32_BUILD_TYPE=DEBUG
+          USE_DISTCC=true
+          DISTCC_HOSTS=localhost rnd01 rnd02 rnd03 rnd04
+      (I'd use the local TARGET_ROOT except I don't have enough disk space)
+    - Copy an existing .p4rc into it.
+      One of my .p4rc's looks like this:
+          P4PORT=spindle:1666
+          P4USER=dhatch
+          P4PASSWD=83297
+          P4EDITOR=vi
+          P4DIFF=xdiff
+          P4CLIENT=dhatch_zeno0
+      Choose a new client name, and change the P4CLIENT in the .p4rc to it.
+    - Define the client by using some existing sandbox as your template.
+      For example if I wanted to use dhatch_zeno0 as a template,
+      cd into the new directory and:
+          p4 client -t dhatch_zeno0
+      or to use one of the cotd templates, use one of the following:
+          p4 client -t zeno2
+      or:
+          p4 client -t zeno2-flat
+    - To sync to right now:
+          p4 sync
+      But if you are using a dependant build, you should sync
+      to the cotd label instead...
+          p4 sync @zeno2-SUSE_IA32_DEBUG
+      (using "zeno2" as the prebuilt root is shorthand for
+      /dept/rnd/cotd/zeno2/SUSE_IA32_DEBUG, so this matches)
+
+If you need to use multiple prebuilt roots,
+you need to do it a different way (since multiple SUSE_IA32_PREBUILT_ROOTs
+are not supported).
+    mk noprebuilt
+    mk addprebuilt  <firstprebuilt>
+    mk addprebuilt  <secondprebuilt>
+    ...
+These end up in $BUILD_ROOT/Makefile.prebuilt,
+and are blown away when you run "mk clobber".
+
+
+Note, Nick has a build that's often more recent
+than cotd... use this as the prebuilt:
+    /sww/gfx/versions/zeno2/fluid
+
+
+
+NOTE: The overlay sandbox must contain zenoconfig,
+or some of the Panel Arrangements will not be available in the Panel menu!
+
+Q: how to compile 32-bit on a 64-bit machine?
+A: setenv COMPILE_IA32_ALWAYS
+
+Q: how to compile an opt build into a different file system
+   from the debug build, without changing .mkrc back and forth all the time?
+A: make a different .mkrc (e.g. .mkrc.OPT) with the desired settings,
+   and then:
+        (setenv MKCONFIG .mkrc.OPT; mk <options>)
+
+Q: how to compile DynTest without running it?
+A: cd DynTest
+   mk target
+   !!!!!!
+
+Q: some import got messed up because I ran out of disk space, what do I do
+A: cd ProjectThatDependsOnIt; mk importlibs
+
+Q: how to get a coherent class heirarchy?
+   mk doc in each directory doesn't do it,
+   it gives a separate heirarchy for each module.
+   mk fulldoc doesn't seem to exist.
+A: ewimmer days it's: mk all -k ALLCMD=doc
+   As long as you do the dependencies first,
+   you do get the full derivation of each class,
+   with bases classes from a different module marked [external]
+
+Q: how to get a full client, sooner than p4 client -t zeno2-flat
+   (which is up to a day out of date)?
+A (not): from ewimmer:
+    you can check it out if you like, under /dept/rnd/cotd/build_cotd_cron...follow the crazy road
+    (I don't see it)
+
+
+Q: how to resolve this:
+    ImportError: No module named cmd_basic
+A: put in PROJECTS in Makefile: PyCmdBasic
+   likewise for sgcmd_basic, put in PySgCmdBasic
+
+
+
+   
+

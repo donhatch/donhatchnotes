@@ -1,0 +1,70 @@
+Subject: random programming thought: post-increment, pre-decrement
+
+Since the beginning of time, my fingers have been in the habit
+of typing post-increment and pre-decrement,
+i.e. i++ and --i  (rather than i-- and ++i).
+Originally, a valid argument for that was that
+the VAX or PDP-11's instruction sets supported those directly (I think),
+and that seemed like a fortuitous choice to me,
+but I never really understood exactly why.
+
+It seemed natural...
+e.g. to push something on the end of a stack implemented as an array
+that grows upwards:
+    stack[stackSize++] = x;
+and to pop it:
+    x = stack[--stackSize];
+Similarly if you've got a pointer pointing to the end of the stack:
+    push: *stackPointer++ = x;
+    pop:  x = *--stackPointer;
+or, if your stack grows downwards
+(e.g. the function call stack in unix/linux processes):
+    push: *--stackPointer = x;
+    pop:  x = *stackPointer++;
+
+I just now realized why it's always like this...
+it's all about the programming language choice
+to use 0-based indexing rather than 1-based indexing.
+
+When you're labeling the positions *between* items,
+rather than the items themselves, everyone agrees
+how to give them indices-- for, say, an array {A,B,C},
+the indices between the items
+are 0,1,2,3 (0 is at the beginning of A, 3 is at the end of C).
+That's not debatable.
+
+The 0-based or 1-based indexing religious war comes when
+we are compelled to label the items themselves with indices,
+and we don't want to give B the most obvious choice, namely 1.5,
+but we insist on giving it an integer label instead.
+0-based people round down and say B is at index 1 (the position where B starts).
+1-based people round up and say B is at index 2 (the position where B ends).
+
+When we have a programming variable representing the size of an array,
+or a pointer, or often even an indexing variable,
+what it's really naturally pointing to, most of the time,
+is the position just before or after an item
+(rather than directly at any particular item).
+That's certainly true in the examples above.
+
+So, if I'm incrementing or decrementing such a variable,
+and at the same time I want to do something
+to the item that's being swept past,
+then I'd naturally want the "return value"
+of the increment or decrement operation
+to be the index of (or pointer to) that swept item.
+So I'd naturally choose the *smaller* of the old and new values
+if using 0-based indexing
+(in which the index of the item
+is the same as the index of the *beginning* of the item)
+and the *larger* of the old and new values if using 1-based indexing
+(in which the index of the item
+is the same as index of the *end* of the item).
+
+In other words, with 0-based indexing,
+it's more often useful and natural (if it matters at all)
+to say n++ and --n, rather than the opposite.
+
+My fingers are vindicated!
+
+Don

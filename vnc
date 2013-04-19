@@ -1,0 +1,33 @@
+Subject:
+Re: vnc: connecting to a machine that no one is on?
+From:
+Charlie Kilpatrick <charliek@ilm.com>
+Date:
+Thu, 18 Feb 2010 15:22:46 -0800
+To:
+John Horn <horn@ilm.com>
+CC:
+ILM rnd <rnd@ilm.com>
+
+John Horn wrote:
+> I use vnc regularly to work on a machine that I'm already logged in to, but I 
+don't know how to get on a machine that's showing the 'login' screen.  Can anyon
+e tell me how to do this?
+>
+> thanks,
+> /john
+>
+
+If no one is logged in, then you need to run this:
+
+sudo x11vnc -rfbauth <vnc-passwd-file> -auth /var/gdm/:0.Xauth -display :0
+
+Then run the vnc client viewer, and you will see the login screen.  Now log in, 
+and both the vnc server and client will immediately die.
+
+However, now you're logged in, and you can run vnc as you regularly do.
+
+-Charlie
+
+
+

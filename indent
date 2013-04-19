@@ -1,0 +1,4 @@
+indent -i4 -bli0 -nut
+    -i4   -- one indent level is 4 spaces
+    -bli0 -- indent braces 0 spaces
+    -nut  -- use spaces instead of tabs

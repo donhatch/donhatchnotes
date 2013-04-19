@@ -1,0 +1,51 @@
+I forget whether someone else pointed this out to me,
+or whether I figured it out on my own.
+
+Okay, so everyone knows there is this religious war
+over whether items in a list or array should be numbered
+starting at 0 or starting at 1.
+English and mathematical convention start at 1,
+with the interesting exception that in logic/foundations
+we start at 0 (the natural number n is strongly recursively defined
+as {0,..,n-1}, in particular 0 is the empty set).
+
+Say you have a list of three items A, B, C.
+If you want to number the items, how do you do it... this way?
+    1: A
+    2: B
+    3: C
+Or this way?
+    0: A
+    1: B
+    2: C
+
+Well notice that if you wanted to label the spaces *between* the items,
+there's no confusion: every sane person agrees that you do it like this:
+    A   B   C
+  ^   ^   ^   ^
+  |   |   |   |
+  0   1   2   3
+
+Therefore it is obvious that natural way to label A,B,C is:
+     .5: A
+    1.5: B
+    2.5: C
+The problem is usually that the labels are required to be integers
+for some reason,
+so we are forced to artificially choose one side or the other, instead
+if the natural choice which is the middle.
+So, careful personality types will choose
+the left side (0 based), and overoptimistic/sloppy personality types
+will choose the right side (1 based).
+
+Seriously, our choice often depends simply on how we think about processing
+a list.  When we are reporting progress, we want to report how many items
+we've processed so far.  If we report progress at the beginning
+of every iteration, we would naturally report the number of items done
+*before* the current item, which is effectively using 0-based indexing.
+If we report progress at the end of every iteration, we would natureally
+report the number of items done *including* the current item,
+which is effectively using 1-based indexing.  Neither really makes sense...
+what does make sense is to realize that we are labeling
+the *spaces between* the items, not the items themselves...
+and the problem goes away.

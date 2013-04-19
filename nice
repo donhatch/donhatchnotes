@@ -1,0 +1,39 @@
+Man page for nice is next to useless:
+
+       With no COMMAND, print the current  niceness.   Nicenesses  range
+       from -20 (most favorable scheduling) to 19 (least favorable).
+
+       -n, --adjustment=N
+              add integer N to the niceness (default 10)
+
+    NOTE: your shell may have its own version of nice, which usually supersedes
+    the version described here.  Please refer to your shell's documentation
+    for details about the options it supports.
+
+Let's experiment to see what works:
+
+    cat                     -> NI=0
+    /bin/nice cat           -> NI=10
+    /bin/nice /bin/nice cat -> NI=19
+
+    (nice; /bin/cat)        -> NI=4
+    (nice; nice; /bin/cat)  -> NI=4
+    (nice; /bin/nice /bin/cat)        -> NI=14
+    nice /bin/nice /bin/cat -> NI=14
+    /bin/nice nice /bin/cat -> NI=19  (the second nice is /bin/nice in this case)
+
+    nice /bin/cat           -> NI=4
+    (nice /bin/cat)         -> NI=0   (wtf?)
+
+    /bin/nice -n +3 /bin/cat -> NI=3
+    /bin/nice -n+3 /bin/cat -> NI=3
+    /bin/nice -n 3 /bin/cat -> NI=3
+    /bin/nice -n3 /bin/cat -> NI=3
+
+
+   nice -n 3 /bin/cat -> "nice: Badly formed number"
+   nice +3 /bin/cat -> NI=3
+   nice -3 /bin/cat -> "setpriority: Permission denied"
+
+
+

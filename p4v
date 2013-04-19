@@ -1,0 +1,25 @@
+QUESTIONS:
+Q: Change list descriptions get cut off.
+   Sometimes double-clicking on the change, which puts it into the Details tab,
+   makes the full description get loaded, but maybe not.
+   How can I force the full description to get loaded?
+   (Oh hmm, maybe I was mistaken and details always loads it, not sure)
+
+Q: Also, in the Time Lapse View and Revision Graph View,
+   sometimes it says "View changelist to see the full description".
+   What's the quickest way to get to the changelist, from there?
+   (The changelist number is shown but I don't see how to bring
+   up the description.)
+
+
+Q: Help says:
+    The Perforce Visual Client Help files can not be found.
+    Do you want to locate them?
+   How do I find them?
+
+ANSWERED QUESTIONS:
+
+Q: Is there a time lapse diff, like that other tool I think I remember?
+A: Turn on different aspects, using the buttons at the top
+   of the Time Lapse View.  I think that covers everything I'd want.
+   (Probably what I'm remembering is a CVS tool.)

@@ -1,0 +1,10 @@
+To see what it will do:
+    p4 integ -n //gfx/main/...@300568 //gfx/zeno2_rigid.3/...
+then do it for real:
+    p4 integ //gfx/main/...@300568 //gfx/zeno2_rigid.3/...
+    p4 submit
+
+Then re-integ every once in a while to a new change number or whatever
+
+then sync in client
+

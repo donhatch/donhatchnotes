@@ -1,0 +1,24 @@
+(I think this was just in some old version of suse... hasn't happened
+since we upgraded to centos 5)
+
+When tcsh history gets messed up...
+
+To print out history with time stamps:
+    history -hT
+To get date in a number:
+    date +%s
+To translate from number to date:
+    write a program that does ctime :-(
+
+Interesting... when it's messing up,
+I think it's in a mode in which it just never updates
+from what was originally read from .history.
+I can set history = 0 and back, and it never gets more.
+
+env is the same in good as bad shell
+history is same in good as bad shell
+
+When bad, can set history to 0 and back to 100, doesn't help
+When bad, can read in history from ~/.history using history -L ...
+it changes the history to the contents of .history, but then it stays
+that way.

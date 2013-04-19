@@ -1,0 +1,2 @@
+Q: how to convert from seconds-since-epoch to readable date string?
+A: perl -e '$s = localtime(1279045232.523117); print "$s\n"'

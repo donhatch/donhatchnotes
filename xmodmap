@@ -1,0 +1,178 @@
+The xmodmap manual makes no fucking sense and never has.
+Here's some notes and conclusions as I struggle throught the pain...
+
+So, there are keycodes and keysyms, roughly meaning to "physical keys"
+and "logical keys".
+
+Before I run any special xmodmap commands, xmodmap -pk starts with
+the following:
+    There are 2 KeySyms per KeyCode; KeyCodes range from 8 to 255.
+Apparently each keycode has 0, 1, or 2 keysyms.
+Apparently for those that have 2 keysyms, the first is the unshifted one
+and the second is the shifted one.  (By looking at the full output
+of xmodmap -pk.)
+
+I will play with keycode 8 since it seems to have no keysyms attached to it
+initially.
+If I say:
+    xmodmap -e "keycode 8 = Escape Escape"
+it seems to assign Escape to both keysyms for this keycode.
+But if I say
+    xmodmap -e "keycode 8 = Escape Escape Escape"
+xmodmap -pk now says there are 3 keysyms per keycode!
+What does this mean?
+Furthermore, if I undo it:
+    xmodmap -e "keycode 8 ="
+it *still* says there are 3 keysyms per keycode.
+
+Okay, let's experiment with a key that actually exists,
+the left-"windows" key (115, as shown by xev).
+It initially has no keysyms, as shown in "xmodmap -pk | grep 115"
+(although some people have .Xmodmap files with "keycode 115 = Hyper_L",
+and I might soon).
+    % xmodmap -e "keycode 115 = a"
+    % xmodmap -pk | grep 115
+        115     0x0061 (a)      
+Bizarre, now that key gives "a", and shifted, it gives "A"!
+Where the hell did that come from??
+    % xmodmap -e "keycode 115 = A"
+    % xmodmap -pk | grep 115
+        115     0x0041 (A)
+Still: unshifted is "a", shifted is "A".
+But if I give both, it does reverse them.
+
+
+Okay, maybe this all has something to do with the "modifier map",
+about which I have no clue yet, but which can be dumped using "xmodmap -pm":
+    shift       Shift_L (0x32),  Shift_R (0x3e)
+    lock        Caps_Lock (0x42)
+    control     Control_L (0x25),  Control_R (0x6d)
+    mod1        Alt_L (0x40),  Alt_R (0x71)
+    mod2        Num_Lock (0x4d)
+    mod3      
+    mod4      
+    mod5        Scroll_Lock (0x4e)
+hmm, I guess this doesn't provide any clue.
+And what the fuck is this "mod" stuff?
+
+The web page http://www.togaware.com/linux/survivor/Mapping_Key.html
+evidently does some useful stuff, but leaves me just as ignorant
+as before.
+
+
+Okay, let's look at the sawfish shortcuts dialog...
+    background middle-click -> customize -> bindings
+The following modifiers are listed under
+"Modifier key(s) used for default window manager shortcuts":
+    shift
+    control
+    meta
+    alt
+    hyper
+    super
+But changing it doesn't have any effect that I can see.
+However, doing this (as in http://www.togaware.com/linux/survivor/Mapping_Key.html ):
+    % xmodmap -e "keycode 115 = Hyper_L"
+    % xmodmap -e "add mod3 = Hyper_L"
+evidently makes it so that the window manager uses the hyper keysym
+(which I mapped the windows-flag keycode to) as "H-" !?  This is really
+fucking weird and out of control.  
+
+Okay, what about the last bit of black magic in that web page:
+    keysym Alt_L = Meta_L Alt_L
+    add mod1 = Meta_L
+what the fuck is this doing?  Originally, "xmodmap -pm"
+showed that mod1 was "Alt_L Alt_R"; this changes it to "Meta_L Alt_R".
+Answer: That keysym command did the following.
+    1. Find the keycode(s) mapping to the left-hand-side keysym Alt_L:
+       this is keycode 64(0x40), whose keysyms are (now) "Alt_L Meta_L".
+    2. Add that keycode to mod1's list of key codes (it's already there).
+
+
+Fuck all this!
+Let me see if I can find xmodmap wisdom on the web...
+    http://www.tldp.org/HOWTO/mini/Intkeyb/x336.html
+Ah!  This gives me the following piece of wisdom:
+for each keycode, the keysyms come in pairs.
+For example:
+        keycode 0x11 = 8 asterisk aacute 8
+Then, if I have something mapped to ISO_Next_Group, e.g.:
+        xmodmap -e "keycode 115 = ISO_Next_Group"
+(note, 115 is my left-windows-flag key)
+then the next-group key will make it so the next pair is used.
+There seems to be no limit on the number of keysyms allowed per keycode
+(I did up to 32) but all but the first four pairs are ignored, apparently.
+If there is an odd number of them, apparently the last one
+is expanded into a pair by the heuristic that if it's alphabetic
+(regardless of whether it's lower or upper), it turns into (lower,upper),
+otherwise, it just gets repeated.
+
+
+Note: the file /usr/X11R6/lib/X11/etc/xmodmap.std
+contains the standard mappings, and it is even commented!
+So to restore the defaults:
+    % xmodmap /usr/X11R6/lib/X11/etc/xmodmap.std
+Oops, WRONG!  This is really fucking bizarre.  The initial mapping
+wasn't that, it was rather different.
+Okay, but I think maybe I like that better,
+now the windows-flag keys are Meta_L and Meta_R.
+To fix sawfish, I think I just need to change what M- means,
+which means change what xmodmap's mod1 maps to:
+    % xmodmap -e "clear mod1"
+    % xmodmap -e "add mod1 = Meta_L Meta_R"
+Wait, what the fuck:
+    % xmodmap -pm
+        xmodmap:  up to 4 keys per modifier, (keycodes in parentheses):
+        shift       Shift_L (0x32),  Shift_R (0x3e)
+        lock        Caps_Lock (0x42)
+        control     Control_L (0x25),  Control_R (0x6d)
+        mod1        Alt_L (0x40),  Meta_L (0x73),  Alt_R (0x71),  Meta_R (0x74)
+        mod2        Num_Lock (0x4d)
+        mod3      
+        mod4      
+        mod5      
+Why did it add all four of those instead of just what I said?
+Apparently Meta_L turns into "Alt_L Meta_L" and likewise for R.  Why?
+Because they both occur in the same keycode?
+Yes, that's right, according to the man page.
+How completely retarded!!!!!
+ARGH!!!!
+What is the actual association?  To a keycode?  To a keysym?  To a (keycode,keysym) pair?  What if they get disassociated later?  Someone should be shot.
+Answer: the mapping is to key code only-- the keysyms shown
+are just for convenience.  However, there seems to be no way
+to add just the keycode to a modifier set
+if the keycode has a keysym that applies to both that keycode
+and another keycode-- you get both added to the modifier.
+
+
+Okay, let's look for more xmodmap wisdom on the web...
+    http://tiny-tools.sourceforge.net/emacs-keys.html#xmodmap_introduction_ndash_changing_your
+Ah, this starts to have a more complete explanation, although
+the language is hard to understand so I don't follow it all.
+Ah!  And the excerpt from the X Protocol document
+(in the excerpt from the xkeycaps man page) is VERY helpful!
+And matches my observations about keysym lists, alphabetics, etc.,
+but with some extremely hairy fine points that I'm not bothering following
+(having to do with caps lock).
+Ah, interesting... X client programs are supposed to map
+modifier keys as they go, if not already mapped.  Does sawfish
+do this right, I wonder?
+Oh!  Okay, the following information helps:  when I do xmodmap modifier
+map changes, sawfish doesn't notice immediately... but if I then
+"change" the sawfish shortcut (to the exact same thing it was)
+then it notices.  So one thing that might help is to restart sawfish
+after the xmodmap, or something.
+(But, note that if there was *no* hyper mapped before,
+then it will notice as soon as hyper is mapped.)
+(But, it doesn't seem to like mod5, though it accepts Hyper
+when mapped to any other mod, as long as it's "boinked" after the xmodmap.)
+I still can't make any fucking sense of why I can't get it to use meta, though.
+
+
+Resources all told:
+    man xmodmap (fucking pitiful)
+    /usr/X11R6/lib/X11/etc/xmodmap.std
+    http://www.tldp.org/HOWTO/mini/Intkeyb/x336.html
+    http://www.togaware.com/linux/survivor/Mapping_Key.html
+    http://tiny-tools.sourceforge.net/emacs-keys.html#xmodmap_introduction_ndash_changing_your
+

@@ -1,0 +1,7 @@
+Q: how to paste from a terminal window into acroread?
+A: klipper
+       Configure klipper...
+                  change clipboard/selection behavior to "synchronize contents of the clipboard and selection"
+   Then I can copy text from a terminal window by sweeping it out with the left mouse button,
+   and paste it into acroread using ctrl-v.
+

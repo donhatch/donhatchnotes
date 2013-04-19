@@ -1,0 +1,8 @@
+How to get the box drawing characters:
+ctrl-n (14) goes into alternate char set mode,
+ctrl-o (15) goes back.
+
+(this doesn't work... python doesn't support multiple -c's??)
+python -c "import sys" -c "for i in xrange(256): sys.stdout.write('%d: %s %s' % (i, chr(i), chr(14)+chr(i)+chr(15)))"
+
+perl -e 'for my $i (0..128-1) { if ($i%10 == 0) {print "\n";} printf("%3d: %s (%s) ", $i, chr($i), chr(14).chr($i).chr(15)); } print("\n");'

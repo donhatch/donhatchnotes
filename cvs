@@ -1,0 +1,57 @@
+The manual is in:
+        http://www.cvshome.org/docs/manual/
+other advice (SSH) in:
+        file:///usr/share/doc/HOWTO/CVS-RCS-HOWTO.html#s11
+Info about cvs guis in:
+        http://www.cvsgui.org
+Best practices in:
+        XXX
+
+
+Goal: set up an ssh-encrypted CVS server on hadron, without
+root access.
+
+
+Set up the repository:
+    % setenv CVSROOT ~/cvsroot
+    % mkdir $CVSROOT
+    % cd $CVSROOT
+    % cvs init
+    % cd ~/wrk/tyler
+    % ci RCS/*          (to unlock everything)
+    % cp -a RCS $CVSROOT/tyler
+Test it on my local machine:
+    % mkdir ~/cvswrk
+    % cd ~/cvswrk
+    % cvs checkout tyler
+Cool, it works...
+    % scp -r $CVSROOT hatch@plunk.org:cvsroot
+    % mkdir ~/hide
+    % mv $CVSROOT ~/hide    (so I don't accidentally use it)
+    plunk% cd ~/cvsroot/CVSROOT
+    plunk% cat > passwd
+        hatch::
+        green::
+    plunk% htpasswd passwd hatch
+        password: hyler
+    plunk% htpasswd passwd green
+        password: tylerguy
+
+    And asked Brad to add --allow-root=/home/hatch/cvsroot
+    to /etc/xinitd.d/cvspserver
+
+To point to it from a client machine:
+    % setenv CVSROOT :pserver:hatch@plunk.org:/home/hatch/cvsroot
+    % cvs login
+    % cvs checkout tyler
+        This should create (in the current directory):
+            tyler/
+            tyler/Makefile
+            tyler/Tyler.htm
+            tyler/Tyler.java
+            tyler/Tyler.mf
+
+
+
+Lists of graphical diff tools:
+

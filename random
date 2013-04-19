@@ -1,0 +1,6 @@
+Notes on gaussian random number generation from uniform:
+    http://www.taygeta.com/random/gaussian.html
+
+My problem of scattering particles into buckets in order
+seems to have a lot to do with the poisson distribution,
+but Mathworld's description of what it is is not very good.

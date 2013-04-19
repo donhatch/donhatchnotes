@@ -1,0 +1,9 @@
+Q: My work firewall times me out after 60 minutes (or something)...
+   how to prevent this on the client side?
+A: man ssh_config
+   Add one of the following to ~/.ssh/config:
+       TCPKeepAlive yes
+   or:
+       ServerAliveInterval 900
+   Not sure what the implications of one versus the other is,
+   but I'm using the latter... I'll let you know how it goes.

@@ -1,0 +1,14 @@
+Q: how to change window managers, temporarily or permanently?
+PA: temporarily:
+        killall metacity && sleep 3 && metacity &
+    permanently:
+        do the above and:
+            gnome-session-save
+        although this will save the entire session, which includes
+        the shell window... so really should probably just do that
+        when logging out.  I don't expect it will find the right
+        metacity afterwards though :-(
+    Hmm, note that metacity says this when you try to run it
+    and there is one running:
+        Window manager warning: Screen 0 on display ":0.0" already has a window manager; try using the --replace option to replace the current window manager.
+

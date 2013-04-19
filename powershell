@@ -1,0 +1,360 @@
+LINKS:
+======
+    Awesome tips regarding perforce and powershell:
+        http://www.exemplics.com/node/2
+
+    PowerShell Cookbook
+        http://www.johndcook.com/PowerShellCookbook.html
+
+    It's confusing, these are two different links...
+    be sure to look at them both, they are both good:
+    TechNet Library -> Scripting -> Script Center -> Windows Powershell
+        http://technet.microsoft.com/en-us/library/ee692944.aspx
+        In particular, see Owner's Manual -> Piping and the Pipeline
+    TechNet Library -> Scripting -> Windows Powershell
+        http://technet.microsoft.com/en-us/library/bb978526.aspx
+    (the latter is what's in the Help menu in powershell_ise)
+
+    YOU ARE HERE:
+        TechNet Library -> Scripting -> Windows Powershell -> Windows Powershell Core -> Windows PowerShell Getting Started Guide -> Navigating Windows PowerShell -> Navigating the File System
+        http://technet.microsoft.com/en-us/library/bb613489%28VS.85%29.aspx
+
+
+GOTCHAS:
+========
+
+- '@' at the beginning of a word means something non-obvious.  E.g. 
+      p4 sync @12345
+  will not do what you expect-- it will just do a p4 sync.
+  Use this instead:
+      p4 sync '@12345'
+- commas and #'s have to be quoted too
+- $array[1..($array.length-1)] doesn't work, since 1..0 is (1,0).  broken!
+  See this, which describes another method that doesn't work either:
+      http://blogs.msdn.com/b/powershell/archive/2007/02/06/powershell-tip-how-to-shift-arrays.aspx
+
+See this for some more legit complaints:
+    https://connect.microsoft.com/PowerShell/feedback/details/283088/script-logging-needs-to-be-improved
+    
+
+QUESTIONS:
+=========
+
+Q: ">" is producing something that python can't read!?
+A: instead of "> foo", use "| out-file foo ascii"
+
+Q: eval?
+A: iex (which is an alias for Invoke-Expression)
+
+Q: cd -?
+A: http://windows-powershell-scripts.blogspot.com/2009/07/cd-change-to-previous-working-directory.html
+
+
+Q: how to test whether a variable is null?
+A: $var -eq $null
+
+Q: how to ask for all the immediate subdirectories of a given directory?
+   (the directoy name might contain wildcards)
+A: e.g. if the directory is named []:
+    Get-Children -literal [] | ? {$_.PSIsContainer}
+   Probably faster to do this one using a .net utility rather than powershell:
+       [io.directoryinfo]$dir = 'c:\myDir'
+       # current directory only
+       $dir.getDirectories()
+       # all subdirectories
+       $dir.getDirectories('*','AllDirectories')
+   (oh, hmm, that doesn't work)
+
+
+Q: need the following safe aliases like on linux:
+        mv -> mv -i
+        cp -> cp -i
+        rm -> move the thing to ~/trash or recycle bin or something
+   and also noclobber!
+
+Q: what the hell are '?','%'?
+A: oh!!! they are aliases:
+        get-command ?
+   shows that ? is an alias for where-object
+   and % is an alias for Foreach-Object.
+
+Q: how do I get-command for '?' only?
+   all the escapes I could think of either treat it as a wildcard,
+   or don't recognize it at all.
+
+Q: can I get a powershell version of the visual studio command prompt? (PA: just run powershell or powershell_ise from vstudio cmd)
+
+Q: powershell history size?
+   and is there a place I can put startup commands?
+   (a profile?)
+PA:
+    $MaximumHistoryCount
+    $MaximumHistoryCount = 10000
+    see this for info on profiles: http://technet.microsoft.com/en-us/library/bb613488%28VS.85%29.aspx
+    so:
+        $profile
+            C:\Users\dhatch\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1
+        test-path $profile
+            False
+        new-item -path $profile -itemtype file -force
+        notepad++ $profile
+    eek! and have to set the execution policy too, so that scripts will run.
+    as administrator:
+        get-executionpolicy
+            Restricted
+        set-executionpolicy RemoteSigned
+        (actually only need to do this once on the system, don't need to put it in $profile)
+    note, have to do the same thing for $profile in powershell_ise
+    (it's a different file). no need to create the directory or
+    set the execution policy though.
+
+Q: I have $MaximumHistoryCount = 10000
+   but history (aliased to Get-History)
+   is still only retaining the last 32 commands??
+A: history -count 10000
+
+
+Q: environment variables like PATH?
+A:
+    ls Env:
+    ls Env:Path
+    $Env:Path
+    $Env:FOO = "BAR"
+    rm Env:FOO
+
+Q: why isn't Get-Command telling me what "alias" is?
+   it's acting like an alias for Get-Alias, but it's not listed
+
+Q: alias only does Get-Alias.  Can I make it act like Get-or-Set-Alias, like in tcsh?
+A: 
+    # doesn't recognize named args... use Get-Alias or Set-Alias for that
+    function GetOrSet-Alias {if ($args.length -eq 2) {Set-Alias -Scope 1 $args[0] $args[1]} else {Get-Alias $args}}
+    Set-Alias alias GetOrSet-Alias
+
+
+Q: unalias?
+A: rm alias:myalias
+   ooh, don't alias .. to anything, I don't think it's removable!
+
+   function Unset-Alias($name) { rm Alias:$name }
+   Set-Alias unalias Unset-Alias
+
+Q: which?
+A: Just use which, which is an alias for Get-Command.
+   If it shows a function with truncated definition,
+   you can see the full definition as follows:
+       (ls function:myfunction).definition
+   (Actually on my home windows vista machine, with an older version
+   of powershell I guess, it's not an alias for Get-Command--
+   should probably make it one:
+        Set-Alias which Get-Command )
+
+Q: why does this appear to work, but the functions don't take?
+   function .p {. $profile}
+   .p
+
+Q: how to access script args?
+A: $args
+Q: how to access the program's argv[0]?
+
+
+
+
+
+Q: can I time a command, or make all commands be timed (like "set time = 0" in tcsh)?
+PA:
+    Measure-Command {date}
+    but we lose the output? wtf?
+PA:
+    Get-History's output items contain start and end times... so we can query after the fact,
+    something like:
+        history 400 | % {$_.endexecutiontime - $_.startexecutiontime}
+
+Q: how to get python working in powershell_ise?
+   can I make a wrapper that will work properly?
+PA: oh wait, it *does* work properly, just not interactively.
+    oh wait, no it doesn't completely... e.g. it flips out a little
+    during safesync.py if all files are up-to-date.
+
+    see http://blogs.msdn.com/b/powershell/archive/2009/02/04/console-application-non-support-in-the-ise.aspx
+PA: see http://www.tomsguide.com/us/PowerShell-Microsoft-Windows,review-1453.html
+        $x = new-object -comObject "Shell.Application"
+        $x.shellExecute('python')
+    but that just opens a different shell window with python in it.
+    Sheesh, if I wanted that, I could just do:
+        start python
+
+
+Q: are there equivalents of tcsh !!, !$, !* ?
+PA: $$ is the last word of the previous command, that's the most important one
+ (argh, but it's brain damaged--
+ it gets put into the history as $$ rather than expanded)
+
+Q: command-line/history editing:
+    - up/down in history?
+        up-arrow, down-arrow
+        (Q: is there a way that doesn't involve arrows? I'd prefer ctrl-p)
+    - beginning/end of line?
+        home, end
+    - forward/backward a word?
+        ctrl-left-arrow, ctrl-right-arrow
+    - clear line?
+        esc
+
+Q: what is |% (found in some examples)?
+
+Q: grep "pattern" file1 file2 ... ?
+Q: grep "pattern"   (from a pipe)?
+A:
+    (...whatever...) | Select-String "some case-insensitive regex"
+    (...whatever...) | Select-String -ca "some case-sensitive regex"
+    Set-Alias grep Select-String
+    Set-Alias ss Select-String
+
+Q: sed?
+A:
+    (...whatever...) -replace 'some regex pattern','some replacement'
+    (use $1, etc. for backrefs)
+    q: where the hell is the doc for that?
+    q: what's an equivalent pipeline?
+
+Q: tail -1?
+A:
+    (...whatever...)[-1]
+    or:
+    ...whatever... | select -last 10
+Q: tail -f?
+
+Q: if (-f somefile) then
+A: if (Test-Path "somefile") {do something}
+
+Q: find . -name "foo" -print
+A: get-childitem (gci)
+        gci -recurse | ? {$_ -cmatch "Previs"}
+        (gci -recurse) -cmatch "Previs"
+Q: df?
+PA: http://halr9000.com/article/506 or http://poshcode.org/428  (only gives current drive, or the single drive specified)
+Q: du -s? (i.e. just tell me total space used)
+
+Q: file?
+Q: source?
+A: .
+Q: repeat 1000 echo foo?
+A:
+    1..1000 | Foreach-Object {echo foo}
+    1..1000 | % {echo foo}
+
+    function Repeat-Command($n,$stuff) { 1..$n | % $stuff }
+    Set-Alias repeat Repeat-Command
+    repeat 3 {echo foo}
+
+    q: can I define the function with var args so that invocation doesn't require the {}'s?
+
+Q: touch?
+A:
+       new-item -type file -path MY_NEW_FILE
+   or, in any (not necessarily power) shell:
+       fsutil file createnew MY_NEW_FILE 0
+
+Q: env?
+A: ls Env:
+
+
+Q: exit status of last command executed?
+
+Q: how to list the aliases for a given command?
+   e.g. "is there an alias for Select-String"?
+A:
+        get-command | ? {$_.Definition -eq 'Select-String'}
+   (no, there's nothing)
+        get-command | ? {$_.Definition -eq 'get-command'}
+   (shows there's an alias gcm)
+   (note, ? is an alias for where-object, as noted above)
+   I now have this in my profile:
+        function Get-AliasOf($definition) { Get-Alias | Where-Object {$_.Definition -match $definition} }
+        Set-Alias aliasof Get-AliasOf
+
+
+
+
+
+Q: can I get the scroll bar to behave better (not scroll past the bottom)
+   in powershell_ise?
+   (exact same behavior in cmd window... wtf??? is this considered
+   normal/friendly on windows??)
+PA: scroll to bottom and then immediately click just above the scrollbar
+   (that works in powershell_ise but not in cmd window)
+   or, ctrl-end (but that only works sometimes... works for dlenihan consistently, wtf?)
+PA: workaround: start by filling up the scroll area with blanks:
+   1..1000 | % {echo ""}
+
+Q: when I scroll back through history and then forward,
+   deciding I don't want any of the past commands... how to clear the command??
+
+Q: how to show full output, in powershell in cmd window, of, e.g.:
+    ls Variable:
+   some of them are showing truncated with ... at the end.
+
+Q: how to do case insensitive stuff?
+A: for comparison operators, prepend 'c', e.g.:
+        get-command | ? {$_.Definition -ceq 'Get-Command'}
+
+Q: wildcards and expansions? e.g. in tcsh   {a,b,c}*[xyz]??
+
+Q: my $HOME is set to "H:\" for some reason
+   (probably from $Env:HOMEDRIVE="H:" and $Env:HOMEPATH="\" for some reason)...
+   I'm trying to change all those in my $profile but I get:
+       Cannot overwrite variable HOME because it is read-only or constant.
+   How do I change it?
+
+
+
+
+
+Q: what the FUCK?
+   in powershell in cmd window:
+        echo A
+        echo B
+        echo C
+        up-arrow up-arrow Enter, to get "echo B"
+        up-arrow up-arrow Enter, to get "echo C"   
+            NO! it's "echo A"
+            wtf???
+    same in regular cmd?
+
+Q: is there a way to set the window title?
+A: 
+    this works for the cmd window and for powershell_ise:
+        $Host.UI.RawUI.WindowTitle
+        $Host.UI.RawUI.WindowTitle = "hello"
+
+    for console2, you also have to set some strange stuff:
+        Edit -> Settings -> Appearance
+            uncheck "use console window title"
+            check "Show command"
+            clear the title text entry
+    it still shows a "-" which is weird.
+    I now have this in my $profile:
+        function Set-WindowTitle($text) { $Host.UI.RawUI.WindowTitle = $text }
+        Set-Alias title Set-WindowTitle
+   
+
+Q: surely there's a way to make python take stdin from powershell_ise?
+PA: you can do this:
+        type foo.py
+            import sys
+            print sys.stdin.readlines()
+        echo foo | python foo.py
+    and you can do this:
+        read-host "enter something"
+    which pops up a dialog box.
+    well, you can do:
+        read-host "enter something" | python foo.py
+    put that only gives you one line
+    (even if foo.py doesn't ask for one!)
+    what we want is something that will attach to foo.py's stdin
+    and prompt as it goes.
+
+Q: how do I find my mac address?
+A: ipconfig /all
+   and look for "physical address" of the most sensible looking interface

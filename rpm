@@ -1,0 +1,32 @@
+To unpack source and apply any patches...
+
+    # rpm -Uvh dasher-3.2.15-1.src.rpm
+    (to just prep)
+        # rpmbuild -bp /usr/src/redhat/SPECS/dasher.spec
+    (to prep and build)
+        # rpmbuild -bc /usr/src/redhat/SPECS/dasher.spec
+    (to prep and build and install)
+        # rpmbuild -bi /usr/src/redhat/SPECS/dasher.spec
+    (to prep and build and install and build binary package)
+        # rpmbuild -bb /usr/src/redhat/SPECS/dasher.spec
+    (to prep and build and install and build binary and source packages)
+        # rpmbuild -ba /usr/src/redhat/SPECS/dasher.spec
+    (to build just the source package, don't know what else it does
+        # rpmbuild -bs /usr/src/redhat/SPECS/dasher.spec
+
+The source code will end up down in /usr/src/redhat/BUILD .
+(or /usr/src/packages/BUILD if not on redhat).
+
+
+There seems to be a good doc here, if I want to get serious:
+    http://fedoranews.org/hoyt/rpm/
+it shows how to do this stuff as non-root, I think.
+Also, focusing on glibc:
+    http://devpit.org/wiki/Gnu_Toolchain/GLIBC/Building_GLIBC
+
+
+Q: how to just unpack the source into a directory, without being root,
+and look at it??
+A: rpm2cpio I think
+   no, look at: http://bradthemad.org/tech/notes/patching_rpms.php
+

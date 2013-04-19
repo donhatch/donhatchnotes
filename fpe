@@ -1,0 +1,9 @@
+Trying to figure out how to set/get the floating point processor status...
+
+    http://www.delorie.com/gnu/docs/glibc/libc_406.html
+    http://www.gnu.org/software/libc/manual/html_node/Control-Functions.html#Control-Functions
+
+That says there's no way to pass info back and forth, but what about
+sigaction, which gets a siginfo_t containing si_code
+which can be FPE_FLTDIV, etc?
+

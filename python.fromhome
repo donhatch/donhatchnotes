@@ -1,0 +1,318 @@
+TODO: merge python.fromhome with python.fromwork
+
+
+
+GOOD INTERESTING READING AND REFS:
+    http://www.secnetix.de/~olli/Python 
+    http://www.secnetix.de/~olli/Python/doclinks.hawk
+
+        http://www.python.org/doc/current/
+        http://www.python.org/doc/current/tut/tut.html
+        http://www.python.org/doc/current/ref/ref.html
+        http://www.python.org/doc/current/lib/lib.html
+
+    http://www.norvig.com/python-iaq.html       (some way cool tricks)
+    http://p-nand-q.com/python/stupid_lambda_tricks.html
+    http://www.python.org/doc/faq/
+
+GOTCHAS:
+    - --x does not increment x !!!  it returns -(-x)). Likewise for ++x, etc.
+      Need to use x-=1 and x+=1 instead, and there's no equivailent of
+      post-increment or post-decrement.  Attempting them will usually
+      give an error, except in cases like x++ - y which is treated
+      as x + (+(-(y)). :-(
+
+    - x = 3; print("x =", x)
+      prints the list stringified, with parens and comma
+      (although print("x") doesn't print the parens).
+      Weird.  Need to omit the parens from the call, I guess.
+
+    - a global variable can be looked at, or its elements assigned to,
+      in a function, but the variable itself can't be assigned to
+      unless you say "global x".  Without that, it will create
+      a local variable and assign to it instead. :-(
+      Also got bit by the following:
+      in my main body (which is just statements in global scope),
+      I created some variables, which became global...
+      then I referred to that name by accident in a function,
+      and it saw them instead of giving an error like I would
+      have liked...  from now on I'm going to make an explicit main()
+      to prevent this.
+
+    - evidently semantics will be changing
+      so that division is by default float division;
+      see the -Q option in the man page.
+      Use // for integer division (or divmod to get both quotient and remainder).
+      (The Beazley book doesn't mention this.)
+
+    - string functions that test for "is all something"
+      return false on empty string-- lame!
+      Is there a good workaround other than writing my own replacement?
+      (see http://p-nand-q.com/python/stupid_lambda_tricks.html
+      for an approach to a similar issue for list functions
+      that sometimes return None)
+
+    - Generator functions are NOT "tuple comprehension"!
+      E.g.
+          (10**i for i in xrange(3))
+      behaves differently from
+          [10**i for i in xrange(3)]
+      as follows:
+          >>>foo = [10**i for i in xrange(3)]
+          >>> print [x for x in foo]
+          [1, 10, 100]
+          >>> print [x for x in foo]
+          [1, 10, 100]
+          >>> print [x for x in foo]
+          [1, 10, 100]
+
+          >>> bar = (10**i for i in xrange(3))
+          >>> print [x for x in bar]
+          [1, 10, 100]
+          >>> print [x for x in bar]
+          []
+          >>> print [x for x in bar]
+          []
+       XXX give example from work
+      
+
+    - lambda contexts don't work sanely, apparently.
+        >>> print [f() for f in [lambda:range(n) for n in range(4)]]
+        [[0, 1, 2], [0, 1, 2], [0, 1, 2], [0, 1, 2]]
+        funlist = []
+        for i in [0,1,2]:
+            funlist.append(lambda:i)
+        funlist[0](), funlist[1](), funlist[2]()
+        (2,2,2)
+        This page discusses the same thing:
+            http://www.enricozini.org/2007/tips/python-scoping.html
+        Oh!  And it gives a trick for solving it!
+            print [f() for f in [lambda n=n:range(n) for n in range(4)]]
+        similarly for the other one.
+
+
+     
+
+THINGS I DIDN'T SEE AT FIRST:
+    - reduce() has an optional "initial" parameter... so it's
+      not zero-phobic after all!
+      e.g. print reduce(lambda s,x: s+" %d"%x, [0,1,2], "foo:")
+      This makes it much more useful!
+      Although it would be even more useful, maybe, if
+      it had an optional special-case-for-only-one-item parameter too...
+    - == is deep, "is" is shallow (pointer compare)
+        but wait: a = 1+1; b = 2; a is b
+        returns True??? Then I don't understand what "is" means.
+
+    - from http://www.norvig.com/python-iaq.html but without the trailing " ":
+            import sys
+            def printf(format, *args): sys.stdout.write(format%args)
+TRICKS:
+    - from http://www.norvig.com/python-iaq.html:
+      To avoid typing quotes around key names:
+            def Dict(**dict): return dict
+            Dict(a=1, b=2, c=3, dee=4)
+            {'a':1, 'b':2, 'c': 3, 'dee': 4}
+      and there's a similar thing for objects.
+    - to get a local variable inside a lambda, use a helper lambda inside,
+       which declares the desired variable as a param with default value.
+       From http://p-nand-q.com/python/stupid_lambda_tricks.html:
+           f = lambda x: (lambda result=range(20):do_something(result,x))()
+           As mentioned above, local variables are best used in a list,
+           because that way you can use [].__setitem__ for data assignments.
+       (what the hell did the last sentence mean?)
+
+
+TO EXPERIMENT WITH:
+    - generator functions: see http://www.secnetix.de/~olli/Python/examples.hawk
+      I don't think this is mentioned in the Beazley book at all!
+    - hmm! all standard types (string, integer) are classes and so can be
+      sublassed?
+    - http://www.secnetix.de/~olli/Python/dynamic_typing.hawk mentions
+      doctest module for automated regression tests?
+    - need to get good at regular expressions stuff
+    - try to find another example where a "finally" will fail to execute--
+      (stack overflow inside nested finallies, or something)
+    - see whether can implement olli's incrementor (returning
+      a function with a nested scope) using a local function definition
+      instead of a lambda-- potentially more versatile.
+    - see whether olli's example of parsing command line options:
+        http://www.secnetix.de/~olli/Python/tricks.hawk
+      is worthwhile
+    - read up on semantics of shallow versus deep copying, p.21 and p.108
+    - experiment with the bisection module:
+        http://www.python.org/doc/current/lib/module-bisect.html
+      mentioned in the iaq
+    - experiment with, and understand, the iaq's version
+      of ternary ?:
+    - try the iaq guy's .python startup file
+FEATURES TO KEEP IN MIND:
+    - time.clock()
+    - documentation strings (if first statement of a
+      module, class, or function is a string)
+    - string concatenation by just putting the strings side-by-side
+    - to undefine a variable, use del
+    - can do singleton pattern, see the iaq. (note,
+      it uses a totally non-obvious semantic of default args)
+      
+
+
+QUESTIONS (most recent first):
+    Q: beazley p.16 it says "s1" u "s2" can be different from u"s1s2" ...
+       what's an example of this? (It says details in Ch.4 and Appendix A)
+    Q: beazley p.16 says raw strings can't end in a single backslash--
+       why, for heaven's sake?? Backslashes aren't even treated specially,
+       otherwise!
+    Q: the iaq says the lack of "new" keyword is a good thing-- I don't
+       understand this yet.
+    Q: "==" (deep compare, as opposed to "is" which is pointer compare)--
+       are these overrideable in classes?
+    Q: what are the semantics of shallow versus deep copying, for
+       lists, strings, etc.?
+    A: p.21 and 108 (need to read them)
+    Q: how do I tell whether a given object is (a subclass) of a given type?
+        http://www.secnetix.de/~olli/Python/dynamic_typing.hawk talks
+        about testing types, but they test for equality, which
+        is seldom the right thing to do.
+    Q: can I pass things by reference?  e.g. pass a string and
+      have two of its chars changed... actually I'm confused about
+      string mutability/sharing and stuff.
+    Q: can't seem to figure out how to get -tt and -Qwarn and -Werror
+      all at once on the intial #! line???
+
+    Q: what does the unary * operator do?  It's used in both of the following:
+        http://www.secnetix.de/~olli/Python/tricks.hawk
+        http://www.norvig.com/python-iaq.html
+    A(partial): Beazley p.64: when in a function declaration,
+       it's for varargs: if the last parameter name
+       is preceded by *, that param absorbs any remaining args given into a
+       list.  There's also a ** which does more, using a hash.
+       Oh wait, olli's example uses it a different way,
+       so there's more to it... when I figure this out,
+       take a look at olli's page again.
+       Okay, there's more to it on the transposing-matrices trick in:
+           http://www.norvig.com/python-iaq.html
+       I have the impression that passing *list to a function
+       turns the n-element list into n distinct args.
+
+ANSWERED QUESTIONS (most recent first):
+    Q: beazley p.17 says "..." is used in extended slicing operations,
+       but I don't see that on p.24?
+    A: see p.33.  E.g. a[i:j:stride], a[i:j, n:m], or a[..., i:j]
+       But I still have no idea what the last one is supposed to mean,
+       and it gives an error in the interpreter!?
+    Q: time.clock() always returns 0.17999999999999999 -- what the hell?
+    A: ah, the clock is stopped when not doing anything in the interpreter,
+       and seems to have a resolution of 1/100 second-- so,
+       execute something like max(range(1e6)) and afterwards it will show
+       a different value.
+    Q: can I have local variables and compound statements in a lambda function?
+    A: no but can work around using dirty tricks,
+       see "Lambda Limitations" section of:
+        http://p-nand-q.com/python/stupid_lambda_tricks.html
+       E.g. for local variables, use helper lambdas which
+       declare the desired variable as a param with default value.
+       And I think maybe local function definitions can do anything
+       lambdas can do? need to experiment with the example olli gives
+       of the incrementor.
+
+    Q: can I make the equivalient of a "toString()" member of a class,
+       to control how objects are printed (i.e. to control what str(obj)
+       returns).  How about to control what repr(obj) returns?
+    A: The __str__ and __repr__ member functions.
+
+
+PYTHON PROS AND CONS:
+    - Indenting to denote block structure
+            PROS:
+               - avoids bugs over which "if" an "else" matches
+               - code is typically more compact (fewer lines) than
+                 equivalent C or Perl which waste lines on braces,
+                 with no decrease in readability
+                 (of course, can put those braces on same lines
+                 in C or perl, but that makes the code hard to manage)
+            CONS:
+               - I often want to indent a bunch of code
+                 because it is logically a group,
+                 but I don't want to make a function out of it.  Can't.
+                 Especially, I always want to indent the bunch of code
+                 that I think of as "main()".  Just can't.
+               - I often want to make a local block with local variables
+                 that disappear when the block is exited.  Can't.
+               - no delimiting characters like {},
+                 so can't use brace matching in an editor
+                 to easily traverse from beginning to end of a block and back,
+                 or to tell the editor to increase or decrease indentation level
+                 of a whole block at once.
+               - can't just cut-and-paste code samples from a file
+                 or web page into the interpreter, if they are indented--
+                 it gives a syntax error.
+    CON: don't have to declare variables (like perl's non-strict mode)--
+      This encourages sloppiness and bugs.
+      (even if a "strict" mode were introduced,
+      the usefulness would be limited because
+      of the lack of block structure for scoping variables--
+      no wait, that's not true, a block is an indentation level.
+      yeah I think that makes sense-- I want the scope of a variable
+      to be the indented block it's defined in)
+    CON: commands.getoutput() strips the final newline, if any.
+      so when I care about that, I have to use something more complicated--
+      what a pain.  perl does this right, i.e. it retains the newline
+      (sh and csh do it wrong).
+    PRO: -1%10 is 9.  HOORAY!!! A LANGUAGE THAT GETS THIS RIGHT, FINALLY!!!!!
+    CON: no ternary ?: operator??? oh come on, give me a break!
+      can sometimes simulate it using ands and ors, but not always.
+            a ? b : c
+            a and b or c
+      but only if b is guaranteed to return True...
+      or   [b, c][bool(a)]
+      (from http://www.secnetix.de/~olli/Python/tricks.hawk)
+      or   (a and [b] or [c])[0]
+      (from http://p-nand-q.com/python/stupid_lambda_tricks.html
+       which is from the FAQ)
+      but those don't get short-circuit evaluation,
+      (most complete discussion of this is in the iaq,
+      which might actually give something that really works
+      but is just a little obscure... need to read it)
+      Trick for delayed execution is to use a simple lambda without arguments:
+          [lambda:b, lambda:c][not not a]()
+      or:
+          (a and (lambda:b) or (lambda:c))()
+    CON: print seems awkward, the way I can't put parens around its args
+      without changing the meaning (e.g. print 1,2 is different from print(1,2))
+      Maybe I'll get used to that.
+      (turns out everyone hates print, even the author of python)
+      alternative (from the iaq):
+        def printf(format, *args): print format % args,
+      but that puts a space at the end.  So use this intead:
+        import sys
+        def printf(format, *args): sys.stdout.write(format % args)
+    PRO: function declarations are MUCH more readable than perl,
+      and the named arguments and default arguments are great for useability
+      (although I try not to use default arguments very often,
+      since it makes functions harder to use / remember the prototypes
+      of, when not all usages of it are the same)
+    CON: regular expression handling seems a lot more awkward than in perl
+      (using the group() stuff to retrieve matches and stuff?  maybe I'll
+      get used to this...)
+    CON: post-increment and pre-decrement is really useful for implementing
+      stacks and things-- too bad we don't have em (and that
+      using ++ and -- doesn't even give a warning if pre, they
+      are just silently interpreted as double-unary-plus or double-unary-minus)
+    CON: jeez, if I just want to exit, I have to import sys and call sys.exit()?
+      This is a (minor) pain.
+    PRO: stringification (using `` or repr()) is at your fingertips--
+      this is essential, and great.  (In perl, you have to write your own,
+      typically a wrapper around Data::Dumper that tweaks its settings
+      and corrects its behavior for lists.)
+    PRO: functional programming (with correct semantics for nested scopes).
+      Anonymous functions are concise and readable-- nice.
+      see http://www.secnetix.de/~olli/Python/lambda_functions.hawk
+      (although-- can I have local variables and compound statements?
+       no, see workarounds above)
+    PRO: have to use "this" or "self" explicitly-- right on,
+      makes code much more readable.
+    CON: can treat non-bools as bools.  this encourages bugs.
+      (Java gets this one right, C/C++ and perl don't.)
+    PRO: range(0,100) means 0..99 instead of 0..100.
+      This avoids all the -1's all over the place like in perl.

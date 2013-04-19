@@ -1,0 +1,5 @@
+To add knowledge of a new kind of paper,
+put something like this in ~/.enscriptrc :
+
+#      name    width   height   llx   lly   urx   ury
+Media: 11x17   792     1224     24    24    768  1200

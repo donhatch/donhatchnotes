@@ -1,0 +1,40 @@
+To develop ld.so:
+
+    - get the glibc source rpm
+    - install and build it (using ~/.rpmmacros so you don't have to be root)
+    - hack up the source, and recompile
+         (not sure what the right way to rebuild is-- "make" doesn't seem
+         to work from anywhere in the tree. this is the best I found:
+            % cd /var/tmp/doNotRemove/dhatch/rpmbuild/BUILD/glibc-2.12-2-gc4ccff1/build-x86_64-linuxnptl
+            % make -r -C .. objdir=`pwd` elf/ldso_install
+         that actually tries to install, ending with "permission denied"
+         (do NOT do any of this as root!!!)
+
+To run it, find the executable ld.so
+(e.g. in /var/tmp/doNotRemove/dhatch/rpmbuild/BUILD/glibc-2.12-2-gc4ccff1/build-x86_64-linuxnptl/elf/ld.so); you can run it directly:
+
+        ld.so <program> <args> ...
+
+To get all subprocesses of a given process to use it,
+you can do the following:
+    mkdir jail
+    sudo mount --rbind / jail
+    sudo mount --bind /path/to/my/ld.so jail/lib64/ld-2.12.so
+Then to use it:
+    sudo /usr/sbin/chroot jail su - $USER
+
+Optionally, wait til the jailed shell has already started
+before mounting ld.so...
+and you can mount and umount it on the fly while the jailed shell is running,
+to switch back and forth between using the test ld.so and the normal one.
+
+
+THINGS TO BE AWARE OF:
+After testing this for a while,
+ I found I was unable to umount jail afterwards; "device is busy".
+But "/sbin/fuser jail" doesn't help--
+it gets confused and shows all processes using /, instead.
+Also some things go haywire, e.g. if I try to access something
+through the jail that would cause an automount to happen outside the jail,
+that directory gets in a bad state, and, again, it becomes impossible
+to unmount the jail directory.

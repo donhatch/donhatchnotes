@@ -1,0 +1,18 @@
+Q: reference for assembly language?
+A:
+    http://en.wikipedia.org/wiki/X86_assembly_language
+    http://web.cecs.pdx.edu/~singh/courses/cs200/slides/9.access.pdf
+    and just google each instruction
+
+Apparently gcc produces AT&T style assembly, which means:
+    - source comes before destination
+    - mnemonics are suffixed with letter indicating size of the operands, e.g.
+          "q" for qword (8 bytes)
+          "l" for dword (4 bytes)
+          "w" for word  (2 bytes)
+          "b" for byte  (1 byte)
+    - immediate values prefixed with $, and registers prefixed with %
+    - effective address: DISP(BASE,INDEX,SCALE)
+      example: 
+          movl mem_location(%ebx,%ecx,4), %eax
+

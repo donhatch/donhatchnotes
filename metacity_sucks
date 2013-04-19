@@ -1,0 +1,57 @@
+I'd like to redo the window manager keyboard focus policy.
+What kinds of things happen?
+
+(1) mouse moves:
+      upper window to lower window (was in lower window the whole time)
+        SWITCH TO NEW WINDOW
+      lower window to upper window (still in lower window)
+        SWITCH TO NEW WINDOW
+      root to window
+        SWITCH TO NEW WINDOW
+      window to root
+        depending on preference, either no focus change
+            or switch to no focus
+      window to adjacent window
+        SWITCH TO NEW WINDOW
+      move within upper window when focus was lower window
+        SWITCH TO UPPER WINDOW
+    summary: any mouse movement over a window
+        should switch to the topmost window
+(2) non mouse moves:
+      window raised under the mouse
+        NO FOCUS CHANGE unless initiated by user
+      window lowered under the mouse
+        NO FOCUS CHANGE unless initiated by user
+      window appeared under the mouse, from root
+        NO FOCUS CHANGE
+      window appeared under the mouse, from another window
+        NO FOCUS CHANGE
+      window disappeared under the mouse, to root
+        SWITCH TO NO FOCUS  (so no other window recieves keystrokes)
+      window disappeared under the mouse, to another window
+        SWITCH TO NO FOCUS  (so final window doesn't recieve keystrokes)
+   summary: if the mouse doesn't move, don't change the focus!
+        unless the focused window disappears or moves out from
+        under the mouse, in which case switch to NO FOCUS
+        so that no other window gets the end of a sentence being typed
+
+
+
+So the policy is as follows:
+    Keyboard focus change occurs when one of two things happens:
+        1) Mouse moves to a position that's in a window
+           that doesn't already have focus:
+            SWITCH FOCUS TO TOPMOST WINDOW
+        3) User-initiated window push or pop or destroy
+            (BUT NOT CREATE, SINCE THAT IS TIME DELAYED)
+            resulting in a topmost window under the cursor
+            that didn't previously have focus:
+            SWITCH FOCUS TO TOPMOST WINDOW
+        2) Non-user-initiated,
+           the focus window disappears, is iconified, or moves out
+           from under the mouse
+            SWITCH FOCUS TO NO FOCUS
+No other actions change focus.  In particular,
+the focus is NOT changed by:
+    - a new window popping up, in front of cursor or otherwise
+

@@ -1,0 +1,211 @@
+Trying to put together a proof of the following statement:
+
+Given a non-degenerate (i.e. nonzero volume) tetrahedron T
+which is the the convex hull of its vertices {v0,v1,v2,v3} in R^3,
+
+Define the function h_T : S^2 -> R
+by h_T(u) = max {p . u : p in T}
+          - min {p . u : p in T}
+or equivalently (since {v0,v1,v2,v3} is the convex hull of T)
+   h_T(u) = max {v0 . u, v1 . u, v2 . u, v3 . u}
+          - min {v0 . u, v1 . u, v2 . u, v3 . u}.                       (1)
+Informally, h_T is the "height of T in direction u".
+
+Note that, since h_T(u) = h_T(-u), we can safely refer to h_T
+of the direction of a line or segment, meaning
+h_T of either of the two opposite unit vectors
+parallel to the line or segment.
+
+Define the "altitudes" of T to be the following 7 line segments:
+    segment joining v0 to closest point on opposite face plane
+    segment joining v1 to closest point on opposite face plane
+    segment joining v2 to closest point on opposite face plane
+    segment joining v3 to closest point on opposite face plane
+    shortest segment joining the line v0,v1 to the line v2,v3
+    shortest segment joining the line v0,v2 to the line v3,v1
+    shortest segment joining the line v0,v3 to the line v1,v2
+
+Define the "interior altitudes" of T to be those altitudes
+of T that (excluding endpoints) lie inside the interior of T.
+Note that an altitude that lies on the boundary of T is NOT an interior altitude.
+
+Proposition: Given a non-degenerate tetrahedron T in R^3,
+h_T : S^2 -> R is continuous
+and its local minima are exactly the directions
+of the interior altitudes of T.
+
+Corollary: Every shortest altitude of T is an interior altitude of T.
+Proof of Corollary (from Proposition):
+
+    Assume a is an altitude of T that is not an interior altitude;
+    we must show that there is another altitude
+    b that is strictly shorter than a.
+
+    Since a does not lie inside the interior of T,
+    Proposition tells us that the direction of a is not a local minimum of h_T;
+    therefore it is not a global minimum of h_T.
+    Since h_T is continuous on a compact set,
+    it does achieve a global minimum (possibly more than one)
+    in some direction. By Proposition, that direction
+    is parallel to some altitude b that *does* lie in the interior
+    of T.
+    Since dir(b) is a global minimum and dir(a) is not, we have
+        h_T(dir(b)) < h_T(dir(a)).
+    But h_T of the direction of an altitude is simply the length of that
+    altitude; therefore
+        length(b) = h_T(dir(b))
+                  < h_T(dir(a))
+                  = length(a)
+    so b is a shorter altitude than a, as desired.
+
+
+Proof that h_T is continuous:
+    This follows from the continuity of each of the four functions
+    u |-> v_i . u, and the closure of the class of continuous functions
+    under finite max, min, and difference.
+    [XXX actually I think it is true even if T is any compact
+    set in R^3... what is a proof for that??]
+
+
+Proof that every local minimum of h_T is parallel to an altitude of T:
+
+    First note that the altitude directions u
+    are exactly those directions in which all four vertices
+    are extremal, i.e. in which either:
+        one vertex has the largest dot product with u
+            and the other 3 have the smallest, or
+        three vertices have the largest dot product with u
+            and the other one has the smallest, or
+        two vertices have the largest dot product with u
+            and the other two have the smallest.
+
+    Therefore if we have a unit vector u that is *not* the direction
+    of any altitude of T, then there is some vertex v_i that is *not*
+    extremal in direction u.  We want to show that, in this case,
+    u is not a local mimimum of h_T,
+    i.e. that every open neighborhood of u in S^2, no matter how small,
+    contains a unit vector u' for which h_T(u') < h_T(u).
+
+    So, start with a non-altitude direction u
+    and an open neighborhood N of u in S^2.
+    Let
+        Smin = {v_i | v_i.u = min{v0.u, v1.u, v2.u, v3.u}}
+        Smax = {v_i | v_i.u = max{v0.u, v1.u, v2.u, v3.u}}
+        Smid = {v0,v1,v2,v3} / (Smin U Smax)
+    then, Smin,Smid,Smax form a disjoint union of {v0,v1,v2,v3}
+    and, as we noted above, Smid is nonempty,
+    so Smin U Smax has at most 3 points.
+    Also, since T is nondegenerate, each of Smin and Smax is nonempty.
+
+    Let P be a plane that includes the (at most 3) points of Smin U Smax.
+    Note that u is NOT normal to P (since the dot product of u
+    with points of V is not constant,
+    since at least one dot product is at
+    min{v0.u, v1.u, v2.u, v3.u} and one other is at
+    max{v0.u, v1.u, v2.u, v3.u}, and these are different by nondegeneracy of T).
+    Choose a unit vector v normal to P, such that v dot u >= 0
+    (if one of the two opposite unit normal vectors of P has negative
+    dot product with u, then use the other one).
+
+    The idea will be that, if we perturb u by adding a bit of v to it
+    (a small enough perturbation so that the points in Smin, Smax and Smid still
+    have smallest, largest, and non-extremal dot products, respectively,
+    with the perturbed direction, and also small enough so that
+    we stay inside the neighborhood N), then
+    the effect will be to decrease the height of T in the new direction.
+
+    We know that smid dot u < smid dot u < smax dot u
+    for each of the finitely many smin in Smin, smid in Smid, smax in Smax,
+    so by continuity of dot product with each of these finitely many points,
+    there exists eps0 small enough
+    so that for each u' such that ||u'-u|| < eps0,
+        smid dot u' < smid dot u' < smax dot u'
+    for each smin in Smin, smid in Smid, smax in Smax.
+    Choose such an eps0,
+    also small enough so that ||u'-u|| < eps0 implies u' in N.
+
+    Let eps be small enough so that  || ((u + eps v)/||u + eps v||) - u ||
+    < eps0, and let u' = (u + eps v)/||u + eps v||.
+    Then by definition of eps0, we know that
+        smid dot u' < smid dot u' < smax dot u'                    (2)
+    for each smin in Smin, smid in Smid, smax in Smax.
+
+
+    For each vi in Smin U Smax,
+        vi . u' = vi . (u + eps v)/||u + eps v||
+                = (vi.u + eps vi.v) / ||u + eps v||
+(3)             = vi.u / ||u + eps v||           since vi.v == 0 since vi in P
+
+    Also since u dot v >= 0 and u != v, we have:
+        ||u + eps v|| > 1                                          (4)
+
+        h_T(u') = max{v0.u', v1.u',v2.u',v3.u'}
+                - min{v0.u', v1.u',v2.u',v3.u'}
+                = max{smax dot u' : smax in Smax}
+                - min{smin dot u' : smin in Smin}                by (2)
+                = max{smax.u / ||u + eps v|| : smax in Smax}
+                - min{smin.u / ||u + eps v|| : smin in Smin}
+                = (max{smax.u : smax in Smax}
+                 - min{smin.u : smin in Smin}) / ||u + eps v||
+                = h_T(u) / ||u + eps v||
+                < h_T(u)   by (4) (and since h_T > 0 by definition and nondegeneracy of T)
+    So u' is a point in N for which h_T(u') < h_T(u), which was what was wanted.
+
+
+Proof that every local minimum of h_T is in the direction of an interior altitude of T:
+    Let u be a local minimum of h_T.
+    We just showed that u is the direction of some altitude a of T;
+    we now have to show that a is an interior altitude.
+
+    Assume not; we will derive a contradiction.
+    Let Smin and Smax be the vertices of T with minimum and maximum
+    dot product with u; then Smin U Smax = {v0,v1,v2,v3}.
+
+    We start by finding a unit vector v perpendicular to u, and constant c,
+    such that smin dot v <= c for all smin in Smin,
+          and smax dot v >= c for all smax in Smax.
+
+      In the case that |Smax| = 1 and |Smin| = 3 (i.e. if a is a vertex-face altitude),
+      we find such a v as follows:
+      project the single vertex in Smax onto the plane of the opposite face whose vertices are Smin.
+      The projected point won't be in the interior of the face
+      (for that would imply a is an interior altitude of T) so
+      it must be on or outside (at least) one of the face's 3 side lines.
+      Let v be that side's outward normal, in the plane of Smin (i.e. normal to u),
+      and let c be v's dot product with any point on that side.
+      Then smax dot v >= c for the single vertex smax in Smax,
+      and smin dot v <= c for each of the three vertices in Smin, as desired.
+      The opposite case, |Smax| = 3 and |Smax| = 1, is analogous.
+      The final case is when |Smax| = 2 and |Smin| = 2, i.e. a is an edge-edge altitude.
+      If each of the two endpoints of a were in the interior of its respective edge of T,
+      then a would be an interior altitude, contrary to assumption;
+      therefore (at least) one of a's endpoints is either exactly at the end of its edge of T,
+      or outside of T entirely.
+      Assume without loss of generality that it is the Smax edge of T that does not contain
+      its endpoint of a in its interior.
+      Let v be either of the two opposite unit normals of the edge of Smin
+      in the plane that is normal to u (i.e. v = u cross direction of edge of Smin)
+      and let c be v's dot product with either point of Smin.
+      Then either
+          smax dot v <= c for all smax in Smax
+      or  smax dot v >= c for all smax in Smax
+      (since if, to the contrary, the two points in Smax have opposite dot product with v,
+      that would mean that altitude endpoint lies strictly between the two vertices
+      of Smax, contrary to assumption).
+
+    So now we have a vector v and a constant c as we said.
+
+    [XXX GET RID I THINK]
+    Let P = {p in R^3 : p dot v = c}.
+    Then u is parallel to P,
+    and Smin and Smax lie (not necessarily strictly) on opposite sides of P.
+
+    The idea now will be that, if we perturb u by moving it a bit away from v,
+    then the effect will be to decrease the height of T in the new direction.
+    We will do this while working inside an arbitrarily small
+    neighborhood around u, so that will give a contradiction of the fact that u is a local minimum of h_T.
+
+
+
+
+    NEED TO COMPLETE THE REST

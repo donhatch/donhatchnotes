@@ -1,0 +1,96 @@
+Notes about console2 (alternate cmd window for windows) from sourceforge
+
+BUGS:
+=====
+- scrolling is fucked (just like cmd window and powershell_ise and others)
+  til you have as many lines as the buffer.
+  moving scrollbar to bottom should put bottom line at bottom of screen, always!!
+- resizing from top causes bottom to be messed up, have to resize from bottom to fix (seems to be fixed in most recent source from git, 2011/10/19... or maybe just improved? or maybe not)
+- maximize button is disabled (supposedly it's just uncommenting a line, but someone says it might be a bit buggy)
+- history is insane just like the regular cmd window
+      (is this a console thing, or a shell thing? it happens with both cmd and powershell)
+- resizing the window doesn't send proper resize info to a vim session
+  (it seems to hear something here and there but not much)
+  (maybe it's good initially when resizing horizontally but breaks forevermore when resizing vertically)
+- the "tree" command doesn't show box-drawing chars
+- I want the scroll bar on the left!!!!! dammit!!
+- settings dialog not expandable
+
+- help is broken in version I downloaded,
+  just gives an hourglass for a couple of seconds and then nothing, in version I built
+
+My current settings:
+============
+        Edit -> Settings...
+            Mouse
+                was:
+                    Copy/clear selection    Left
+                    Select text             Shift-Left
+                    Paste text              Middle
+                changing to:
+                    Copy/clear selection    None    (Clear and then Assign, or it won't take!)
+                    Select text             Left
+                    Paste text              Middle
+                Assign
+                check "save to user directory"
+                OK
+            Behavior
+                check "copy on select"
+                check "clear selection on copy"  (doesn't seem to work right unless I do this, argh)
+            Hotkeys
+                was:
+                    Help              F1
+                    Copy selection    Ctrl-Insert
+                    Paste             Shift-Insert
+                    Settings Dialog   Ctrl-S
+                    Stop scrolling    None
+                    Rename tab        Ctrl-R
+                    Close tab         Ctrl-W
+                changing to:
+                    Help              Shift-F1          (I'd really like F1 to raise the window, since that's what I'm always hitting it for... is there a way?)
+                    Copy selection    Ctrl-Shift-c
+                    Paste             Ctrl-Shift-v
+                    Settings Dialog   Alt-S
+                    Stop scrolling    Ctrl-S
+                        (doesn't seem to be a "resume scrolling"? use Enter)
+                    Rename tab        None   (Clear then Assign, or it won't take)
+                    Close tab         None
+                unchecked "Use Scroll Lock for scrolling"  (although I don't think it was functional anyway)
+            Appearance
+                change font from "courier new 10" to "terminal 9"  XXX argh! but that keeps changing to look like something else, every time someone installs something!?  now Lucida Console 9 is close, but not quite it... bold is too wide, non-bold is not bold enough
+                messed with title options, I don't really understand them:
+                        uncheck "use console window title"
+                        check "Show command"
+                        clear the title text entry
+                    so now it honors setting window title in powershell:
+                        $Host.UI.RawUI.WindowTitle = "my title"
+                    (although it shows a "-" before my title, which is weird... this seems to be the best I can get)
+            More...
+                uncheck "show menu"
+                uncheck "show toolbar"
+                uncheck "show status bar"
+                check "flat scrollbars" (doesn't take effect til restart, although it doesn't say that)
+            Console
+                Buffer size: was 500, changed to 10000
+                Shell: (leave blank-- resist temptation to change it)
+
+
+To make different shortcuts to run different shells in console:
+    Edit -> Settings -> Tabs
+        change first tab (make sure it's first!)
+            name: powershell
+            shell: powershell
+        Add
+            name: cmd
+            shell: cmd
+        Add
+            name: git bash
+            shell: C:\Program Files (x86)\Git\bin\bash.exe
+        Add
+            name: cygwin bash
+            shell: C:\cygwin\bin\bash.exe
+        Add
+            name: cygwin tcsh
+            shell: C:\cygwin\bin\tcsh.exe
+then make the shortcut target something like this:
+    C:\Users\dhatch\Desktop\Downloads\Console-2.00b147-Beta_32bit\Console2\Console.exe -t powershell

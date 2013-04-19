@@ -1,0 +1,10 @@
+from 03/25/2011 10:49 PM
+Subject: Re: usage stats page request
+
+I figured out how to fix the "Hide/Show Totals" button, so it's totally zippy now.
+
+(apparently jquery's show()/hide() functions are ridiculously slow when showing/hiding multiple table rows; I think it's quadratic in the table size, or something...
+but if I change it to simply change the table rows' css "display" property between "none" and ""
+instead, it accomplishes the same thing and it's really fast).
+
+Don 

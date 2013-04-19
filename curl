@@ -1,0 +1,18 @@
+Q: how to get curl to work around here?
+A:
+    The proxy is proxy.lucasfilm.com:8080 .
+    So,
+        setenv http_proxy proxy.lucasfilm.com:8080
+        setenv https_proxy proxy.lucasfilm.com:8080
+    I think that applies to both wget and perl.
+    Then, could use --proxy-user dhatch --proxy-passwd 'MY_PASSWORD_HERE' http://google.com/,
+    but don't want that showing up in the process table, so instead,
+    put this in my ~/.wgetrc (and chmod 600 it):
+           proxy-user = dhatch
+           proxy-passwd = MY_PASSWORD_HERE
+           http-user = my_website_username_here
+           http-passwd = MY_WEBSITE_PASSWORD_HERE
+    For using curl, put this in my ~/.curlrc (and chmod 600 it):
+           proxy-user = dhatch:MY_PASSWORD_HERE
+           user = my_website_username_here:MY_WEBSITE_PASSWORD_HERE
+

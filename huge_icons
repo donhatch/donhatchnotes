@@ -1,0 +1,2 @@
+To fix them via command line?
+gconftool-2 --type string --set /apps/panel/profiles/toplevels/top_panel/orientation "top" 

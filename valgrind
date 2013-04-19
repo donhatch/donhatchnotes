@@ -1,0 +1,64 @@
+valgrind will report leaks from STL.
+To make this not happen, setenv GLIBCPP_FORCE_NEW
+(in gcc3.2.2 and greater-- libstdc++v3 says gcc3.3 and greater,
+but it's lying).
+----------------------------------------------------------------
+
+
+To: nick, zoran, tommy
+Subject: valgrind-friendly python installed on kazoo-- should this be done everywhere?
+
+I just installed the valgrind-friendly python
+on Zoran's hp64 machine kazoo:
+
+   % sudo rpm -Uvh ~nick/work/suse/9.3/python/RPMS/*/*.rpm
+
+Tommy, is there any reason this shouldn't be pushed out to all machines,
+so individual people don't have to know about and think about this,
+so they can just valgrind python out of the box?
+
+I know the morally repugnant default version of python
+may be slightly faster in some situations,
+but Nick's and my impression is the savings aren't noticeable enough
+to be worth the hassle and bad karma that comes with it.
+
+Don
+
+
+
+From Ed Hanway, 1/17/2006:
+
+    Don,
+
+    FYI, I've had a little bit of luck with valgrind 3.1.0 on IA32.  3.1.0 seems much less memory hungry than 3.0.0.  Combine that with suppressing
+    the hell out of python (--suppressions=/home/ehanway/etc/valgrind-python.supp) and I can actually run the Zeno GUI in valgrind.  It is necessary to increase
+    VG_N_SEGNAMES in coregrind/m_aspacemgr/aspacemgr.c -- I just doubled the number from 400 to 800.
+
+    -Ed 
+
+From Ed Hanway, 2/23/2006:
+
+    Some valgrind tips that not everyone may be aware of:
+
+    - Try version 3.1.0 instead of the installed version 3.0.0  The newer version has much better memory management.  At least for 32-bit, it goes from being unusable for most zeno test cases to being usable for the whole GUI.
+
+    - setenv GLIBCPP_FORCE_NEW -- this changes the default STL allocator to new/delete each object separately, instead of using pools.  There's obviously a performance penalty, but valgrind error detection will be more robust.
+
+    Note that for gcc 4.0 the variable name changes to GLIBCXX_FORCE_NEW.
+
+    -Ed 
+
+
+for more on GLIBCPP_FORCE_NEW:
+http://www.opensource.apple.com/darwinsource/Current/gcc_os-1823/libstdc++-v3/docs/html/ext/howto.html#3
+
+========================================================================
+  Newer valgrind builds are available here:
+
+  /dept/rnd/vendor/valgrind-3.5.0-amd64/bin 
+
+
+  tip:
+    --track-origins=yes 
+========================================================================
+see valgrind_friendly_python for more.

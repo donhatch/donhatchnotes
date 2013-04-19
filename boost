@@ -1,0 +1,66 @@
+BIND/LAMBDA
+
+    QUESTIONS (most recent first:
+        Q: What's the easiest way of expressing the following
+           using boost::bind and/or boost::lambda?
+           Python:
+                (lambda a,b,c:a+b+c)(10,20,30)
+           Perl:
+                print &{sub {$_[0]+$_[1]+$_[2]}}(10,20,30), "\n";
+           Mathematica:
+                #1+#2+#3&[10,20,30]
+
+        Q: What's the easiest way of taking a function
+                    f:(int,int,int)->int,
+           (i.e. f takes 3 ints a,b,c and returns an int)
+           and currying it, i.e. producing a function:
+                    g:int->(int->(int->int))
+           (i.e. g takes an int a and returns a function taking an int b and returning
+           a function taking an int c and returning an int)
+           such that g(a)(b)(c) = f(a,b,c).
+           In other words, we want a function:
+                    curry3 : ((int,int,int)->int) -> (int->(int->(int->int)))
+           such that:
+                    curry3(f)(a)(b)(c) = f(a,b,c).
+           Python:
+                curry3 = lambda f:lambda a:lambda b:lambda c:f(a,b,c)
+                f = lambda a,b,c:a+b+c
+                curry3(f)(10)(20)(30)
+           Mathematica:
+                curry3 := Function[{f},Function[{a},Function[{b},Function[{c},f[a,b,c]]]]]
+                f := Function[{a,b,c}, a+b+c]
+                curry3[f][10][20][30]
+              The innermost Function can be defined more succinctly, as can f:
+                curry3 := Function[{f},Function[{a},Function[{b},f[a,b,#1]&]]]
+                f := #1+#2+#3&
+                curry3[f][10][20][30]
+              although that makes it a bit less readable in the curry3 case.
+              And the outermost ones can be defined using usual function notation:
+                curry3[f_] := Function[{a},Function[{b},Function[{c},f[a,b,c]]]]
+                f[a_,b_,c_] := a+b+c
+                curry3[f][10][20][30]
+              Actually there's a much simpler way;
+                curry3[f_][a_][b_][c_] := f[a,b,c]
+                f[a_,b_,c_] := a+b+c
+                curry3[f][10][20][30]
+              This isn't exactly equivalent, since the rule isn't invoked
+              until all args are present (so for example typing
+              curry3[f][10][20] gives a different result from the previous case)
+              but in most usages it should work out the same, I think.
+              Rule-based programming makes me nervous
+              because when we combine several rules, it's easy to get
+              cases where evaluation is ambiguous; we probably need
+              to adhere to some conventions that guarantee that the
+              right choice is taken, and it's not obvious how to do that
+              in general, so we rely on luck until it fails and
+              then go back to some other more reliable method or language.
+
+           Perl:
+              sub curry3($) {my $f = $_[0]; sub {my $a = $_[0]; sub {my $b = $_[0]; sub {my $c = $_[0]; $a+$b+$c}}}};
+              sub f($$$) {$_[0]+$_[1]+$_[2]}
+              print &{&{&{curry3(*f)}(10)}(20)}(30), "\n";
+              print curry3(*f)->(10)->(20)->(30), "\n";
+              print curry3(*f)->(10)(20)(30), "\n";
+
+    ANSWERED QUESTIONS (most recent first):
+

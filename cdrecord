@@ -1,0 +1,47 @@
+NOTE: see bottom for centos
+
+   -r: rock ridge with useful file ownership modes and values (maybe)
+        (all files owned by root, and have at least read permission)
+        (this is NOT suitable for backup, use -R instead I think)
+   -J: generate joliet names (up to 64 chars long),
+       so it doesn't come out like crap on windows
+
+% mkisofs -r -J -o test_image.isofs dirname/
+# mount -t iso9660 -o ro,loop=/dev/loop0 test_image.isofs test_mountpoint/
+       (actually the -t iso9660 is not necessary)
+       (and ro, isn't necessary either, it ends up effectively read-only anyhow)
+       the following works:
+    # mount -o loop test_image.isofs test_mountpoint/
+
+# cdrecord --scanbus  # to get the device number; the following assumes 0,0,0
+# umount test_mountpoint/
+# cdrecord -dummy -v speed=10000 dev=0,0,0 test_image.isofs
+# cdrecord -v speed=10000 dev=0,0,0 test_image.isofs
+
+NOTE: if cdrecord --scanbus says something like:
+   cdrecord: No such file or directory. Cannot open '/dev/pg*'. Cannot open SCSI driver.
+accompanied by a syslog message:
+    Jul 13 01:27:07 ack modprobe: modprobe: Can't locate module char-major-97
+It is because ide-scsi is not installed for some reason.
+You need to run:
+   # lsmod | grep ide
+   # rmmod ide-cd
+   # insmod ide-scsi
+Sometimes there will be a process (the mount process?)
+that keeps re-insmodding ide-cd every couple of seconds
+(I observed this a long time ago on redhat 6.1;
+it doesn't seem to be happening now on redhat 9, although maybe
+that's just because I don't have a CD in right now).
+To get around that, say (if there re 2 cd devices):
+        rmmod ide-cd; insmod ide-cd ignore=hdc ignore=hdd
+Note, all my /etc/grub lines say hdc=ide-scsi;
+I tried adding hdd=ide-scsi but it didn't help.
+
+
+NOTE: need to add info about verifying correctness-- use dd?
+
+
+NOTE: in centos, need to use dev=ATAPI:1,0,0  and it works,
+no need to fiddle with the kernel modules.  (but the error message
+is mystifying if you don't know this).  Also need -v -v, to get
+the nice progress messages.

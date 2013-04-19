@@ -1,0 +1,70 @@
+Tells how to get the orientation from just the angular velocity I think:
+New Foundations for Classical Mechanics p.484, $299
+http://books.google.com/books?id=AlvTCEzSI5wC&pg=PA487&lpg=PA487&dq=polhode+%22parametric+equation%22&source=web&ots=8SEMQbhKeQ&sig=NoY_wByqXG47USI0XKeKUd6marE&hl=en#PPA484,M1
+
+
+
+Use boost to compute elliptic integrals!
+http://cci.lbl.gov/~rwgk/shortcuts/boost_hot/libs/math/doc/sf_and_dist/html/math_toolkit/special/ellint/ellint_carlson.html
+http://www.boost.org/doc/libs/1_35_0/libs/math/doc/sf_and_dist/html/math_toolkit/special/ellint/ellint_intro.html
+
+One of the euler angles is:
+phi(t) = phi(t0) + l/I3 (t-t0) + (2 E I3 - l^2)/(l I3) [pi(tau,a^2)-pi(tau0,a^2)]
+where pi(tau,n) = integral[0,tau] dt/(1 + n sn^2 tau)
+(incomplete elliptic integral of the third kind)
+
+So, what is l?  They omitted page 483, dangit.
+Guess I have to pay $299 for this book.
+Ordered it.
+
+
+
+Clearer development, maybe, in:
+Elliptic functions by Armitage  p. 340-342
+http://books.google.com/books?id=zyxAb4ro-oMC&pg=RA9-PA340&lpg=RA9-PA340&dq=polhode+elliptic&source=web&ots=zpfTXaqD-b&sig=NPcTXkUrpdXjByysc2pDWhMASng&hl=en#PRA9-PA340,M1
+but I don't think it talks about the final step of getting the frame.
+
+ARGH this is givin me random pages
+
+
+
+
+Other references that look good:
+
+The Characteristic Equation for the Rigid Body Problem
+for Quaternion State Variables
+(just the abstract)
+http://pdf.aiaa.org/preview/CDReadyMGNC07_1500/PV2007_6403.pdf
+
+This looks almost the same, but it is in rtf,
+which both ooffice and abiword mess up:
+    http://www.vsgc.odu.edu/src/Conf06/papers/Paper%20-%20Davailus.rtf
+
+
+All right there is a paper "Integration of The Rigid Body Equations with Quadratic Controls"
+by M. Puta and C. Lazureanu.
+It's more complicated than we need,
+but maybe we can use it, just setting l to 0.  The paper
+says it reduces to what is described in Lawden's book in that case.
+
+        omega1 = P*cn(p*(t-t0))
+        omega2 = -Q*sn(p*(t-t0))
+        omega3 = R*dn(p*(t-t0))
+where P,Q,R,p,k are defined as follows (but k doesn't appear?! I guess it's the modulus of the Jacobi elliptic functions?)
+        p^2 = (I2-I3)(I1 T - M^2)(I1-I2) / (I1*I2*I3*(I1-I2))
+        k^2 = (I1-I2)(M^2 - I3*T)
+        P^2 = (M^2 - I3*T) / (I1*(I1-I3))
+        Q^2 = (M^2 - I3*T) / (I2*(I2-I3))
+        R^3 = (M^2 - I3*T) / (I1-I3)
+and M and T are constants of the motion:
+        T(omega1,omega2,omega3) = I1*omega1^2 + I2*omega2^2 + I3*omega3^2
+        M(omega1,omega2,omega3) = I1^2*omega1^2 + I2^2*omega2^2 + I3^2*omega3^2
+where I1 > I2 > I3.
+
+
+Note in the special case I1==I2 (i.e. a pencil) we have only trig functions in the solutions;
+probably the same is true for I2==I3.
+
+
+
+Hmm, there is code from Ramses van Zon called tops (tops.h, tops.cc)

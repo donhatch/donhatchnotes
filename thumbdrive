@@ -1,0 +1,13 @@
+    how to mount my memorex traveldrive?
+    according to
+        http://www.memorex.com/html/support_search_faq_step3.php?qid=400
+
+        To use the ThumbDrive on Linux do the following.
+
+           1. Reboot your PC
+           2. Login as root
+           3. Plug in Thumbdrive Smart (the LED should light up)
+           4. Open command console: Enter the command: "mkdir -p /mnt/trek ;mount -tvfat /dev/sda1 /mnt/trek"
+    hey it works!  but not the usb ports in the front
+    and it works with just:
+        # mount  /dev/sda1 /mnt/trek

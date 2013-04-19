@@ -1,0 +1,388 @@
+TODO: merge python.fromhome with python.fromwork
+
+
+
+GOOD INTERESTING READING AND REFS:
+    http://www.secnetix.de/~olli/Python 
+    http://www.secnetix.de/~olli/Python/doclinks.hawk
+
+        http://www.python.org/doc/current/tut/tut.html
+        http://www.python.org/doc/current/ref/ref.html
+        http://www.python.org/doc/current/lib/lib.html
+
+    http://www.norvig.com/python-iaq.html       (some way cool tricks)
+    http://p-nand-q.com/python/stupid_lambda_tricks.html
+    http://www.python.org/doc/faq/
+    http://www.ferg.org/projects/python_gotchas.html
+
+
+    PEP8 (often-nonsense best practices): http://www.python.org/dev/peps/pep-0008/#programming-recommendations
+        some rationales here:
+    https://groups.google.com/forum/?fromgroups=#!topic/python-ideas/EWj5ciqkaO0
+        e.g.
+            On 8/8/2012 4:29 PM, Georg Brandl wrote:
+            > For None, "==" and "is" are equivalent, because no other object is equal
+            > to None.  For True and False, this is different, and using "is" here is
+            > a very stealthy bug.
+            It's easy to make other objects == None, by writing buggy __eq__
+            methods.  That doesn't happen much, but it's easier with __ne__, where
+            the negated logic is easy to screw up.  I've seen it happen. Use "is
+            None", not "== None".
+
+            --Ned. 
+
+        and:
+            > Why does the PEP say that == True is preferred to is True?
+
+            Because there surely are still libraries out there that return 0 and 1
+            as true/false values. The bool type was introduced in (by memory)
+            Python 2.2 or 2.3, so very old code may fail, or worse, silently do the
+            wrong thing if you use "is True". 
+
+
+
+GOTCHAS:
+    - --x does not increment x !!!  it returns -(-x)). Likewise for ++x, etc.
+      Need to use x-=1 and x+=1 instead, and there's no equivailent of
+      post-increment or post-decrement.  Attempting them will usually
+      give an error, except in cases like x++ - y which is treated
+      as x + (+(-(y)). :-(
+
+    - x = 3; print("x =", x)
+      prints the list stringified, with parens and comma
+      (although print("x") doesn't print the parens).
+      Weird.  Need to omit the parens from the call, I guess.
+
+    - a global variable can be looked at, or its elements assigned to,
+      in a function, but the variable itself can't be assigned to
+      unless you say "global x".  Without that, it will create
+      a local variable and assign to it instead. :-(
+      Also got bit by the following:
+      in my main body (which is just statements in global scope),
+      I created some variables, which became global...
+      then I referred to that name by accident in a function,
+      and it saw them instead of giving an error like I would
+      have liked...  from now on I'm going to make an explicit main()
+      to prevent this.
+
+    - evidently semantics will be changing
+      so that division is by default float division;
+      see the -Q option in the man page.
+      Use // for integer division (or divmod to get both quotient and remainder).
+      (The Beazley book doesn't mention this.)
+
+    - string functions that test for "is all something"
+      return false on empty string-- lame!
+      Is there a good workaround other than writing my own replacement?
+      (see http://p-nand-q.com/python/stupid_lambda_tricks.html
+      for an approach to a similar issue for list functions
+      that sometimes return None)
+
+    - bizarre symlink behavior when importing-- follows the symlink
+      and looks for the imported files there.
+
+    - lambda scopes are broken:
+        >> fs = [(lambda n: i + n) for i in range(10)]
+        >> [f(4) for f in fs]
+        [13, 13, 13, 13, 13, 13, 13, 13, 13, 13]
+      workaround:
+        >> fs = [(lambda n,i=i: i + n) for i in range(10)]
+        >> [f(4) for f in fs]
+        [4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+      see:
+          http://math.andrej.com/2009/04/09/pythons-lambda-is-broken/
+
+    - 1==True and 13==True evaluate to False, but
+      bool(1)==True and bool(13)==True evaluate to True
+
+
+THINGS I DIDN'T SEE AT FIRST:
+    - for ... else   what a waste of my time having to research what this means
+    - try ... else   what a waste of my time having to research what this means
+    - reduce() has an optional "initial" parameter... so it's
+      not zero-phobic after all!
+      e.g. print reduce(lambda s,x: s+" %d"%x, [0,1,2], "foo:")
+      This makes it much more useful!
+      Although it would be even more useful, maybe, if
+      it had an optional special-case-for-only-one-item parameter too...
+    - == is deep, "is" is shallow (pointer compare)
+
+    - from http://www.norvig.com/python-iaq.html but without the trailing " ":
+            import sys
+            def printf(format, *args): sys.stdout.write(format%args)
+
+TRICKS:
+    - from http://www.norvig.com/python-iaq.html:
+      To avoid typing quotes around key names:
+            def Dict(**dict): return dict
+            Dict(a=1, b=2, c=3, dee=4)
+            {'a':1, 'b':2, 'c': 3, 'dee': 4}
+      and there's a similar thing for objects.
+    - to get a local variable inside a lambda, use a helper lambda inside,
+       which declares the desired variable as a param with default value.
+    - for key, value in os.environ.iteritems():
+
+TO EXPERIMENT WITH:
+    - generator functions: see http://www.secnetix.de/~olli/Python/examples.hawk
+      I don't think this is mentioned in the Beazley book at all!
+    - hmm! all standard types (string, integer) are classes and so can be
+      sublassed?
+    - http://www.secnetix.de/~olli/Python/dynamic_typing.hawk mentions
+      doctest module for automated regression tests?
+    - need to get good at regular expressions stuff
+    - try to find another example where a "finally" will fail to execute--
+      (stack overflow inside nested finallies, or something)
+    - see whether can implement olli's incrementor (returning
+      a function with a nested scope) using a local function definition
+      instead of a lambda-- potentially more versatile.
+    - see whether olli's example of parsing command line options:
+        http://www.secnetix.de/~olli/Python/tricks.hawk
+      is worthwhile
+    - read up on semantics of shallow versus deep copying, p.21 and p.108
+    - experiment with the bisection module:
+        http://www.python.org/doc/current/lib/module-bisect.html
+      mentioned in the iaq
+    - experiment with, and understand, the iaq's version
+      of ternary ?:
+    - try the iaq guy's .python startup file
+      
+
+
+QUESTIONS (most recent first):
+
+    Q: what are the utilities for converting an arg list
+       to a properly quoted shell command, and back?
+    A: shlex.split
+       subprocess.list2cmdline
+
+    Q: how to tell whether an object is (derived from) a given class?
+       (something like isa or instanceof)
+    A: isinstance(obj,class)
+
+    Q: how to tell what version of python is running a script?
+    A: sys.version_info
+
+
+    Q: how to tell whether a script was imported or execfile'ed,
+       vs. being run from the command line?
+    A: if __name__ == '__main__':
+           # Running as a script
+
+    Q: how to undefine a variable?
+    A: del var0,var1,var2
+
+    Q: how to test whether a certain variable exists?
+    A: try:
+           x
+       except NameError:
+           ... x doesn't exist, do something ...
+       else:
+           ... x exists, do something else ...
+
+    Q: how to access the command name? (for usage message, for example)
+    A: os.path.basename(sys.argv[0])
+
+    Q: the iaq says the lack of "new" keyword is a good thing-- I don't
+       understand this yet.
+    Q: "==" (deep compare, as opposed to "is" which is pointer compare)--
+       are these overrideable in classes?
+    Q: what are the semantics of shallow versus deep copying, for
+       lists, strings, etc.?
+    A: p.21 and 108 (need to read them)
+    Q: how do I tell whether a given object is (a subclass) of a given type?
+        http://www.secnetix.de/~olli/Python/dynamic_typing.hawk talks
+        about testing types, but they test for equality, which
+        is seldom the right thing to do.
+    Q: can I pass things by reference?  e.g. pass a string and
+      have two of its chars changed... actually I'm confused about
+      string mutability/sharing and stuff.
+    Q: can't seem to figure out how to get -tt and -Qwarn and -Werror
+      all at once on the intial #! line???
+
+    Q: what does the unary * operator do?  It's used in both of the following:
+        http://www.secnetix.de/~olli/Python/tricks.hawk
+        http://www.norvig.com/python-iaq.html
+    A(partial): Beazley p.64: when in a function declaration,
+       it's for varargs: if the last parameter name
+       is preceded by *, that param absorbs any remaining args given into a
+       list.  There's also a ** which does more, using a hash.
+       Oh wait, olli's example uses it a different way,
+       so there's more to it... when I figure this out,
+       take a look at olli's page again.
+       Okay, there's more to it on the transposing-matrices trick in:
+           http://www.norvig.com/python-iaq.html
+       I have the impression that passing *list to a function
+       turns the n-element list into n distinct args.
+       (Right: http://docs.python.org/tutorial/controlflow.html#tut-unpacking-arguments)
+
+
+    Q: How to convert back and forth between tuple and list?
+    Q: Why would I want to use a tuple instead of a list? (Faster for const?)
+
+ANSWERED QUESTIONS (most recent first):
+
+    Q: running other programs?
+    A: os.system('date')
+
+    Q: environment variables?
+    A: os.environ
+       os.environ['FOO'] = 'BAR'
+       del os.environ['FOO']
+       
+
+    Q: isatty?
+    A: import sys; sys.stdout.isatty()
+
+    Q: trying to use vi as a clipboard, I can't do this:
+        if True: print "hello"
+        print "goodbye"
+       nor any other way...
+    A: xterm -xrm trimSelection=true
+       and put a blank line between them. :-(
+
+    Q: how to access the current line number in a script, similar to __LINE__ in c++ or perl?
+    A: from http://code.activestate.com/recipes/145297/ :
+        import inspect
+        def lineno():
+            """Returns the current line number in our program."""
+            return inspect.currentframe().f_back.f_lineno
+
+    Q: how to see the doc string for a function or method?
+    A: print funcname.__doc__
+       print obj.methodname.__doc__
+
+    Q: how to see all the available methods of an object?
+    A: dir(obj)
+       although it's not reliable, nothing is, apparently :-(
+
+    Q: how to print without a newline?
+    A: sys.stdout.write('foo')
+
+    Q: How does it make the path used for imports,
+       and how to print that path?
+    A: Print it via:
+        import sys; sys.path
+       It consists of:
+        [<dir of script, following symlinks, or '' if none>, '.', <elements of $PYTHONPATH>, ...system lib places...]
+
+    Q: time.clock() always returns 0.17999999999999999 -- what the hell?
+    A: ah, the clock is stopped when not doing anything in the interpreter,
+       and seems to have a resolution of 1/100 second-- so,
+       execute something like max(range(1e6)) and afterwards it will show
+       a different value.
+
+    Q: can I have local variables and compound statements in a lambda function?
+    A: no but can work around using dirty tricks,
+       see "Lambda Limitations" section of:
+        http://p-nand-q.com/python/stupid_lambda_tricks.html
+       E.g. for local variables, use helper lambdas which
+       declare the desired variable as a param with default value.
+       And I think maybe local function definitions can do anything
+       lambdas can do? need to experiment with the example olli gives
+       of the incrementor.
+
+    Q: can I make the equivalient of a "toString()" member of a class,
+       to control how objects are printed (i.e. to control what str(obj)
+       returns).  How about to control what repr(obj) returns?
+    A: The __str__ and __repr__ member functions.
+
+    Q: How are nested ifs/elses disambiguated?
+    A: By indentation-- an else matches the last preceding if
+       at the same indent level.
+
+    Q: What are semantics of tabs?
+    A: Apparently tabs are expanded to 8-space tab stops.
+
+    Q: What's the deal with the memory allocator? Valgrind
+       reports it's doing out-of-bounds memory reads.
+
+
+PYTHON PROS AND CONS:
+    - Indenting to denote block structure
+            PROS:
+               - avoids bugs over which "if" an "else" matches
+               - code is typically more compact (fewer lines) than
+                 equivalent C or Perl which waste lines on braces,
+                 with no decrease in readability
+                 (of course, can put those braces on same lines
+                 in C or perl, but that makes the code hard to manage)
+            CONS:
+               - I often want to indent a bunch of code
+                 because it is logically a group,
+                 but I don't want to make a function out of it.  Can't.
+                 Especially, I always want to indent the bunch of code
+                 that I think of as "main()".  Just can't.
+               - I often want to make a local block with local variables
+                 that disappear when the block is exited.  Can't.
+               - no delimiting characters like {},
+                 so can't use brace matching in an editor
+                 to easily traverse from beginning to end of a block and back,
+                 or to tell the editor to increase or decrease indentation level
+                 of a whole block at once.
+               - can't just cut-and-paste code samples from a file
+                 or web page into the interpreter, if they are indented--
+                 it gives a syntax error.
+    CON: don't have to declare variables (like perl's non-strict mode)--
+      This encourages sloppiness and bugs.
+      (even if a "strict" mode were introduced,
+      the usefulness would be limited because
+      of the lack of block structure for scoping variables.)
+    CON: commands.getoutput() strips the final newline, if any.
+      so when I care about that, I have to use something more complicated--
+      what a pain.  perl does this right, i.e. it retains the newline
+      (sh and csh do it wrong).
+      (although, can use os.popen('hostname').read() or whatever,
+      when we want to retain newline)
+    PRO: -1%10 is 9.  HOORAY!!! A LANGUAGE THAT GETS THIS RIGHT, FINALLY!!!!!
+    CON: no ternary ?: operator??? oh come on, give me a break!
+      can sometimes simulate it using ands and ors, but not always.
+            a ? b : c
+            a and b or c
+      but only if b is guaranteed to return True...
+      or   [b, c][bool(a)]
+      (from http://www.secnetix.de/~olli/Python/tricks.hawk)
+      or   (a and [b] or [c])[0]
+      (from http://p-nand-q.com/python/stupid_lambda_tricks.html
+       which is from the FAQ)
+      but those don't get short-circuit evaluation,  XXX huh? yes they do
+      (most complete discussion of this is in the iaq,
+      which might actually give something that really works
+      but is just a little obscure... need to read it)
+      (trick for delayed execution is to use a simple lambda
+      without arguments)
+        (lambda:c,lambda:b)[bool(a)]()
+    CON: print seems awkward, the way I can't put parens around its args
+      without changing the meaning-- maybe I'll get used to that.
+    PRO: function declarations are MUCH more readable than perl,
+      and the named arguments and default arguments are great for useability
+      (although I try not to use default arguments very often,
+      since it makes functions harder to use / remember the prototypes
+      of, when not all usages of it are the same)
+    CON: regular expression handling seems a lot more awkward than in perl
+      (using the group() stuff to retrieve matches and stuff?  maybe I'll
+      get used to this...)
+    CON: post-increment and pre-decrement is really useful for implementing
+      stacks and things-- too bad we don't have em (and that
+      using ++ and -- doesn't even give a warning if pre, they
+      are just silently interpreted as double-unary-plus or double-unary-minus)
+    CON: jeez, if I just want to exit, I have to import sys and call sys.exit()?
+      This is a (minor) pain.
+    PRO: stringification (using `` or repr()) is at your fingertips--
+      this is essential, and great.  (In perl, you have to write your own,
+      typically a wrapper around Data::Dumper that tweaks its settings
+      and corrects its behavior for lists.)
+    PRO: functional programming (with correct semantics for nested scopes).
+      Anonymous functions are concise and readable-- nice.
+      see http://www.secnetix.de/~olli/Python/lambda_functions.hawk
+      (although-- can I have local variables and compound statements?)
+    PRO: have to use "this" or "self" explicitly-- right on,
+      makes code much more readable.
+    CON: can treat non-bools as bools.  this encourages bugs.
+      (Java gets this one right, C/C++ and perl don't.)
+      the rules are impossible to remember:
+      http://docs.python.org/3/library/stdtypes.html#truth
+    PRO: range(0,100) means 0..99 instead of 0..100.
+      This avoids all the -1's all over the place like in perl.
+    CON: requiring \ at end of line when splitting lines
+      is somewhat error prone-- extra space can get inserted
+      when cutting and pasting or moving from unix to dos file systems

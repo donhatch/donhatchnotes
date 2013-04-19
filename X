@@ -1,0 +1,5 @@
+To run the x server without a certain extension:
+        cp /etc/X11/xorg.conf ~/xorg.conf
+and mess with it.
+
+(found that by running "sudo strace -s256 -oSTRACEOUT Xorg :2")

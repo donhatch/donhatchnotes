@@ -1,0 +1,16 @@
+man rsync
+a lot like "cp -a" but smart about copying only what's needed
+
+Q: how to avoid creating a subdir when the destination already exists?
+A:  The crucial thing to remember is:
+    A trailing slash on the source
+    means do *not* create an additional directory level at the destination.
+    I.e. "copy the contents of this directory"
+    as opposed to "copy the directory by name"...
+    however, in both cases the *attributes* of the containing directory
+    are copied.
+    (If you don't want that, then use src/* instead of src/...
+    in which case the destination must already exist, of course.)
+
+Q: how to make it delete files from dst that have been deleted from src?
+A: --delete

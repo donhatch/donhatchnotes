@@ -1,0 +1,68 @@
+From Tommy 8/10/07
+
+I run jed parson's "rmlock" script when things like this pop up and it
+seems to take care of most issues:
+
+/home/tommy/bin/rmlock -> /san/dept/training/bin/rmlock*
+
+
+Sebastian Fernandez writes:
+| The lock file is
+| 
+| ~/.mozilla/firefox/<some random string>.default/.parentlock
+| 
+| 
+| Jeffery Yost wrote:
+| > When I start firefox now, I get the error message:
+| >
+| > Firefox is already running, but is not responding.  To open a new window,
+| > you must first close the existing Firefox process, or restart your 
+| > system.
+| >
+| > The thing is, there is no other firefox process running.  And I can't 
+| > find a
+| > lock file anywhere to remove (it would be in ~/.phoenix, right?)  Does 
+| > anyone
+| > have any idea how to get rid of this message?  I assume that there's a 
+| > file
+| > somewhere that I should delete, but I don't know which file.
+
+
+Q: how to open NOW files?
+   e.g. http://start/infosys/supportq/view/36589
+A: http://lois4/document/lucas-mimehandler-setup-httpstart
+   Holy moly it worked!
+
+       /sww/gfx/bin/lucas-mime-handler
+
+  See notes in "mime" for more info.
+
+Q: how to get local file links to work from non-local ones?
+A: http://kb.mozillazine.org/Links_to_local_pages_don%27t_work
+   added this to my ~/.mozilla/firefox/????????.default/prefs.js :
+       user_pref("capability.policy.policynames", "localfilelinks");
+       user_pref("capability.policy.localfilelinks.sites", "http://alanon:8010");
+       user_pref("capability.policy.localfilelinks.checkloaduri.enabled", "allAccess");
+   EEEK!  Per comment 142 in https://bugzilla.mozilla.org/show_bug.cgi?id=84128,
+   put that in a user.js instead!!
+   And it only needs:
+      user_pref("capability.policy.localfilelinks.sites", "http://alanon:8010");
+   So:
+      cd ~/.mozilla/firefox/????????.default
+      echo 'user_pref("capability.policy.localfilelinks.sites", "http://alanon:8010");' >>! user.js
+   (however, to remove it, you'll have to edit prefs.js... bleah!!)
+
+Q: how to set the default printer?
+A: about:config
+
+Q: how to just kill a long-running script that's slowing down firefox,
+   rather than killing firefox?
+   and how to locate the malfunctioning page so I can close it,
+   rather than restarting the rogue script again?
+   http://serendipity.ruwenzori.net/index.php/2013/03/02/which-firefox-tabs-rogue-javascript-is-hogging-the-cpu-here-is-the-answer
+   http://kb.mozillazine.org/Unresponsive_Script_Warning
+
+   Ok I got the javascript deobfuscator, I think I identified it
+   but I don't see how to find which tab to close
+   or how to kill the script :-(
+  

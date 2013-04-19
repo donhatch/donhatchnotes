@@ -1,0 +1,49 @@
+QUESTIONS (most recent first):
+
+Q: How to filter out ARP and DHCP?
+A: in capture filter:
+
+Q: how to keep the capture from getting killed
+   when I do ifdown eth0 or whatever?
+A: capture on "Pseudo-device that captures on all interfaces: any"
+
+Q: Right click on packet -> apply as filter
+   or prepare a filter doesn't seem to do anything.. ?
+
+Q: how to figure out how to filter out a particular kind of packet,
+   either in capture or display?  I want to filter out ARP and UDP/DHCP
+A: short answer:
+        capture filter: not arp and not udp port 68
+        display filter: not arp and !(udp.port==68)
+                    or: not arp and not bootp
+   long answer:
+        capture filters: man tcpdump
+        display filters: man ethereal-filter
+
+Q: How about, more specifically, to filter out
+   just the dhcp traffic that's not associated with me?
+   Let's see how these packets look:
+       Empirically, stuff associated with me:
+           Initially:
+               DHCP ACK(Reply): 73.64.12.1:bootps(67)->71.198.8.96:bootpc(68)
+           When already running:
+               DHCP Request: 0.0.0.0(me):bootpc(68) -> 255.255.255.255:bootps(67)
+               DHCP ACK: 73.64.12.1:bootps(67) -> 71.198.8.96(me):bootpc(68)
+                        (put my ip address in the data too)
+                  (Oh neat!  And I send back a "Destination unreachable",
+                   that's charming)
+               DHCP Release: 71.198.8.96(me):bootpc(68) -> 68.87.76.13:bootps(67)
+       And other stuff happening all the time:
+           DHCP Offer: 73.64.12.1:bootps(67)->255.255.255.255:bootpc(68)
+                    (with some other ip address in the data)
+           DHCP NAK: 73.64.12.1:bootps(67)->255.255.255.255:bootpc(68)
+                    (with some other ip address in the data)
+           DHCP NAK: 73.64.12.1:bootps(67)->255.255.255.255:bootpc(68)
+                    (with 0.0.0.0 in the data)
+
+
+ANSWERED QUESTIONS (most recently answered first):
+
+Q: How to toggle "scroll packets in real time"?
+A: View -> Auto Scroll in live capture,
+   or there's a button for it on the toolbar

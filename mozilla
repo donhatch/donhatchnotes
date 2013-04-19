@@ -1,0 +1,28 @@
+There must be a conspiracy or something;
+I've wasted days trying to look up how to manage plug-ins,
+with no success.
+You can view the current plug-ins:
+        Help -> About Plug-ins
+The links it shows for more information are either broken or useless.
+
+Here is purportedly an mplayer plug-in:
+    http://www.linux-sxs.org/multimedia/mplayermozplug.html
+
+Oh my god, it worked!
+
+
+QUESTIONS: (most recent first)
+
+ANSWERED QUESTIONS: (most recent first)
+
+    Q: how to clear the URL entry field without losing clipboard contents?
+    A: ctrl-L backspace, or esc backspace
+       or, ctrl-shift-L (same as File->Open URL) and paste there instead
+       or, just paste into an empty area in the browser canvas!
+       or (more legit) paste onto the bookmark icon to left of url
+       or, note that select-to-copy, middle-to-paste uses PRIMARY
+           whereas ctrl-c,ctrl-v uses CLIPBOARD...
+           so, use the ctrl-c,ctrl-v thing.  except I don't
+           know how to get stuff from gnome-terminal into CLIPBOARD,
+           so it just doesn't work as a general solution.
+
