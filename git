@@ -1,5 +1,7 @@
 Git resources:
 
+    man gittutorial
+
     http://git-scm.com/book/en/Git-Basics-Viewing-the-Commit-History
     looks like this is part of a pretty good book!
 
@@ -20,23 +22,58 @@ Git resources:
     http://schacon.github.io/git/howto-index.html (with link to linus's "revert a faulty merge")
     https://git.wiki.kernel.org/index.php/Git_FAQ
 
+    http://nuclearsquid.com/writings/git-tricks-tips-workflows/
+        really good advice
+        TODO: check out his git-wtf
+
+    http://www.fini.net/v/RichmondPM/JohnLundinDevel
+        really good overview of git and other version control systems, with more links
+
+    http://blogs.gnome.org/newren/2007/12/08/limbo-why-users-are-more-error-prone-with-git-than-other-vcses/
+        recommends:
+            "git diff HEAD" instead of "git diff"
+            "git commit -a" instead of "git commit"  (automatically adds all changes to tracked files)
+
 Awesome interactive cheatsheet:
     http://www.ndpsoftware.com/git-cheatsheet.html
 
 
 Huh? slideshow? http://sbecker.github.com/intro_to_git/#29
 
-Aliases I might start using:
-    alias gc git checkout
-    alias gb git branch
-    alias gs git status
-    alias gd git difftool -y
-    alias gl git log --color --graph --stat --decorate --date-order
-        Other useful options:
-            -<n>  limit to last n
-            --all
-            --oneline
-            --pretty=[oneline|short|medium|full|fuller]  (default is medium)
+Customizations and aliases I currently use:
+
+    Tcsh aliases:
+        # Current git aliases to make my life easier... subject to change.
+        # NOTE no --color is given here (for some commands like git-status,
+        # there isn't even an option)--
+        # we assume "git config --global color.ui auto" has been run instead)
+        alias g git
+        alias gc git checkout
+        alias gb git branch
+        alias gs git status
+        alias gd git difftool -y
+        alias gl git log --graph --decorate --date-order --stat --summary
+            # note, the --stat --summary foils other things like --oneline
+        alias gl0 'git log --graph --decorate --date-order --oneline `cd .git/refs/heads && /bin/ls | grep -v .-work`' --
+        alias gl1 git log --graph --decorate --date-order --oneline --branches=*
+            Other useful options:
+                -<n>  limit to last n
+                --all
+                FETCH_HEAD (not included in --all, and not labeled in output for somer reason... although usually same as origin/master or something)
+                --oneline
+                --pretty=[oneline|short|medium|full|fuller]  (default is medium)
+    Customizations (mostly from http://nuclearsquid.com/writings/git-tricks-tips-workflows/):
+        # Allow all Git commands to use colored output, if possible:
+        git config --global color.ui auto
+        # Allow git diff to do basic rename and copy detection:
+        git config --global diff.renames copies
+        # Tell git diff to use mnemonic prefixes (index, work tree, commit, object) instead of the standard a and b notation:
+        git config --global diff.mnemonicprefix true
+        # Always show a diffstat at the end of a merge:
+        git config --global merge.stat true
+
+        - Put a "git" wrapper in my ~/bin, see below
+
 
 THINGS IT WOULD BE NICE TO HAVE A HELPER WRAPPER FOR MAYBE:
     - the stats from "git filelog --stat" are cool but a bit brain dead,
@@ -55,6 +92,8 @@ THINGS IT WOULD BE NICE TO HAVE A HELPER WRAPPER FOR MAYBE:
                 1 files changed, 4 insertions(+), 2 changes (c), 2 deletions(-)
                 
         - is there a way to replace all git diff stat pictures with this? (git diff --stat, git log --stat, ...)
+          (hmm, I think it's using the "diffstat" program,
+          which, according to man page, is supposed to do this? is it broken or something?)
 
     - git log graph is still wicked confusing (even with --date-order).
       can I get exactly one dedicated column per branch?
@@ -79,8 +118,7 @@ THINGS IT WOULD BE NICE TO HAVE A HELPER WRAPPER FOR MAYBE:
             # Actually, do this with all git commands, not just log... most of them
             # go through the pager and will have the same issue.
 
-            #/usr/bin/git "$@"
-            /san/dept/rnd/bin/linux64/git "$@"
+            /usr/bin/git "$@"
             status=$?
             if [ "$status" = "141" ]; then
                 # empirically this is what happens when it dies due to broken pipe.
@@ -195,6 +233,8 @@ THINGS IT WOULD BE NICE TO HAVE A HELPER WRAPPER FOR MAYBE:
       Or some other file expressing how branches should be automatically regenerated from other branches??
       Hmm, maybe StGit is the thing?  Not sure.
           http://www.procode.org/stgit/
+      hmm, http://nuclearsquid.com/writings/git-tricks-tips-workflows/ says:
+      "I used to use this program quite a lot, but it has since been superseded with git rebase and git stash."
 
     - show currently checked out branch in prompt or title?
 
@@ -230,7 +270,7 @@ QUESTIONS:
 
     Q: p4 filelog?
     A: git log dl-fini.c
-       git log --color --graph --stat --decorate --date-order
+       git log --color --graph --stat --summary --decorate --date-order
             -<n>  limit to last n
             --all
             --oneline
@@ -250,8 +290,13 @@ QUESTIONS:
        git difftool -y 28363b~{1,0} dl-fini.c
 
     Q: where are ~ and ^ documented?
-    A: https://www.kernel.org/pub/software/scm/git/docs/gitrevisions.html
-       TODO: read it
+    A: in "man gittutorial" or "man gitrevisions"
+       The basic usage is:
+           head^ or head~1 -- parent of head
+           head^^ or head~2 -- grandparent of head
+           head^^^ or head~3 -- great-grandparent of head
+           etc.
+       See "man gitrevisions" for more control about which parent and stuff.
 
     Q: p4annotate?
     A: git blame dl-fini.c
@@ -617,29 +662,6 @@ Don
          so I want work to be a union of 5 things now.
          How the hell do I do that??
 
-    Q: pisses me off when quitting out of git log says "Broken Pipe" which makes the top line scroll.
-       what to do about it?
-    A: made a little wrapper:
-
-            #!/bin/bash
-
-            # Little wrapper for git.
-            #
-            # This is a quick hack to make "git log" not print "Broken pipe"
-            # nor provoke my precmd that prints a line when a command fails.
-            # Actually, do this with all git commands, not just log... most of them
-            # go through the pager and will have the same issue.
-
-            #/usr/bin/git "$@"
-            /san/dept/rnd/bin/linux64/git "$@"
-            status=$?
-            if [ "$status" = "141" ]; then
-                # empirically this is what happens when it dies due to broken pipe.
-                # turn it into exit status 0
-                status=0
-            fi
-            exit $status
-
     Q: I've got 5 branches that I keep flowing into each other
        in various set ways.  How do I keep track
        of what needs to be merged? (Is this what a "tracking branch" means?)
@@ -679,6 +701,31 @@ Don
         http://marc.info/?l=git&m=135456897811682&w=2
         but it needs a more recent version of tcsh, or something?
         holey moley! too ambitious.
+
+    Q: "git push" to google code says the following:
+            error: error setting certificate verify locations:
+              CAfile: /usr/ssl/certs/ca-bundle.crt
+              CApath: none while accessing https://code.google.com/p/donhatchnotes/info/refs
+            fatal: HTTP request failed
+    PA: setenv GIT_SSL_NO_VERIFY true
+
+    Q: is there a nice way of preparing a commit,
+       including message, like in perforce?
+       it's disorienting having to compose the message
+       on the fly as the last step; currently I sometimes
+       compose it into a scratch file and then read that into the editor
+
+    Q: "git diff --stat" and "git log --stat" don't recognize the difference
+       between an empty file and a nonexistent file--
+       it it possible to make it show it?
+       e.g. "3 empty files created, 2 empty files deleted" or something
+    A: --summary
+
+
+     
+       
+
+
 
 
 
