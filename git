@@ -2,6 +2,8 @@ Git resources:
 
     man gittutorial
 
+    https://www.kernel.org/pub/software/scm/git/docs/everyday.html
+
     http://git-scm.com/book/en/Git-Basics-Viewing-the-Commit-History
     looks like this is part of a pretty good book!
 
@@ -265,6 +267,77 @@ BEST PRACTICES:
       that aren't expecting the output of "git branch" to contain that stuff
 
 
+SETTING UP DIFFTOOLS:
+
+
+Progress trying various tools...
+xxdiff is really a good simple merge tool, wish I had the equivalent:
+select what I want from left and/or right, save merged, done.
+Why is that hard??
+Well actually it's not ideal, it doesn't know the concept of merge base...
+can I maybe write a tool that's the best of everything?
+Oh well, experimenting with various existing:
+
+Beyond Compare:
+
+    Currently I have this in my ~/bin/git-diff-wrapper:
+        #!/bin/sh
+
+        # http://www.iokom.com/drupal/node/4
+
+        # diff is called by git with 7 parameters:
+        # path old-file old-hex old-mode new-file new-hex new-mode
+
+        #"/usr/bin/bcompare" "$2" "$5" | cat
+
+        # TODO: there's a program that converts between cyg paths and windows paths, right?
+        # /tmp/whatever -> c:/cygwin/tmp/whatever
+        lhs="c:/cygwin$2"
+        rhs="$5"
+
+        "/cygdrive/c/Program Files (x86)/Beyond Compare 3/BComp.exe" "$lhs" "$rhs" | cat
+
+    Result:
+        Good for diff
+        Sucks for merge.
+        Actually supposed to show 3 revs side by side? I only see 2 revs! Wtf?
+
+    TODO: get straight on exactly what I'm doing and what the other options are
+    TODO: can I integrate the diff tool into git diffing?
+    TODO: can I integrate the diff tool into git merging?
+    TODO: can I integrate the merge tool into git diffing?
+    TODO: can I integrate the merge tool into git merging?
+
+
+p4merge:
+    - Part of p4v, I just installed it all.
+    - Had to run installer a second time and "repair" for it to appear
+      in "c:/Program Files/Perforce/p4merge.exe".
+    - Have to change "line ending type" preference to Unix (if that's what I want)
+    Result:
+      Seems ike it would be fairly nice and usable, except:
+        - when lots of diffs, scrolling the right-hand part gets all corrupt??
+          hmm can't reproduce it on subsequent run, maybe doesn't happen
+          very often?
+        - a bit hard to tell what's what after "select left" and then
+          a couple of mods
+        - hmm, there's a diffing mode that's somewhat similar to xxdiff--
+          just run it with 2 files, then hit "edit file in left pane"
+          or "edit file in right pane", allowing selectively pulling over stuff from other side... could be useful
+
+    TODO: can I integrate the diff tool into git diffing?
+    TODO: can I integrate the diff tool into git merging?
+    TODO: can I integrate the merge tool into git diffing?
+    TODO: can I integrate the merge tool into git merging?
+
+
+
+TODO: Check out:
+    - SourceGear DiffMerge? this says it may be decent: http://therightstuff.de/2009/01/28/Setting-Up-SourceGear-DiffMerge-With-Git.aspx
+    - araxis merge
+TODO: get straight on how to allow different tool options and how to set up scripts for each one
+
+
 
 QUESTIONS:
 
@@ -287,6 +360,7 @@ QUESTIONS:
     Q: how to suppress the list of possible difftools?
 
     Q: diff against previous?
+       git difftool -y 28363b{^,} dl-fini.c
        git difftool -y 28363b~{1,0} dl-fini.c
 
     Q: where are ~ and ^ documented?
@@ -720,6 +794,14 @@ Don
        it it possible to make it show it?
        e.g. "3 empty files created, 2 empty files deleted" or something
     A: --summary
+
+    Q: what exactly makes a branch a "tracking branch"?
+
+
+    Q: man gittutorial says gitk does a better job than git log.
+       exactly how?
+       (not in a position to run it and find out at the moment I'm writing this)
+
 
 
      
