@@ -1,10 +1,14 @@
+http://stackoverflow.com/questions/60950/is-there-a-better-windows-console-window
+http://www.hanselman.com/blog/ConEmuTheWindowsTerminalConsolePromptWeveBeenWaitingFor.aspx
+
 ConEmu is a console emulator,
 seems to be as good as, or better than, console2
 in all respects.
+
 I found out about it from this:
-    http://stackoverflow.com/questions/60950/is-there-a-better-windows-console-window
 
 Downloaded latest stable version 120727c [32]
+(per bug report 1004, /log4 added in build 130411 so upgraded to 130425)
 
 Customizations (mostly to mimic normal console, minus bugs!):
 
@@ -92,14 +96,117 @@ Console2 problems that aren't problems in ConEmu:
       (Left Alt) and Text selection (I changed from Left Shift to <Always>)!
     - ctrl-q properly resumes scrolling after stopped with ctrl-s
     - "tree" command actually shows the box-drawing characters!
+    - ooh nice, ctrl-win-alt-space toggls showing the RealConsole!
+      (but see the faq, they say it's flakey and sometimes you have to hit space again)
+Awesome things:
+    - ooh it can do more colors than other consoles? see:
+          https://code.google.com/p/conemu-maximus5/wiki/Screenshots
+          https://code.google.com/p/conemu-maximus5/wiki/AnsiEscapeCodes
+            seems to be a bit flakey though...
+                tcsh: only the 16 normal colors come out
+                    cat "c:/Program Files (x86)/ConEmu/ConEmu/Addons/AnsiColors256.ans"
+                cmd: comes out good, but turns flakey after scrolling
+                    type "c:\Program Files (x86)\ConEmu\ConEmu\Addons\AnsiColors256.ans"
+                powershell: all colors come out, but lots of artifacts
+                    (wait, now I can't get it to come out at all-- I thought it did,
+                    yesterday? maybe previous version of ConEmu?)
+                    (oh I think it needs ConEmuHk.dll which I turned off)
+    - progress! applies heuristics to put progress in the task bar icon
+      (e.g. run chkdsk and watch it)
+BUGS:
+    - do NOT use the (undocumented?) /title option!
+      - it prevents "title" from working
+      - if there are several consoles up, they will start dropping keystrokes
+      - if lots of them are up, the system becomes unusable
+      this is being tracked as:
+       https://code.google.com/p/conemu-maximus5/issues/detail?id=1004
+     
+
 Other observations:
+    - still can't type while a process is spewing, to get blank lines the way I like
     - selection still doesn't stay highlighted
     - double-clicking selects a word, but then dragging doesn't extend the selection properly
     - still can't put scrollbar on left :-)
-    - bug in language:  "Leave on close" should be "Stay on close"
+    - bug in language:  "Leave on close" should be "Stay on close" (wait the whole thing might have been rearranged... was this the "Task bar" tab? maybe no longer a problem, although I have no idea what "Quit on close (e.g. caption bar cross clicking)" means)
     - is /cmd arg flaky?  I thought the first time I tried it, it started two tabs, one with /cmd and the other with tcsh ...
       but it seems to be working better now.  (I think it's optional if nothing but the command is given, or something?)
-    - /title works, but isn't mentioned in "About"
-    - does the About dialog REALLY need to be modal???
     - can't see what default settings are without hitting Reset...
       but that actually saves the Reset settings, it shouldn't have to do that, should it?
+    - does the About dialog REALLY need to be modal???
+    - settings dialog is not resizeable (maybe it doesn't need to be? hmm)
+
+
+
+
+WARNING: Stay away from the /title option!!!!
+I added the following to
+https://code.google.com/p/conemu-maximus5/issues/detail?id=1004
+=================================================
+This happens for me too (on windows vista).
+
+This took a long time for me to realize,
+but I believe it only happens for me
+if there is *another* ConEmu running,
+and the other ConEmu was started using the (undocumented?) /title command-line option.
+(And, the more "ConEmu /title" processes are running,
+the more likely the problem is to happen.)
+
+/log4 output is elusive (since when the problem would happen,
+the logs get flooded and the program becomes unresponsive),
+but I can tell you this:
+
+- If I run "ConEmu /log4", it is responsive (though slow) and the problem doesn't happen.
+  But if, while it's running,
+  I start a separate "ConEmu /title hello",
+  the first (logged) ConEmu becomes unresponsive,
+  its ConEmu-gui.log file (in the Desktop/ConEmuLogs/ directory)
+  starts getting flooded with the following:
+        12:40:23.214 MsgC02B(49195): HWND=x0019050E, W=x00000006, L=x001D0434
+        12:40:23.248 MsgC02B(49195): HWND=x0019050E, W=x00000006, L=x001D0434
+        12:40:23.284 MsgC02B(49195): HWND=x0019050E, W=x00000006, L=x001D0434
+        12:40:23.326 MsgC02B(49195): HWND=x0019050E, W=x00000006, L=x001D0434
+        12:40:23.359 MsgC02B(49195): HWND=x0019050E, W=x00000006, L=x000D0480
+        12:40:23.392 MsgC02B(49195): HWND=x0019050E, W=x00000006, L=x001D0434
+        12:40:23.426 MsgC02B(49195): HWND=x0019050E, W=x00000006, L=x001D0434
+  for as long as the second ConEmu exists,
+  and even for several minutes after the second ConEmu exits.
+  (I think the longer the second ConEmu has been running,
+  the longer it takes for the flood to stop after it exits.)
+
+- If I run "ConEmu /title hello /log4", it never gets to the prompt--
+  the ConEmu-gui.log file shows an apparently infinite flood of mostly the following:
+        12:45:54.502 Msg00AE(174): HWND=x0020050E, W=x00000008, L=x00000000
+        12:45:54.524 Msg8011(32785): HWND=x0020050E, W=x00000000, L=x00000000
+        12:45:54.589 Msg000C(12): HWND=x0020050E, W=x00000000, L=x022AD160
+        12:45:54.636 Msg00AE(174): HWND=x0020050E, W=x00000008, L=x00000000
+        12:45:54.669 Msg007F(127): HWND=x0020050E, W=x00000002, L=x00000000
+        12:45:54.733 Msg007F(127): HWND=x0020050E, W=x00000000, L=x00000000
+        12:45:54.769 Msg007F(127): HWND=x0020050E, W=x00000001, L=x00000000
+        12:45:54.813 Msg007F(127): HWND=x0020050E, W=x00000002, L=x00000000
+        12:45:54.835 Msg007F(127): HWND=x0020050E, W=x00000000, L=x00000000
+        12:45:54.857 Msg007F(127): HWND=x0020050E, W=x00000001, L=x00000000
+        12:45:54.880 MsgC02B(49195): HWND=x0020050E, W=x00000006, L=x002B038E
+        12:45:54.910 Msg8011(32785): HWND=x0020050E, W=x00000000, L=x00000000
+        12:45:54.935 Msg000C(12): HWND=x0020050E, W=x00000000, L=x022AD160
+        12:45:54.957 Msg00AE(174): HWND=x0020050E, W=x00000008, L=x00000000
+        12:45:54.980 MsgC02B(49195): HWND=x0020050E, W=x00000006, L=x002B038E
+        12:45:55.002 MsgC02B(49195): HWND=x0020050E, W=x00000006, L=x000D0480
+        12:45:55.032 Msg8011(32785): HWND=x0020050E, W=x00000000, L=x00000000
+
+- Inside a "ConEmu /title hello", the "title" command doesn't work!
+  But inside a ConEmu that was started without /title, the title command
+  works fine (and doesn't trigger any problem in other ConEmu processes).
+
+- If I run a dozen "ConEmu /title hello"s at once,
+  my computer slows way down and becomes very unpleasant to work on,
+  and procexp says "Desktop Window Manager" is taking up 25%-35% of a cpu.
+
+The moral seems to be:
+don't use the /title option!
+(But then, is there any way to set the initial title?
+I guess I can set an environment variable to my desired title,
+and then make my shell startup file notice that
+and run the "title" command appropriately...
+is there a simpler way?)
+
+Don Hatch

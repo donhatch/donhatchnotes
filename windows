@@ -1,4 +1,21 @@
-To use a windows machine remotely on linux:
+Good links:
+    http://www.hanselman.com/blog/ScottHanselmans2011UltimateDeveloperAndPowerUsersToolListForWindows.aspx
 
-    rdesktop -f -d lucas lecpc0345
-    ctrl-shift-enter to get out of full-screen mode
+
+Customizations (mostly Windows Vista):
+
+ANNOYANCES/AGGRAVATIONS and my current workarounds:
+
+
+Good tools:
+    AutoHotKey
+    Console2
+    ConEmu (obsoletes Console2 except for https://code.google.com/p/conemu-maximus5/issues/detail?id=1004)
+    Dependency walker (depends)
+    Process Explorer (procexp)
+        to select the process of a window:
+            drag the target thingy onto the window
+        to see what files a process has open:
+            select the process (click on it, or type first few chars of name)
+            View -> Show Lower Pane
+            Vier -> Lower Pane View -> Handles
