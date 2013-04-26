@@ -100,10 +100,24 @@ THINGS IT WOULD BE NICE TO HAVE A HELPER WRAPPER FOR MAYBE:
     - git log graph is still wicked confusing (even with --date-order).
       can I get exactly one dedicated column per branch?
       hmm, I'm getting the feeling a branch is just a (moving) label for a commit...
-      so after it gets moved (vie git reset), I lose the record of where it was before, is that right?
+      so after it gets moved (via git reset), I lose the record of where it was before, is that right?
       yeah, that's right :-(
       I'm getting more of a handle on this, by tagging branch heads that I delete or move
       and by making empty commits at the beginning of each branch (see BEST PRACTICES below)
+
+      hmm, git show-branch gives one column per branch...
+      that's *almost* what I want but not quite...
+      it's rather cluttered since it shows all branches
+      back to infinity in time, past when the branch was created... ?
+      maybe I can make something more intuitive?
+      Really I think I just want git log to allocate a "swim lane"
+      for each branch, I think?  Various discussion the web refers to this
+      as a swimlane.
+      See this for maybe some more thoughts:
+          https://confluence.atlassian.com/display/FISHEYE/Ordering+of+Branches+Important+When+Visualising+Git+Changesets
+      and supposedly "github network view" tries to give swim lanes?
+          https://github.com/git/git/network
+
 
     - Pisses me off when quitting out of git log makes tcsh say "Broken Pipe" which makes the top line scroll
       off the top of the terminal
@@ -264,10 +278,19 @@ BEST PRACTICES:
           git commit --allow-empty -m "Initial empty commit"
 
     - hmm! maybe don't use aliases for branches.  I think it breaks various scripts
-      that aren't expecting the output of "git branch" to contain that stuff
+      that aren't expecting the output of "git branch" to contain that stuff.
+        - breaks git-rebase-all (that guy's script)
+        - gives useless extra columns in "git show-branch"
 
 
-SETTING UP DIFFTOOLS:
+SETTING UP DIFFTOOLS (work in progress):
+
+
+
+First of all, there are many references on the web
+to methods that create wrapper scripts such as "git-diff-wrapper"...
+I think they *may* be obsolete?  (but they take 7 args, does that make them
+more versatile? hmm TODO check this out)
 
 
 Progress trying various tools...
@@ -333,6 +356,8 @@ p4merge:
 
 
 TODO: Check out:
+    - everything they mention here:
+        http://stackroulette.com/stackoverflow/137102/undefined
     - SourceGear DiffMerge? this says it may be decent: http://therightstuff.de/2009/01/28/Setting-Up-SourceGear-DiffMerge-With-Git.aspx
     - araxis merge
 TODO: get straight on how to allow different tool options and how to set up scripts for each one
