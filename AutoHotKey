@@ -1,0 +1,35 @@
+Tips/Tricks:
+
+    - During development of a hotkey script,
+      put in this hotkey (comment it out when not developing):
+          ^!r::Reload ; Assign ctrl-alt-r as hotkey to restart this script
+
+
+Q: how to make F1 raise the current window and F2 lower it?
+A: I put this at the end of ~/Documents/AutoHotKey.ahk
+        F1::
+            MouseGetPos, xpos, ypos, id, control
+            ;Msgbox, F1 pressed. The cursor is at x=%xpos% y=%ypos% id=%id% control=%control%
+            WinSet, Top, , ahk_id %id%
+        return
+
+        F2::
+            MouseGetPos, xpos, ypos, id, control
+            ;Msgbox, F2 pressed. The cursor is at x=%xpos% y=%ypos% id=%id% control=%control%
+            WinSet, Bottom, , ahk_id %id%
+        return
+
+Q: how to fence a scrollbar so it doesn't snapback?  (see scrollbars notes)
+PA: hack up ControlFence: http://www.donationcoder.com/Software/Skrommel/index.html#ControlFence
+    however that only works with native scrollbars--
+    some apps use them:
+        gvim
+        procexp
+    some don't :-(
+        firefox
+        chrome
+        cmd console
+        console2
+        ConEmu
+
+Q: can I emulate middle mouse button by simultaneous(-enough) left-and-right click?

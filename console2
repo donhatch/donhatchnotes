@@ -1,3 +1,11 @@
+NOTE:
+    I think console2 has been obsoleted by ConEmu--
+    ConEmu seems to be at least as good in every way
+    I care about, and doesn't have some of the bugs of console2.
+    http://stackoverflow.com/questions/60950/is-there-a-better-windows-console-window
+    See ConEmu notes.
+
+=========================================================================
 Notes about console2 (alternate cmd window for windows) from sourceforge
 
 BUGS:
@@ -47,7 +55,7 @@ My current settings:
                     Rename tab        Ctrl-R
                     Close tab         Ctrl-W
                 changing to:
-                    Help              Shift-F1          (I'd really like F1 to raise the window, since that's what I'm always hitting it for... is there a way?)
+                    Help              Shift-F1          (I'd really like F1 to raise the window, since that's what I'm always hitting it for... is there a way? YES, make an AutoHotKey script)
                     Copy selection    Ctrl-Shift-c
                     Paste             Ctrl-Shift-v
                     Settings Dialog   Alt-S

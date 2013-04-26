@@ -1,0 +1,21 @@
+"Microsoft Scrollbar-Dragging Behavior Considered Harmful"
+    http://www.red-bean.com/kfogel/ms-scrollbar.html
+    http://www.red-bean.com/kfogel/scrollbar-redux.html
+
+http://www.osnews.com/story/22601/Windows_Scrolling_Behaviour_Really_Really_Annoying
+
+Q: is there a way to disable the snap, or make the "hotspot" ("drag region") bigger?
+   (ideally covering whole screen except for 1 pixel wide on left or something? hmm)
+
+PA:  Make an AutoHotKey script... unfortunately it only recognizes native "Scrollbar" controls...
+     some programs use them, others (firefox, chrome) don't,
+     and the scroll bars aren't really recognizeable. :-(
+
+
+Scroll bars are better on the left.
+Assumptions:
+    - scrolling does *not* cause window to be raised or lowered
+    - in fact, clicking in a window (to do selections and stuff) does *not* cause window to be raised or lowered
+Reason: you can be monitoring 10 different overlapping windows,
+each with just the lower-left (most important)
+part visible, and be able to scroll each one.

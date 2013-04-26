@@ -1,0 +1,105 @@
+ConEmu is a console emulator,
+seems to be as good as, or better than, console2
+in all respects.
+I found out about it from this:
+    http://stackoverflow.com/questions/60950/is-there-a-better-windows-console-window
+
+Downloaded latest stable version 120727c [32]
+
+Customizations (mostly to mimic normal console, minus bugs!):
+
+    Right-click->Settings
+        Main
+            Font
+                was: Lucida Console size=16
+                changed to: Terminal size=12
+                            (same as [Raster Fonts 8x12] I think)
+        Size&Pos (child of Main)
+            Width: 80  Height: 24
+            (actually not quite sure what I did...
+            the "Show&store current window size and position" thing is confusing)
+        Features
+            Miscellaneous options
+                uncheck "Inject ConEmuHk" (keeps things from running slower, see below)
+            Scrollbar
+                Always show scrollbar   (beware confusing tri-state checkbox that I don't understand)
+                Save settings (doesn't close dialog if Shift pressed)
+        Text cursor (child of Features)
+            uncheck "Blinking"
+            Min size: change from 2 to 8
+        Tabs (child of Features)
+            uncheck "Enable Tabs"  (takes effect when Setting window closed and reopened)
+        Status bar (child of Features)
+            uncheck "Show status bar"
+        Mark&Paste (child of Keys&Macro)
+            changed selection Back color index from 14 (yellow) to 15 (white)
+            change Text selection from "Left Shift" to "<Always>"
+            change "Change prompt text cursor position with Left Click" from "<Always>" to "Left Shift"
+                (although I don't know what that means
+                 especially since this tri-state checkbox has no tooltip)
+            uncheck "First line (default Ctrl+V)" since that interferes with ctrl-v in vim
+
+            (note, double-clicking on a word seems to select it now,
+            although it seemed like it didn't do that at first?? not sure
+            if I did anything to make it do that)
+
+
+Made 3 launchers:
+In all 3 cases, drag ConEmu executable to launcher bar,
+right click on it, and Start In: "c:/Users/hatch".
+    - "cmd in ConEmu":
+        target: "C:\Program Files (x86)\ConEmu\ConEmu.exe" /title cmd
+    - "powershell in ConEmu":
+        target: "C:\Program Files (x86)\ConEmu\ConEmu.exe" /title powershell /cmd powershell
+    - "tcsh in ConEmu":
+        target: "C:\Program Files (x86)\ConEmu\ConEmu.exe" /title tcsh /cmd "c:\cygwin\bin\tcsh"
+
+
+Q: with above customizations... is it as good as console2 in all ways?  I think so.
+
+Q: wait a minute, a lot of commands are slower to start!
+   e.g. here are timings using console2 or usual console,
+   vs. in ConEmu:
+   'python -c "print 0"'  .13   .3
+   /bin/echo foo          .02   .21
+   so, all executed children have an overhead of .2 secs?  that's not good :-(
+   Is it something to do with the Info/Debug thing?  I.e. are we effectively running a debugger?
+A: it's a faq... he doesn't know exactly why, but it's fixable by:
+    uncheck "Inject ConEmuHk" on Features page-- fixed it!
+Q: procexp says:
+    ConEmu.exe
+        ConEmuC64.exe
+            cmd.exe
+                tcsh.exe
+   how do I get rid of the cmd.exe in the middle?
+   hmm, interesting, can just kill it in procexp, it disappears... but doesn't seem
+   to hurt anything
+   Note that ConEmu's Settings/Info/Debug window shows subprocesses too
+   (actually they show up in procexp, but they don't show up as children of the tcsh
+   so it's hard to keep track of them)
+
+Q: how to set initial title?
+
+Q: how to copy/paste? (want QuickEdit mode or something)
+
+
+
+Console2 problems that aren't problems in ConEmu:
+    - windows resize well (doesn't have console2's bug where it sometimes
+      gets in a bad state if you resize from anywhere but bottom edge)
+    - maximize button works!
+    - woohoo! supports BOTH block selection (for the 1/1000 of the times I want it)
+      (Left Alt) and Text selection (I changed from Left Shift to <Always>)!
+    - ctrl-q properly resumes scrolling after stopped with ctrl-s
+    - "tree" command actually shows the box-drawing characters!
+Other observations:
+    - selection still doesn't stay highlighted
+    - double-clicking selects a word, but then dragging doesn't extend the selection properly
+    - still can't put scrollbar on left :-)
+    - bug in language:  "Leave on close" should be "Stay on close"
+    - is /cmd arg flaky?  I thought the first time I tried it, it started two tabs, one with /cmd and the other with tcsh ...
+      but it seems to be working better now.  (I think it's optional if nothing but the command is given, or something?)
+    - /title works, but isn't mentioned in "About"
+    - does the About dialog REALLY need to be modal???
+    - can't see what default settings are without hitting Reset...
+      but that actually saves the Reset settings, it shouldn't have to do that, should it?
