@@ -1,0 +1,30 @@
+Q: how to interact with clipboard?
+A: "clipboard:" can be used as a file name, for convert etc.
+
+Q: how to deal with raw files?
+A:
+   convert to and from raw rgba:
+        convert foo.png foo.png.rgba
+        convert -depth 8 -size 540x960 foo.rgba foo.rgba.png
+   or using stdin/stdout:
+        convert png:- rgba:-
+        convert -depth 8 -size 540x960 rgba:- png:-
+
+Q: and how to extract a rectangle from a file?
+PA: two possible options look relevant:
+        -crop
+        -extract
+   I think they might be functionally the same,
+   but -extract might be more efficient?
+   Wait, this: http://www.imagemagick.org/RMagick/doc/image1.html
+   insinuates crop might retain the offset info
+   (in formats such as gif?) hmm.
+        convert -depth 8 -size 540x960 -crop    200x200+100+100 rgba:- png:-
+        convert -depth 8 -size 540x960 -extract 200x200+100+100 rgba:- png:-
+   or, equivalently (according to the page):
+        convert -depth 8 -size 540x960 'rgba:-[200x200+100+100]' png:-
+
+Q: image viewer/inspector for windows?
+A: nope, they all suck-- I don't WANT blurry zoom-in!
+   (gimp is fine but takes too long to load)
+   I wrote one using AutoHotKey, called myImageViewer.ahk
