@@ -1,0 +1,56 @@
+http://reviews.cnet.co.uk/software-and-web-apps/50-essential-chrome-tips-50008273/
+
+Very cool things:
+    ctrl-shift-I: developer tools
+    ctrl-shift-J: javascript console (just developer tools opened to that tab)
+
+
+
+Q: can I customize some styles? (link colors and stuff)
+A:  on windows vista:
+        ~/AppData/Local/Google/Chrome/User\ Data/Default/User\ StyleSheets/Custom.css
+    for example:
+        A:link { color: #80a0ff ! important }
+        A:hover { color: #ffff00 ! important }
+        A:visited { color: #a000ff ! important }
+    when the file is changed, displayed pages change instantly.
+
+
+Q: is there a keyboard shortcut to open the link in a new tab?
+   various sites say ctrl-shift-left but it doesn't work.
+
+Q: how do I change the font size when printing?
+   it prints teeny tiny and I want to make it bigger.
+
+Q: can I set up some custom thing
+   in which tabs are arranged in a tree view,
+   with pages arranged under where they started from,
+   and I can move them around and delete subtrees etc.?
+   that would be kind of cool
+
+Q: how do I tell which tab is using cpu?
+A: Tools -> Task Manager
+
+Q: how do I tell which tab is using memory?
+PA: (still not sure exactly how to use it usually)
+    chrome://memory
+    https://developers.google.com/chrome-developer-tools/docs/heap-profiling
+
+Q: how do I disable the Predictions url drop-down?
+   I would like to set it so there's no drop-down ever.
+PA: menu -> settings -> Show advanced settings...
+       -> Privacy -> "use a prediction service"
+       uncheck it.
+   woops, does not work.
+   I don't think there's a way?
+   even though it takes up
+   half the screen on android??
+   I don't think it can be done :-(
+   See this if serious: http://blog.techprognosis.com/2011/07/08/privacy-how-to-lock-down-googles-chrome-browser.html
+
+
+Q: how do I get chrome to forget links I've visited?
+   the following doesn't do it:
+       History -> Clear browsing data... -> obliterate everything
+A: oh hmm, actually I think it's completing
+   based on bookmarks.  I'd have to remove the bookmarks too.

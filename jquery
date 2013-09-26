@@ -1,3 +1,21 @@
+http://coding.smashingmagazine.com/2008/09/16/jquery-examples-and-best-practices/
+
+very cool site that allows fiddling with javascript and jquery on the fly:
+    http://jsfiddle.net/bY3CC/3/
+
+
+Possibly good optimization:
+    http://encosia.com/dont-let-jquerys-document-ready-slow-you-down/
+
+Q: how to put stuff in the clipboard?
+A: ZeroClipboard. note it doesn't work with file://
+   but it's easy to run a simple httpd server:
+       python -m SimpleHTTPServer
+   which will start with a directory listing of the directory
+   in which the server was started.
+
+
+
 from 03/25/2011 10:49 PM
 Subject: Re: usage stats page request
 
@@ -8,3 +26,5 @@ but if I change it to simply change the table rows' css "display" property betwe
 instead, it accomplishes the same thing and it's really fast).
 
 Don 
+
+ADDED NOTE: something about duration? by default, show/hide do a fade

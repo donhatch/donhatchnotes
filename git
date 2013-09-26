@@ -493,6 +493,11 @@ Don
        also here: http://stackoverflow.com/questions/822811/differences-in-git-branches
        see Eric Anderson's answer, seems like a nice way to try out the merge
        in a throw-away branch
+       also this:
+           http://docs.mathjax.org/en/latest/installation.html
+       seems to imply that "git remote show origin"
+       is the dry run of "git pull origin" (haven't tried it yet)
+
 
     Q: why is "git status" not showing files ending in .orig?
     A: it's listed in .gitignore

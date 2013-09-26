@@ -20,6 +20,10 @@ LAYERS
     Re-stack layers by using up and down arrow buttons in Layers dialog.
     "Merge down" by selecting Merge Down in layer's right-mouse menu
 
+    When you paste something, it becomes a "Floating Selection (Pasted Layer)";
+    to make it permanently part of the image, hit the Anchor in the Layers dialog
+    (or ctrl-H, or click outside the selection).
+
     Introduction to layers in manual is in section 8.1: Intro to Layers
         http://docs.gimp.org/2.6/en/gimp-image-combining.html#gimp-concepts-layers
 CHANNELS
@@ -38,7 +42,30 @@ COMPOSITING
 
 
 
-QUESTIONS:
+UNANSWERED QUESTIONS:
+
+Q: when I read in a multi-page pdf file, each page
+   becomes its own layer. how do I save all these back out
+   into a pdf file?
+PA: some references say print-to-file, but that produced
+   a pdf that acroread couldn't read back in :-(
+
+Q: what's the difference between the crop and resize buttons, in
+   the crop info window after I've dragged out a crop region?
+
+Q: the background layer doesn't have an alpha channel,
+   added layers do.
+   I can add an alpha channel via right-click-on-layer -> Add Alpha Channel
+   But how to remove one?
+   Wtf?  The docs say there's supposed to be a menu item for "Remove Alpha Channel"
+   but there isn't one???
+
+ANSWERED QUESTIONS:
+
+Q: sometimes when I paste, creating a Floating Selection,
+   it lets me drag the position around, and move it with arrow keys,
+   but sometimes not... ??? (when in Rectangle Select Tool)
+A: not sure, but switching to "Mode Tool" seemed  to fix it
 
 Q: how to tell the dimensions of an image or layer?
 A: <Image> View -> Info Window
@@ -59,19 +86,6 @@ A: hmm, probably the whole image is selected then.
    (or Select->None).
    once the selection is made smaller or nonexistent,
    it will become manageable again.
-
-Q: the background layer doesn't have an alpha channel,
-   added layers do.
-   I can add an alpha channel via right-click-on-layer -> Add Alpha Channel
-   But how to remove one?
-   Wtf?  The docs say there's supposed to be a menu item for "Remove Alpha Channel"
-   but there isn't one???
-A: 
-
-ANSWERED QUESTIONS:
-
-Q: what's the difference between the crop and resize buttons, in
-   the crop info window after I've dragged out a crop region?
 
 
 

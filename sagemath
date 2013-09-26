@@ -1,0 +1,81 @@
+ANSWERED QUESTIONS:
+===================
+
+Q: how to manipulate polynomials?
+   e.g. doing arithmetic on them, evaluating them, composing them
+A: First of all there is already a variable "x" defined,
+   which could have been created using:
+       var('x')
+   or  x = var('x').
+   You can say stuff like:
+       sage: a,b,c,x,y = var('a,b,c,x,y')
+       sage: p = a*x^2 + b*x^2 + c
+           a*x^2 + b*x^2 + c
+       sage: p^2
+           (a*x^2 + b*x^2 + c)^2
+       sage: (p^2).expand()
+           a^2*x^4 + 2*a*b*x^4 + b^2*x^4 + 2*a*c*x^2 + 2*b*c*x^2 + c^2
+       sage: p(a=100)
+           b*x^2 + 100*x^2 + c
+       sage: p(a=100,x=y+1)
+           (y + 1)^2*b + 100*(y + 1)^2 + c
+       sage: p(a=100)(x=y+1)
+           (y + 1)^2*b + 100*(y + 1)^2 + c
+       sage: p(x=p)
+           (a*x^2 + b*x^2 + c)^2*a + (a*x^2 + b*x^2 + c)^2*b + c
+
+Q: Interval arithmetic?
+A:
+        http://www.sagemath.org/doc/reference/rings_numerical/sage/rings/real_mpfi.html
+    There's a class RIF which is equivalent to
+    the result of RealIntervalField(53).
+
+    If I want to do 50 digits (not bits), something like
+    the following would work:
+
+        sage: RI50 = RealIntervalField(log(10)/log(2) * 50)
+        sage: x = RI50(1/3)
+        sage: x
+            0.33333333333333333333333333333333333333333333333333?
+        sage: (x + RI50('1e12') - RI50('1e12')).str()
+            '0.3333333333333333333333333333333333334?'
+        sage: x.str(style='brackets')
+            '[0.333333333333333333333333333333333333333333333333329 .. 0.333333333333333333333333333333333333333333333333336]'
+        sage: (x + RI50('1e12') - RI50('1e12')).str(style='brackets')
+            '[0.333333333333333333333333333333333333329415018830592 .. 0.333333333333333333333333333333333333341169962338816]'
+
+
+
+QUESTIONS:
+=========
+
+Q: How to make sure I'm using the desired types and precisions,
+   in literals, python variable values,
+   polynomial coefficients,
+   vector and matrix entries?
+   This seems to get away from me sometimes.
+
+
+POSSIBLE BUGS:
+==============
+Bug:
+    mpmath.hurwitz(0,smallOddNumber/2) bombs with "mpmath.libmp.libhyper.NoConvergence: zeta: too much cancellation"
+    see projecteuler/0430/runme.sage
+    I don't think it should be a bad case,
+    but I avoid it by using a trivial expression in that case
+
+Bug:
+    sage: print 99.0 % 2
+    -1.00000000000000
+    should be 1, right?
+Bug:
+    polynomial.coeffs() gives low-precision answers
+    with terms close to zero omitted!
+Bug:
+    this doesn't seem to work unless PRINT.py is in current dir:
+        import sys
+        sys.path.append('../includepy')
+        from PRINT import PRINT,EVAL
+Bug:
+    takes too damn long to start up!
+    need a workflow to re-read a source file into a running session

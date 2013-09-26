@@ -1,12 +1,55 @@
-great page on X clipboard:
-http://www.freedesktop.org/wiki/Specifications/ClipboardsWiki
+On Windows:
+    Clipboard stack would be nice.
+    People have suggested:
+        ClipX
+        ClipBoard Diary
+        clipmagic
+        Ditto
+        PureText (has "paste as unformatted)
+        Yankee Clipper
+        something using AutoHotKey
+    A bunch of them described here: http://www.nonags.com/nonags/clipb.html
+
+    But... do we really need a menu?
+    How about just ctrl-v going back through the stack
+    and something else going forward through it? hmm.
+    no wait, ctrl-v ctrl-v ctrl-v pastes 3 times, so that doesn't work.
+
+    How bout this:
+        ctrl-v pastes and leaves nothing selected, as usual
+        ctrl-shift-v pastes and leaves the pasted thing selected,
+            so that ctrl-shift-v again can replace it with previous
+            thing in clip history, etc.?
+            and then should releasing shift make deselect?
+    See this:
+        http://www.autohotkey.com/board/topic/10576-a-simple-clipboard-stack-kill-ring/
+        post on 24-March-2009 says he's tried almost every clipboard manager out there and very few allow this basic funcionality, and those who do implement it horribly.
+
+    AutoHotKey-based:
+        This page:
+            http://www.autohotkey.com/docs/misc/Clipboard.htm
+        lists a couple of ahk-based ones:
+            Deluxe Clipboard
+            ClipStep (note, the version here seems to work for me on vista;
+                      the one on donationcoder.com has more menus and About
+                      but doesn't seem to work (paste claims there's no clip)
+                BUT interacts poorly with cygwin,
+                in which ctrl-c and ctrl-v don't mean copy and paste!
+                so, guess I can't use this?  :-(
+
+On Linux/X:
 
 
-Still tons of mysteries.  I don't like not knowing what's going on.
-For example...
+    great page on X clipboard:
+    http://www.freedesktop.org/wiki/Specifications/ClipboardsWiki
 
-Q: copy something from a cmd or console2 on windows...
-   can paste it back,
-   but can NOT paste it into thunderbird on linux (through synergy).
-   but, can paste it into gnome-terminal on linux (through synergy),
-   then copy-paste it from there to thunderbird.  what the fuck??
+
+    Still tons of mysteries.  I don't like not knowing what's going on.
+    For example...
+
+    Q: copy something from a cmd or console2 on windows...
+       can paste it back,
+       but can NOT paste it into thunderbird on linux (through synergy).
+       but, can paste it into gnome-terminal on linux (through synergy),
+       then copy-paste it from there to thunderbird.  what the fuck??
+       Really need to monitor what's happening to get a clear idea of how things work.

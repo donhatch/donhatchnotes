@@ -9,3 +9,12 @@ A: well...
         $   (synchronize)
 
   apparently '/' searches in subject?
+
+Q: how to toggle view-by-thread?
+A:
+        :set sort=date
+        :set sort=threads
+
+
+Q: how to view/save attachments?
+       v to view attachments

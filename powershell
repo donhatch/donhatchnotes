@@ -144,7 +144,8 @@ A: Just use which, which is an alias for Get-Command.
    If it shows a function with truncated definition,
    you can see the full definition as follows:
        (ls function:myfunction).definition
-   (Actually on my home windows vista machine, with an older version
+   (Actually on my home windows vista machine,
+   with a different/older version
    of powershell I guess, it's not an alias for Get-Command--
    should probably make it one:
         Set-Alias which Get-Command )
@@ -358,3 +359,6 @@ PA: you can do this:
 Q: how do I find my mac address?
 A: ipconfig /all
    and look for "physical address" of the most sensible looking interface
+
+Q: how to invoke a script, automatically finding the application?
+   (like "start" in cmd, I think?)

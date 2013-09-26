@@ -1,0 +1,7 @@
+yum update
+
+yum install imagemagick
+Enable epel so that yum will see more:
+    per https://fedoraproject.org/wiki/EPEL :
+        downloaded epel for centos 5, and installed it
+        yum install git

@@ -1,21 +1,106 @@
 Good links:
     http://www.hanselman.com/blog/ScottHanselmans2011UltimateDeveloperAndPowerUsersToolListForWindows.aspx
+    good list of idiosyncracies and stuff about messages, at programmer level:
+        http://www.itimdp4.com/winbugs.html
 
 
 Customizations (mostly Windows Vista):
 
 ANNOYANCES/AGGRAVATIONS and my current workarounds:
 
+X-Mouse
+    1. How to enable it?
+       possible relevant links:
+           http://www.sevenforums.com/tutorials/9000-mouse-hover-makes-window-active-enable.html
+           http://fy.chalmers.se/~appro/nt/TXMouse/
+
+       This worked:
+        On vista:
+            TweakVI
+                Misc Tweaks
+                    Mouse Tweaks
+                        "Enable Window tracking using your mouse cursor"
+                        reboot :-(
+            "Ultimate Windows Tweaker" doesn't seem to have any mouse-related stuff
+            True X-Mouse
+                (cool, when using this, clicking in a window doesn't raise it!)
+                (oh no! does it mess up my AutoHotkey hotkeys for F1 and F2??
+                 yes!  argh!)
+                (and it causes crazy flakey behavior... right click
+                on ConEmu title bar pushes window to back
+                instead of bringing up Settings :-( )
+            X-Mouse Controls
+                http://joelpurra.com/Projects/X-Mouse_Controls/
+                looks good, but it's source only-- need visual studio?? :-(
+            maybe using AutoHotKey? http://www.autohotkey.com/board/topic/20996-auto-raise-mouse-hover/
+
+    2. Certain apps automatically raise the window
+       when they recieve focus, therefore are extremely unfriendly
+       when using x-mouse:
+           gimp (if not in windows->"single window mode")
+           java (starting with 1.7) (but only within same application??)
+           visual studio (if I recall correctly-- don't have it at this moment)
+       Q: what makes them do that?
+       Q: is there a way to prevent them from doing that?
+          (intercept something?)
+
+Non-resizeable windows
+
+    Examples:
+        - file or shortcut Properties dialog
+        - System properties
+        - environment variables
+
+    There's a tool called ResizeEnable
+    which works sometimes, but it has extremely unfriendly interaction
+    with chrome so I have it turned off most of the time,
+    and I turn it on temporarily when I want to resize a window.
+
 
 Good tools:
     AutoHotKey
-    Console2
+    Console2 (mostly obsoleted by ConEmu)
     ConEmu (obsoletes Console2 except for https://code.google.com/p/conemu-maximus5/issues/detail?id=1004)
     Dependency walker (depends)
     Process Explorer (procexp)
         to select the process of a window:
             drag the target thingy onto the window
+        to see properties of a process:
+            select it and:
+                Process->Properties
+                or hit Enter
+                or double click on it
         to see what files a process has open:
             select the process (click on it, or type first few chars of name)
             View -> Show Lower Pane
             Vier -> Lower Pane View -> Handles
+
+
+
+Q: what the hell does "search everywhere" mean?
+A: According to
+       http://windows.microsoft.com/en-us/windows-vista/the-start-menu-overview
+   it means "search your entire computer".
+
+Q: how to open a script from the command line
+   like clicking in explorer?
+PA: explorer <script>
+   but how to pass it args?
+
+Q: and how to bypass explorer and bring up the explorer right-click menu?
+
+Q: I keep forgetting how to set environment variables
+A: start -> *right click* on computer -> Advanced system settings -> Environment Variables
+
+Q: I keep forgetting what all the parts of the windows desktop are?
+A:
+        start menu   taskbar   system tray
+
+
+CMD BATCH SCRIPTING
+    http://www.microsoft.com/resources/documentation/windows/xp/all/proddocs/en-us/ntcmds_shelloverview.mspx
+    http://www.microsoft.com/resources/documentation/windows/xp/all/proddocs/en-us/percent.mspx
+
+    Q: how to make a .cmd script that runs a program,
+       forwarding the command line args?
+    A: %*  and yes it seems to get quoted right (in simple cases anyway)

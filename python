@@ -36,8 +36,15 @@ GOOD INTERESTING READING AND REFS:
             wrong thing if you use "is True". 
 
 GOTCHAS:
+    - To get the last suffixLength elements of a list or tuple,
+      listOrTuple[-suffixLength:] works most of the time,
+      but it fails unexpectedly if suffixLength is 0,
+      wrongly returning the whole array!
+      For a robust idiom, use listOrTuple[len(listOrTuple)-suffixLength:]
+      instead.
+
     - --x does not increment x !!!  it returns -(-x)). Likewise for ++x, etc.
-      Need to use x-=1 and x+=1 instead, and there's no equivailent of
+      Need to use x-=1 and x+=1 instead, and there's no equivalent of
       post-increment or post-decrement.  Attempting them will usually
       give an error, except in cases like x++ - y which is treated
       as x + (+(-(y)). :-(
@@ -46,6 +53,7 @@ GOTCHAS:
       prints the list stringified, with parens and comma
       (although print("x") doesn't print the parens).
       Weird.  Need to omit the parens from the call, I guess.
+      Oh I see, it's treatin it as a tuple, not as function args!
 
     - a global variable can be looked at, or its elements assigned to,
       in a function, but the variable itself can't be assigned to

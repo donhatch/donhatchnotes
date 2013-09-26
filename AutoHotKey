@@ -1,12 +1,52 @@
+Possibly precious file:  ~/Documents/AutoHotKey.ahk
+(although I don't put anything in it any more)
+
+==============================================
+Towards better checking of stuff,
+see utilities by Adrian Hawryluk
+    ClassCheck.ahk
+    DllCallCheck.ahk
+    object.ahk
+
+
+Really good working examples of syntax:
+    http://www.daviddeley.com/autohotkey/xprxmp/autohotkey_expression_examples.htm
+
 Tips/Tricks:
 
     - During development of a hotkey script,
       put in this hotkey (comment it out when not developing):
           ^!r::Reload ; Assign ctrl-alt-r as hotkey to restart this script
+      (Actually it needs to be smarter than Reload
+      to get the original args... see my Reload.ahk)
 
+    - Search for the following that are probably errors:
+        / = /  (most likely should be :=
+        / , *$/ (i.e. comma at end of line)
+
+Best Practices:
+    - Try to do all work inside functions,
+      rather than subroutines, so as to keep scratch variables
+      out of the global namespace.  Avoid temptation to do stuff
+      directly in the subroutines even though it's easier initially,
+      since as soon as you need a scratch variable you'll regret it.
+
+
+Q: how can I make the text in an Edit *not* be highlighted initially?
+A: http://www.autohotkey.com/board/topic/94102-solvedgui-edit-and-highlight-some-text-or-insert-formatted-text-in-edit/
+    EM_SETSEL:=0x0B1
+    SendMessage EM_SETSEL,0,4,,ahk_id %hEdit%
+    ;-- Select the first 4 characters of the Edit control
+
+
+Q: can I make it intercept keystrokes to really unfriendly apps
+   like java and gimp, and make them do the right thing?
+   (i.e. don't raise window when it gets focus--
+   especially when it gets focus by x-mouse!
+   maybe implement x-mouse in AutoHotKey?)
 
 Q: how to make F1 raise the current window and F2 lower it?
-A: I put this at the end of ~/Documents/AutoHotKey.ahk
+PA: I put this at the end of ~/Documents/AutoHotKey.ahk
         F1::
             MouseGetPos, xpos, ypos, id, control
             ;Msgbox, F1 pressed. The cursor is at x=%xpos% y=%ypos% id=%id% control=%control%
@@ -18,6 +58,15 @@ A: I put this at the end of ~/Documents/AutoHotKey.ahk
             ;Msgbox, F2 pressed. The cursor is at x=%xpos% y=%ypos% id=%id% control=%control%
             WinSet, Bottom, , ahk_id %id%
         return
+
+    Hmm but it only works for some windows...
+    in others (like ConEmu), it only works in the title bar?
+    Oh wait maybe that's interaction with txmouse? Bleah!
+    (but it's pointless without some kind of x-mouse)
+    And if the ConEmu is being run by Admin, it just sends A or B?
+    (i.e. it doesn't work there, that's what F1 and F2 do
+    when the script isn't running)
+
 
 Q: how to fence a scrollbar so it doesn't snapback?  (see scrollbars notes)
 PA: hack up ControlFence: http://www.donationcoder.com/Software/Skrommel/index.html#ControlFence
@@ -33,3 +82,114 @@ PA: hack up ControlFence: http://www.donationcoder.com/Software/Skrommel/index.h
         ConEmu
 
 Q: can I emulate middle mouse button by simultaneous(-enough) left-and-right click?
+
+Q: how to I express multi-line text in the middle of a script?
+A: e.g.
+    text := "first line`n"
+          . "second line`n"
+          . "third line"
+    MsgBox, %text%
+
+
+Q: is there a way to run it from command line (tcsh)
+   in such a way that ctrl-c will kill it?
+PA: hmm, can I trace parent processes and find the parent shell window,
+   and make a window-specific ctrl-c hotkey
+   that exits the script?
+
+Q: is there an autohotkey clipboard slash tilter?
+   (i.e. something that takes the clipboard contents
+   and tilts it from a windows filename to a unix filename or vice versa)
+   or can I write one?
+
+Q: can I make a simple image viewer in ahk?
+   all the image viewers take too long to start
+   and/or don't have zoom that allows pixel inspection.
+A: yes, did it (myImageViewer.ahk TODO: publish it)
+
+Q: why is this program not acting like I expect:
+
+        MsgBox(msg)
+        {
+            MsgBox, % msg
+        }
+
+        if (true) MsgBox("this should be msg box 1")
+        if (true) MsgBox("this should be msg box 2")
+        if (true) MsgBox("this should be msg box 3")
+        if (false) MsgBox("this shouldn't happen A")
+        if (false) MsgBox("this shouldn't happen B")
+        if (false) MsgBox("this shouldn't happen C")
+        MsgBox("this should be msg box 4")
+        MsgBox("this should be msg box 5")
+        MsgBox("this should be msg box 6")
+
+    expected output:
+        this should be msg box 1
+        this should be msg box 2
+        this should be msg box 3
+        this should be msg box 4
+        this should be msg box 5
+        this should be msg box 6
+    actual output:
+        this should be msg box 1
+        this should be msg box 2
+        this should be msg box 3
+        this shouldn't happen A
+        this should be msg box 5
+        this should be msg box 6
+
+Q: how to compile a .ahk program into a .exe program?
+A: simplest way is probably to right-click in explorer -> Compile Script.
+   or on command line:
+        Ahk2exe.exe /in "MyScript.ahk"
+        Ahk2exe.exe /in "MyScript.ahk" /icon "MyIcon.ico" /pass "CustomPassword" /NoDecompile
+   make sure you're not already running a pre-existing .exe,
+   or you'll get a somewhat cryptic failure.
+
+
+Q: 90% of my time is spent tracking down fallout from nonexistent
+   variables due to typos or failure to declare something global.
+   can I please have a "strict" mode
+   that will make it give a clear error message
+   instead of silently doing something wrong
+   when I:
+       - refer to a nonexistent or uninitialized variable,
+       - call a nonexistent method,
+       - do ops on vars that don't make sense,
+       - use = when I meant :=
+       - use + or += when I meant . or .=
+       - say "foo"."bar" when I meant "foo" . "bar" or "foo" "bar"
+       - say Substr(str, 0, len) when I meant Substr(str, 1, len)
+       - pass an object member variable to a function that takes it as ByRef
+           (doesn't work)
+       - say "new Object()" instead of "Object()"
+       - call VarSetCapacity on a member variable
+           (have to call Obj.SetCapacity(member)
+           and Obj.GetCapacity(member) instead)
+       - refer to &obj.member (it returns blank;
+           (have to say obj.GetAddress("member") instead)
+       - call NumSet(obj.member, offset, "int")
+         or NumGet(obj.member, offset)
+         (have to say NumGet(obj.GetAddress("member")+offset))
+       - call NumGet(addr, "int") or NumPut(x, addr, offset, "int")
+         (have to say NumGet(addr+0, "int")
+          or NumPut(x, addr+0, offset, "int") instead)
+       - passing misspelled or nonexistent type to NumGet or NumPut
+       - put a space between the function name and the opening '('
+       - call a function by name (i.e. %functionName%(arg1,arg2,...))
+         and pass it the wrong number of args
+       - screw up something like this (can you spot the bug?)
+            Gdip_DrawImage(G3, globalBitmap2,   ; dst,src
+                         , dstX0, dstY0, dstX1-dstX0, dstY1-dstY0
+                         , dstX0, dstY0, dstX1-dstX0, dstY1-dstY0)
+       - or this (can you spot the bug?
+            AHKsock_AsyncSend(iSocket, ptrData, iLength
+                            , startedFunc, startedFuncArg
+                            , progressFunc, progressFuncArg
+                            , finishedFunc, finishedFuncArg)
+                            , failureFunc, failureFuncArg)
+            {
+                ; ...
+            }
+   (answers: extra comma, extra paren)

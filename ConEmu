@@ -18,6 +18,13 @@ Customizations (mostly to mimic normal console, minus bugs!):
                 was: Lucida Console size=16
                 changed to: Terminal size=12
                             (same as [Raster Fonts 8x12] I think)
+                and set width to 8 instead of 0
+                    (doesn't have any immediate apparent effect,
+                    but prevents the font from getting fucked up
+                    and changing to width 6 or so
+                    when I log out and back in without rebooting...
+                    note this problem happens in console2 too,
+                    but I don't know how to fix it there)
         Size&Pos (child of Main)
             Width: 80  Height: 24
             (actually not quite sure what I did...
@@ -31,6 +38,8 @@ Customizations (mostly to mimic normal console, minus bugs!):
         Text cursor (child of Features)
             uncheck "Blinking"
             Min size: change from 2 to 8
+        Colors (child of Features)
+            uncheck "Fade when inactive"
         Tabs (child of Features)
             uncheck "Enable Tabs"  (takes effect when Setting window closed and reopened)
         Status bar (child of Features)
@@ -42,6 +51,8 @@ Customizations (mostly to mimic normal console, minus bugs!):
                 (although I don't know what that means
                  especially since this tri-state checkbox has no tooltip)
             uncheck "First line (default Ctrl+V)" since that interferes with ctrl-v in vim
+            uncheck "Confirm <Enter> paste"
+            uncheck "Confirm pasting more than"
 
             (note, double-clicking on a word seems to select it now,
             although it seemed like it didn't do that at first?? not sure
@@ -59,7 +70,14 @@ right click on it, and Start In: "c:/Users/hatch".
         target: "C:\Program Files (x86)\ConEmu\ConEmu.exe" /title tcsh /cmd "c:\cygwin\bin\tcsh"
 
 
+Q: I lost track of how to bring up Settings
+   (I think I changed some shortcuts)... how do I get it?
+A: left-click on icon on left side of title bar
+
 Q: with above customizations... is it as good as console2 in all ways?  I think so.
+A: no, it slows down and I have to restart all of them several times
+   a day :-(
+   Q: is that still true using latest alpha? (130708 x86)
 
 Q: wait a minute, a lot of commands are slower to start!
    e.g. here are timings using console2 or usual console,
@@ -70,6 +88,8 @@ Q: wait a minute, a lot of commands are slower to start!
    Is it something to do with the Info/Debug thing?  I.e. are we effectively running a debugger?
 A: it's a faq... he doesn't know exactly why, but it's fixable by:
     uncheck "Inject ConEmuHk" on Features page-- fixed it!
+    oh! latest alpha (130708 x86) doesn't seem to have that problem! yay!
+
 Q: procexp says:
     ConEmu.exe
         ConEmuC64.exe
@@ -85,6 +105,10 @@ Q: procexp says:
 Q: how to set initial title?
 
 Q: how to copy/paste? (want QuickEdit mode or something)
+
+Q: do I want the x68 one or the x64 one?
+PA: doing the x86 one for now
+
 
 
 
@@ -103,17 +127,24 @@ Awesome things:
           https://code.google.com/p/conemu-maximus5/wiki/Screenshots
           https://code.google.com/p/conemu-maximus5/wiki/AnsiEscapeCodes
             seems to be a bit flakey though...
-                tcsh: only the 16 normal colors come out
+                TCSH: ONLY the 16 normal colors come out
                     cat "c:/Program Files (x86)/ConEmu/ConEmu/Addons/AnsiColors256.ans"
                 cmd: comes out good, but turns flakey after scrolling
                     type "c:\Program Files (x86)\ConEmu\ConEmu\Addons\AnsiColors256.ans"
                 powershell: all colors come out, but lots of artifacts
-                    (wait, now I can't get it to come out at all-- I thought it did,
-                    yesterday? maybe previous version of ConEmu?)
-                    (oh I think it needs ConEmuHk.dll which I turned off)
+                    (needs ConEmuHk.dll in order to work at all)
     - progress! applies heuristics to put progress in the task bar icon
       (e.g. run chkdsk and watch it)
 BUGS:
+    - "Terminal" font changes appearance on log-out-and-in without reboot:
+      its width changes to effectively 6 or so.
+      Changing it from 0 to 8 in Settings seems to prevent this.
+
+
+    - pasting large things doesn't work at all?
+        tried the script in http://www.autohotkey.com/board/topic/20996-auto-raise-mouse-hover/ , it didn't work
+    - title '' sets the title to "ConEmu 130425 [32]" --
+      I want it to be a blank string!
     - do NOT use the (undocumented?) /title option!
       - it prevents "title" from working
       - if there are several consoles up, they will start dropping keystrokes
@@ -133,6 +164,7 @@ Other observations:
     - can't see what default settings are without hitting Reset...
       but that actually saves the Reset settings, it shouldn't have to do that, should it?
     - does the About dialog REALLY need to be modal???
+    - and non-resizeable?? (ResizeEnable fixes that)
     - settings dialog is not resizeable (maybe it doesn't need to be? hmm)
 
 
