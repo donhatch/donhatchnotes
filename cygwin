@@ -1,2 +1,155 @@
 To search for stuff (better than looking in setup.exe)
     http://cygwin.com/packages/
+
+Q: how to ask what version of stuff is installed on cygwin?
+A: 
+    % cygcheck -f /usr/bin/rcs.exe
+        rcs-5.7-11
+    % cygcheck -c rcs
+        Cygwin Package Information
+        Package              Version        Status
+        rcs                  5.7-11         OK
+
+----------------------------------------------------------
+NOTE: rcs-5.8.1-1 and rcs-5.8.2-1 have a very serious bug!
+5.7.11 doesn't.
+look in ~/wrk/rcsBad
+http://www.cygwin.com/ml/cygwin/2013-10/msg00086.html
+----------------------------------------------------------
+
+
+Q: I DO NOT UNDERSTAND THE SETUP PROGRAM!
+   I sent the following message to cygwin at cygwin.com:
+       http://www.cygwin.com/ml/cygwin/2013-10/msg00090.html
+
+    ==========================================
+    Subject: baffling cygwin setup.exe behavior
+
+    I've always been baffled by cygwin setup's behavior.
+    I wish I understood it and could control it.
+
+    Here is a typical example where I want to do something
+    very simple and I have no idea how to get the setup program
+    to do it.  Help!
+
+    My goal: upgrade rcs to the "currently considered most stable"
+    version, without changing anything else on the system.
+
+    I run "cygcheck -c rcs", which outputs:
+        Cygwin Package Information
+        Package              Version        Status
+        rcs                  5.7-11         OK
+    I run cygwin setup-x86.exe.
+    The splash window says "Setup.exe version 2.829 (32 bit)".
+       I click Next.
+    On the next window I select "Install from Internet",
+       and click Next.
+    On the next window I select
+       Root Directory: C:\cygwin
+       Install For: All Users
+       and click Next.
+    On the next window I select
+       Local Package Directory: C:\Users\hatch\Downloads
+       and click Next.
+    On the next window I select "Direct Connection"
+       and click Next.
+    On the next window I select the download site
+       http://cygwin.mirrors.hoobly.com
+       and click Next.
+    It quickly downloads some stuff and
+       puts me in the "Select Packages" window,
+       with the "Curr" radio button selected and View=Category.
+
+    First I browse around to see what the "Curr" world looks
+    like (i.e. "Globally select the version that is currently
+    considered the most stable. (RECOMMENDED)" according
+    to the tooltip.
+    I open the Devel folder and scroll down to the "rcs" row,
+    which says:
+       Current = 5.7-11
+       New = <arrows> 5.8.2-1
+       Bin? = [X]
+       Src? = [ ]
+       Size = 286k
+       Package = rcs: The Revision Control system
+    So far I think this makes sense:
+    yes, I have 5.7-11 installed, and I want to upgrade to 5.8.2-1.
+    I click on the "<arrows> 5.8.2-1" to see what other
+    possibilities are available for this package.
+    It goes through the following values:
+       <arrows> 5.8.2-1   (initial value)
+       <arrows> Keep
+       <arrows> 5.8.1-1
+       <arrows> Uninstall
+       <arrows> Keep
+       <arrows> 5.8.1-1
+       <arrows> Uninstall
+       ...
+    Huh?  Once I've clicked it once,
+    it never cycles back to the initial value
+    of 5.8.2-1.  So that's baffling thing #1.
+    (The only way I can see to get it to show 5.8.2-1 again
+    is to globally change from "Curr" to something else
+    and then back to "Curr".)
+
+    Next, I change the global radio button
+    from "Curr" to "Keep"
+    (i.e. "Sets all packages to their currently installed version.
+    This is equivalent to telling setup not to make any changes
+    to any package." according to the tooltip).
+    I think this is the right thing to do
+    since since I don't want to change any packages except rcs--
+    I figure I will now be able to change just rcs individually.
+
+    I open the Devel folder again and scroll down to the "rcs" row,
+    which now says:
+       Current = 5.7-11
+       New = <arrows> Keep
+       Bin? = n/a
+       Src? = n/a
+       Size = ?
+       Package = rcs: The Revision Control System
+    When I click on the "<arrows> Keep" it cycles through:
+       <arrows> Keep      (initial value)
+       <arrows> 5.8.1-1
+       <arrows> Uninstall
+       <arrows> Keep
+       <arrows> 5.8.1-1
+       <arrows> Uninstall
+       ...
+    Huh?  My desired value of 5.8.2-1 isn't available
+    from here at all???  That's baffling thing #2.
+
+    So, as far as I can see,
+    the only way to get rcs 5.8.2-1 is to globally select "Curr"
+    and *don't click on rcs at all*.
+    So, to upgrade rcs and nothing else,
+    I'd have to globally select "Curr"
+    and manually change every package *except* rcs
+    to "Keep", leaving rcs alone.
+    That seemed like a lot of work and error prone
+    (and I knew I was going to be doing all this several times)
+    and who knows whether I'd run into other problems on the way.
+    So instead, I elected to upgrade
+    my entire system to "Curr", even though
+    that's not really what I wanted.
+
+    If anyone can explain what's going on here
+    (is it a bug? or something wrong with my thinking?)
+    and how to do this simple operation,
+    I'd really appreciate it!
+
+    Don
+    ==========================================
+
+
+
+
+
+
+
+
+
+
+
+
