@@ -103,13 +103,15 @@ Q: procexp says:
    so it's hard to keep track of them)
 
 Q: how to set initial title?
+   (bleah! utterly non-productive dialogue about this)
 
 Q: how to copy/paste? (want QuickEdit mode or something)
 
 Q: do I want the x68 one or the x64 one?
 PA: doing the x86 one for now
 
-
+Q: after latest cygwin upgrade,
+   as soon as I run vim, paste stops working???
 
 
 Console2 problems that aren't problems in ConEmu:
