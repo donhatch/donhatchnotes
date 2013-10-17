@@ -104,6 +104,7 @@ PA: well here's how to make q not do it:
    The problem is, quit still does it, and ctrl-d executes quit.
    Maybe can redefine quit, and use some sort of "shell kill parent of $$" thing?
    Hmm, "set confirm off" is supposed to do it, but I think it 
+   has other undesired side effects
 
 
 Q: how to make it "shared" just enough to get a good stack trace?
@@ -138,10 +139,6 @@ ANSWERED QUESTIONS:
 Q: how to go to a particular numbered stack frame (not using "up" or "down"
    which are relative?)
 A: frame <n>
-
-Q: how to make it NOT say "The program is running. Exit anyway? (y or n)"
-   on quit or ctrl-d?
-A: set confirm off
 
 Q: how to make "w" an alias for "where"?
 A: put this in .gdbinit:

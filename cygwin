@@ -15,6 +15,41 @@ NOTE: rcs-5.8.1-1 and rcs-5.8.2-1 have a very serious bug!
 5.7.11 doesn't.
 look in ~/wrk/rcsBad
 http://www.cygwin.com/ml/cygwin/2013-10/msg00086.html
+(generated a thread)
+----------------------------------------------------------
+
+http://cygwin.com/ml/cygwin/2013-10/msg00117.html
+Subject: ssh takes forever to interrupt-- known problem?
+
+ssh'ing from a cygwin shell to a linux computer,
+if I run an output-bound command
+(e.g. "yes aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+and I try to kill the command
+using ctrl-c, it takes a long time, sometimes several minutes.
+I'd love to get this fixed, as it's the one thing
+that's preventing me from using cygwin/ssh effectively
+as a remote terminal.
+
+The problem occurs in the following situations:
+    - cygwin ssh from windows to linux
+    - cygwin ssh from windows to localhost
+The problem does NOT occur in the following situations:
+    - ssh from putty on windows to linux
+    - ssh from linux to cygwin sshd on windows
+    - ssh from linux to linux
+
+So the problem seems to be unique to the cygwin ssh client.
+Is this a known problem?
+Any ideas why it would be like this for only this client,
+and whether there are any inherent technical difficulties
+that would make it hard to fix?
+
+Note there is a post about this behavior on serverfault:
+    http://serverfault.com/questions/32159/what-do-you-do-when-a-command-floods-your-terminal-with-too-much-output
+although it doesn't mention it being specific to cygwin ssh.
+
+Don
+
 ----------------------------------------------------------
 
 
