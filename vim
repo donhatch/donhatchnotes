@@ -49,6 +49,7 @@ Q: how to get that in my .exrc always?
    Neither of the following work:
        set formatoptions-=coqrl
        autocmd BufRead * set formatoptions-=croql
+PA: hmm, I don't think I'm doing anything special any more but it's not happening? good.
 
 (NOTE, I think I finally got something that works, see my .exrc)
 Q: difference among map, map!, and nmap? (and manbe other things like vmap, xmap, smap, imap, lmap, cmap)
@@ -63,6 +64,23 @@ A: http://vim.wikia.com/wiki/Mapping_keys_in_Vim_-_Tutorial_(Part_1)
         smap means "select mode map"
         cmap means "command-line mode map"
         omap means "operator pending mode map"
+
+Q: (asked here: http://vi.stackexchange.com/questions/3261/speed-bump-on-esco-insert-to-normal-to-insert-new-line-above-cursor)
+   Speed bump on <Esc>O (Insert to Normal to Insert new line above cursor)
+
+   Often when I'm in Insert mode, I'll hit <Esc> to get into Normal mode, and then immediately hit O to begin a new line above the cursor and go into Insert mode there.
+
+   But when I do that, there is a 1-second delay after I hit the O before there is any visible response.  Furthermore if I begin typing the new text during that 1-second delay, if the new text begins with any of a certain set of characters (e.g. j,k,m,n,o), I end up in the middle of some other operation I didn't intend, often making a mess, at which point I have to stop and fumble around with undos and redos until I am reasonably sure I have undone the damage.
+
+   To avoid that unpleasantness, I've gotten in the habit of pausing for one second after every time I type O.  But this slows me down and prevents me from being the vim speed demon I would otherwise be.
+
+   What causes this?  Is there a fix or workaround?
+
+A:  Oh! :help xterm-cursor-keys
+    It says I could do the following (though I don't completely understand):
+        :set notimeout          " don't timeout on mappings
+        :set ttimeout           " do timeout on terminal key codes
+        :set timeoutlen=100     " timeout after 100 msec
 
 =============================================================
 "Here is my current .exrc  (2015/05/13 at google):
@@ -110,3 +128,7 @@ syntax enable
 set modeline
 set modelines=5
 
+"per :help xterm-cursor-keys, to avoid the <Esc>O problem
+set notimeout          " don't timeout on mappings
+set ttimeout           " do timeout on terminal key codes
+set timeoutlen=100     " timeout after 100 msec
