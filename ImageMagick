@@ -28,3 +28,8 @@ Q: image viewer/inspector for windows?
 A: nope, they all suck-- I don't WANT blurry zoom-in!
    (gimp is fine but takes too long to load)
    I wrote one using AutoHotKey, called myImageViewer.ahk
+   XXXTODO: check it in somewhere
+
+Q: how to specify a constant image?
+A: http://www.imagemagick.org/script/color.php
+   convert -size 100x100 xc:red whatever.png

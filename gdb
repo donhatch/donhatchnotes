@@ -72,6 +72,8 @@ Commands I always forget:
     disassemble $pc $pc+1
     or:
         x/i <addr>
+    or:
+        disas
 
     to print the first num elements of array, starting with startindex:
         p array[startindex]@num
@@ -107,9 +109,23 @@ PA: well here's how to make q not do it:
    has other undesired side effects
 
 
+Q: how does the "shared" trick go?
+A: http://visualgdb.com/gdbreference/commands/sharedlibrary
+   put the following in ~/.gdbinit:
+    # by default gdb loads symbols from every shared library when it starts,
+    # which takes forever.
+    # we disable that here, so that on startup, it doesn't load any.
+    # at runtime, you can say "shared" to load them all,
+    # or "shared <substring>" to load symbols from all DSOs 
+    # containing the given substring.
+    set auto-solib-add off
+    # the following gives nice verbosity during .so loading,
+    # but it also gives some other undesired behavior :-(
+    set verbose on
+
 Q: how to make it "shared" just enough to get a good stack trace?
    (assuming "set auto-solib-add off")
-A: see what I put in my .gdbinit
+A: see what I put in my .gdbinit   XXXTODO: copy to here!
 
 Q: how to make it stop when loading just one library,
    so that I can shared that library and set a breakpoint in it?
@@ -132,6 +148,23 @@ PA: I don't think there's a way (short of using a front-end program),
    This can be accomplished by typing one space on my blank line;
    then I can hit enter as many times as I want and get
    the desired behavior.
+
+
+Q: show first arg, etc.?
+PA: info registers, and then something like:
+        print (char *)$rax
+        print (char *)$rbx
+        print (char *)$rcx
+        print (char *)$rdx
+        print (char *)$rsi
+    until it shows something interesting.
+        $rdi seems to be first arg
+        $rsi seems to be second arg
+        $rdx seems to be third arg
+        
+Q: show what dso an address is in?
+PA: info files
+
 
 
 ANSWERED QUESTIONS:

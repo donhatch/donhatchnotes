@@ -15,6 +15,16 @@ A: According to "help datafile":
    separate `index`es (see `plot datafile index`).  Data separated by double
    blank records are treated as if they were in separate data files.
 
+Q: after upgrade to ubuntu 14.04.1, gnuplot wasn't showing graph window.
+A: per http://askubuntu.com/questions/277363/gnuplot-not-showing-the-graph-window :
+    sudo apt-get install gnuplot-x11
+    now it works!
+    (and when gnuplot starts it says "terminal type set to wxt" instead of unknown)
+
+Q: how to get the graph to be exactly square?
+A: set size square
+
 QUESTIONS:
 Q: how to get the plot window come up square, and stay that way?
+
 

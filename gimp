@@ -87,5 +87,12 @@ A: hmm, probably the whole image is selected then.
    once the selection is made smaller or nonexistent,
    it will become manageable again.
 
-
+Q: how do I make "=" zoom in??? it used to, wtf :-(
+A: the help for + (view->zoom release mouse, hover over '+', F1)
+   acknowledges this is controversial, and to make a dynamic shortcut.
+   Edit -> Keyboard shortcuts -> View -> Zoom in
+       Q: there are two of them?  view-zoom-in and view-zoom-in-accel
+       A: oh fooey, they aren't really both +; one is + and the other is
+          numeric-keyboard-+.
+          Okay so I'll reassign the first one to be = instead.
 

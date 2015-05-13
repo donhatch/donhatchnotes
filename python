@@ -299,7 +299,7 @@ ANSWERED QUESTIONS (most recent first):
        
 
     Q: isatty?
-    A: import sys; sys.stdout.isatty()
+    A: import sys; sys.stdin.isatty()
 
     Q: trying to use vi as a clipboard, I can't do this:
         if True: print "hello"

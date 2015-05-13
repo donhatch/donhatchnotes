@@ -1,4 +1,6 @@
 http://www.dice.inf.ed.ac.uk/groups/infrastructure/directory/support/ldaplookup.html
-Equivalent of ypcat passwd:
-    getent passwd
 
+Q: what's the modern equivalent of ypcat and ypmatch?
+A: getent passwd [optional user name]
+   getent group [optional group name]
+   getent hosts [optional host name]

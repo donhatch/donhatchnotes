@@ -1,0 +1,63 @@
+=========================================================
+Subject: to make google docs comments wider in chrome
+
+Ralf was saying that when viewing a google doc on a wide screen,
+it would be nicer if the comments were wider.
+Here is one way to make that happen:
+
+    1. Install the "Stylish" extension from chrome.google.com/webstore
+    2. Click on the Stylish extension icon -> Manage Installed Styles
+        click "Write new style" button
+            Name: wider comments in google docs
+            Enabled: (check the box)
+            Code: .docos-anchoreddocoview-facelift {width: 700px;}
+            Applies to URLs starting with: https://docs.google.com/
+            Save
+    3. See how it looks, and tweak the 700px to your liking. (default is 240px)
+
+Wish list for further improvements:
+    * left-justify the document,
+      to use up all that blank space on the left
+      so there will be even more comment space on the right.
+      The only method I've found for doing this
+      is to change the "left" value to 0px in the following:
+          <div class="kix-zoomdocumentplugin-outer" aria-hidden="true" style="width: 818px; height: 7462px; left: 434px; top: 8px;">
+      Unfortunately this gets changed back by some javascript
+      somewhere each time I resize the browser window,
+      and I don't know how to disable or override that.
+
+Don
+=========================================================
+
+Trying to figure out how to do better...
+I think it would be via a user script (formerly known as greasemonky script),
+which you just call <scriptname>.user.js and drag it into chrome://extensions.
+(actually that's disabled-- but can download it and drag from the download to there)
+Okay so what should the .user.js file look like?
+      // ==UserScript==
+      // @name           SomeGoogleDocsTweaks
+      // @description    Some google docs tweaks
+      // @include        https://*
+      // @version        1.0
+      // ==/UserScript==
+
+      alert(0);
+Once I've got it installed,
+can work directly in the extension directory.
+Find it down inside ~/.config/google-chrome-beta/Default/Extensions;
+it will be the most recently created one.
+Mine ended up in:
+There will be a file called script.js in there; edit that one.
+Mine ended up in:
+    ~/.config/google-chrome-beta/./Default/Extensions/hebjjhggeiakbnklplmbbpnegbmmegkn/1.0_0/script.js
+Edit it, then
+Disable/enable the extension to reload it.
+
+Q: seems to work when loading https://plunk.org, but not http://plunk.org... ??
+A: OH maybe I have javascript disabled altogether for http pages?
+   hmm, settings -> advanced settings -> privacy -> content settings -> javascript
+   says it's allowed on all sites... ?
+
+
+Q: how do I create a brand new doc??
+A: + button in lower right of docs.google.com page

@@ -1,0 +1,5 @@
+Q: how the HELL do I make it so htop does not clear the screen
+   when I ctrl-c or ctrl-z it, so I can copy-paste that top item?
+PA: I know you hate it when I answer a different question,
+   but here's an answer to a different question.
+   shift-double-click on the pid will copy it to clipboard.

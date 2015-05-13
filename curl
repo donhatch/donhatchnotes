@@ -1,4 +1,7 @@
-Q: how to get curl to work around here?
+http://conqueringthecommandline.com/book/curl
+http://joelpm.com/curl/tools/2010/06/17/curl-with-cookies-and-headers.html
+
+Q: how to get curl to work around here? (ILM)
 A:
     The proxy is proxy.lucasfilm.com:8080 .
     So,

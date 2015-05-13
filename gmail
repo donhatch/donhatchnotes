@@ -1,0 +1,21 @@
+Q: how does one check for new messages in a label in gmail?
+   Posted this to nehen (internal google mailing list for naive questions):
+
+      Subject: how does one check for new messages in a label in gmail?
+
+      The only way I know of to get gmail to load new messages
+      when I'm looking at a particular label (e.g. "label:nonbulk")
+      is to switch to Inbox and then back to the label, in the left pane.
+      I'd expect just clicking on the label would do it
+      (like clicking on Inbox does it, when viewing Inbox),
+      but it doesn't, usually.
+
+      Is this the intended behavior?
+      Is there an easier / less jarring way to check for new messages 
+      when in a label view?
+
+      Don
+
+A: If already in thread view for that label, just click on the label again.
+   If not, click on the label once to get in the thread view for the label,
+   then click on the label again.

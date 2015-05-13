@@ -1,0 +1,26 @@
+Q: what's the opposite of lsof again?
+A: fuser
+
+Q: what's the opposite of fuser again?
+A: lsof
+
+
+Q: how do I tell who's listening on a port:
+A: one of several ways...
+   there's a nice writeup here,
+   including ways of drilling deeper with rpm (on systems that use it):
+      http://www.cyberciti.biz/faq/find-linux-what-running-on-port-80-command/
+   and it refers to this, which also has some of the same stuff:
+      http://www.cyberciti.biz/faq/what-process-has-open-linux-port/
+
+   For example:
+    % netstat -l | grep :10000
+    % netstat -tulpn | grep :10000
+
+    % fuser tcp/10000
+        10000/tcp:           26339
+    % ls -l /proc/26339/exe
+        lrwxrwxrwx 1 donhatch eng 0 Mar 16 22:29 /proc/26339/exe -> /google/obj/workspace/9b13271813b23e626adff141351e8fa0/2452854e-56a2-43dc-8d19-0b1febbabfff/blaze-out/gcc-4.X.Y-crosstool-v17-hybrid-grtev3-k8-fastbuild/bin/geo/vectordb/server/vectordb_server_main
+
+    % lsof -i :10000 | grep LISTEN
+        vectordb_ 26339 donhatch  207u  IPv4 2465482      0t0  TCP *:webmin (LISTEN)

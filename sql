@@ -226,4 +226,60 @@ do("select session_str,e.* from zeno.session_log s join zeno.event e on s.sessio
 # See just the session_log fields, for sessions started in the last hour
 do("select s.* from zeno.session_log s join zeno.event e on s.session_id=e.session_id where event='START' and when_local > current_date - 1/24 order by when_local")
 ============================================================================================
-more Q/A in ~dhatch/wrk/sql/NOTES
+more Q/A in ~dhatch/wrk/sql/NOTES   XXXTODO: find that and add it here!
+
+Q: how can I group by a column,
+   but make every row with NULL value in that column
+   come out as a singleton group?
+   Note that all the refs I see imply GROUP BY groups nulls together:
+      http://technet.microsoft.com/en-us/library/ms187007(v=sql.90).aspx
+      http://stackoverflow.com/questions/13566117/group-by-a-nullable-column
+      http://en.wikipedia.org/wiki/Null_(SQL)
+       "Because SQL:2003 defines all Null markers as being unequal to one another, a special definition was r
+equired in order to group Nulls together when performing certain operations. SQL defines "any two values that
+ are equal to one another, or any two Nulls", as "not distinct".[19] This definition of not distinct allows S
+QL to group and sort Nulls when the GROUP BY clause (and other keywords that perform grouping) are used."
+
+   Funny situation:
+   Unfortunately, putting things with empty name in same group is not what I want.
+   Fortunately, "" is NULL and NULL is a special case: (NULL=NULL) is false!
+        (actually I don't know whether "" is NULL in the sql I'd be using? hmm)
+   Unfortunately, GROUP BY is an even specialer case:
+       it treats two NULLs as "not distinct"!
+
+A: from SQL For Smarties:
+
+    20.1.1 NULLs and Groups
+
+    SQL puts the NULLs into a single group, as if they were all equal.
+    The other option, which was used in some of the first SQL implementations before the standard,
+    was to put each NULL into a group by itself.
+    That is not an unreasonable choice.
+    But to make a meaningful choice between the two options,
+    you woul dhave to know the semantics of the data you are trying to model.
+    SQL is a language based on syntax, not semantics.
+
+    For example, if a NULL is being used for a missing diagnosis in a medical record,
+    you know that each patient will probably have a different disease when the NULLs are resolved.
+    Putting the NULLs in one group would make sense if you wanted to consider unprocessed diagnosis reports
+    as one group in a summary.
+    Putting each NULL in its own group would make sense if you wanted to consider each unprocessed diagnosis
+    report as an action item for treatment of the relevant class of diseases.
+    Another example was a traffic ticket databasde that used NULL for a missing auto tag.
+    Obviously, there is more than one car without a tag in the database.
+    The general scheme for getting separate groups for each NULL is straightforward:
+
+        SELECT x, ..
+            FROM Table1
+          WHERE x IS NOT NULL
+          GROUP BY x
+        UNION ALL
+        SELECT x, ..
+            FROM Table1
+          WHERE x IS NULL;
+
+    There will also be cases, such as the traffic tickets,
+    where you can use another GROUP BY clause to form groups where the principal grouping columns are NULL.
+    For example, the VIN (Vehicle Identification Number) is taken when the car is missing a tag,
+    and it would provide a grouping column.
+

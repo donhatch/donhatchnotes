@@ -1,0 +1,68 @@
+Q: what exactly does the "parent" param to widget constructors do?
+A: it expresses ownership. the QObject destructor deletes all child objects.
+
+Q: I don't get it.
+   Exactly what does the moc do,
+   and how do I get it to work when it's not working?
+PA:
+      http://qt-project.org/doc/qt-4.8/moc.html
+      http://qt-project.org/doc/qt-5/why-moc.html
+      http://openbooks.sourceforge.net/books/kde20devel/ch03lev1sec4.html
+
+  "The moc looks in your code and searches for certain keywords.
+  When a keyword is found, it is replaced by other code."
+  The moc keywords are:
+      Q_OBJECT
+      public slots:
+      protected slots:
+      private slots:
+      signals:
+  You must put the class definition and class implementation
+  in different files, because the class implementation needs the code
+  that moc generates.
+
+  To moc a single header file by hand:
+    moc mywindow.h -o mywindow.moc
+  That produces mywindow.moc,
+  which is .cpp-type implementation code, not header code.
+  The typical way to use it is to #include it from mywindow.cpp:
+  either mywindow.cpp consists solely of '#include "mywindow.moc"',
+  or that and more implementation code.
+  The main program just #includes mywindow.h; it doesn't need the moc output.
+
+  When I use a .pro file,
+  and I put MyQStuff.h in the HEADERS
+  and MyQStuff.cc in the SOURCES,
+  It automatically does this:
+      moc ... MyQStuff.h -o moc_MyQStuff.cpp
+  so MyQStuff.cc needs to #include "moc_MyQStuff.cpp"
+  (and maybe more implementation code).
+
+  Most other relevant technical details are in http://qt-project.org/doc/qt-4.8/moc.html .
+
+Q: misspell a signal or slot name in a connect() call,
+   and it silently compiles but does nothing? wtf?
+PA: oh, there's a warning at runtime:
+    Object::connect: No such signal MyQThing::signalThatDoesNotExist(int) in MyQStuff.h:177
+    Object::connect: No such slot MyQThing::slotThatDoesNotExist(int) in MyQStuff.h:177
+
+Q: I'd rather that were a fatal error.  can I make it so?
+A: check the return value of connect().
+   it's bool (actually an object castable to bool).
+   one reasonable option is to make a connectOrDie() wrapper for it.
+
+Q: how to put stretchable space in a layout (like QHBoxLayout or QGridLayout)
+   other than the magic layout-specific things?
+   there is size hint, size policy, size policy flags...
+   I am completely lost, it seems like psychotic randomness.
+
+Q: alternate signal/slot implementations?
+A: I've been using sigslot.h by Sarah Thompson-- works great!
+   WAY less headache than qt, since no special spooky build steps are needed.
+   boost::signal and boost::signal2 have gotten praise.
+   look here for someone's attempt to get qt and other sig/slot libs
+   working together: http://crazyeddiecpp.blogspot.com/2011/01/quest-for-sane-signals-in-qt-step-1.html
+   (and there's a step 2 and step 3)
+   XXX didn't I see an article defending qt's method, and describing
+   what it would take to change it?
+
