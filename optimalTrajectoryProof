@@ -1,7 +1,15 @@
-Subject: got it! proof of my optimal trajectory conjecture
-
 (awkward save of email thread, most recent messages first)
 
+
+Subject: got it! proof of my optimal trajectory conjecture
+
+==============================================================================
+On Wed, Feb 11, 2015 at 10:49 PM, Don Hatch <donhatch@google.com> wrote:
+>  (scale is infinity, but which infinitesimal part of the cosh graph is it? could be any)
+Actually as the velocity path degenerates toward a straight line segment, scale need not go to infinity--
+it could also be taken to be a segment of a unit-scaled (or arbitrarily scaled) cosh graph that is farther and farther from the origin, since such a segment becomes straighter and straighter.  So there is lots of ambiguity in this case.
+Again, that's with any parametrization I can think of...
+however there still might be some clever parametrization that would make this problem disappear by making all straight segments converge to the same parameters, somehow.
 
 ==============================================================================
 On Wed, Feb 11, 2015 at 10:16 PM, Don Hatch <donhatch@google.com> wrote:
