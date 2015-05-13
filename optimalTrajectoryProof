@@ -1,0 +1,247 @@
+Subject: got it! proof of my optimal trajectory conjecture
+
+(awkward save of email thread, most recent messages first)
+
+
+==============================================================================
+On Wed, Feb 11, 2015 at 10:16 PM, Don Hatch <donhatch@google.com> wrote:
+
+Also, I think I misremembered when I was talking about it the other day:
+integrating the velocity (some rotated/scaled/translated catenary, parametrized by arc length) isn't hard;
+wolframalpha does it no problem.
+The part that's the pain is finding the appropriate rotation/scale/translation of the cosh function in velocity space
+so that it passes through the desired start and end velocities
+and so that the path integral is the desired position displacement.
+One might think this could be done with something like a newton solve, but in practice it behaves rather awfully
+in certain places (with any parametrization I could think of).
+One thing that seems to make it nasty is that when the catenary segment degenerates to a straight line segment (or nearly one) the rotate/scale/translate is not unique
+(scale is infinity, but which infinitesimal part of the cosh graph is it? could be any)
+
+
+==============================================================================
+On Wed, Feb 11, 2015 at 7:22 PM, Don Hatch <donhatch@google.com> wrote:
+Nah, that's just a geometric fact about the catenary, I don't think it says anything I didn't already know.
+
+
+==============================================================================
+On Wed, Feb 11, 2015 at 4:27 PM, Don Hatch <donhatch@google.com> wrote:
+Okay, I've been reading the treatment of the maximum principle
+in Daniel Liberzon's book
+"Calculus of variations and optimal control theory":
+http://liberzon.csl.illinois.edu/teaching/cvoc.pdf
+
+Following Example 4.4.1 on page 107, but in R^n instead of R,
+I've verified my conjecture, as follows.
+As in the example, we can deduce the following about the solution
+costate p1*,p2*:
+    dp1*/dt is 0, so p1* is some constant vector c1
+    dp2*/dt is -p1* = -c1 so p2* is c2 - c1 t for some other constant vector c2.
+Then the Hamiltonian maximization condition says that at all times t,
+the optimal control (acceleration) u*
+must be the unit vector that maximizes p2* dot u*;
+in other words, u* is the unit vector in the direction of p2* = c2 - c1 t,
+i.e. u* = (c2 - c1 t) / ||c2 - c1 t||
+(like I've been saying all along!).
+Integrate that over time and the result (the velocity) is a catenary
+traversed at unit speed, like I said.
+
+As for additional geometric insight, 
+I think there's only one piece 
+of the maximum principle statement that I haven't looked at fully for this case:
+that is, the condition that H is 0 at all times along the optimal trajectory.
+That amounts to saying that
+        c1 dot x2 + ||c2 - c1 t|| = 1  for all t
+where x2 is the velocity and c1,c2 are the constant vectors comprising the
+costate, as above.  
+Maybe this says something interesting or useful,
+but I'm not sure what at the moment.
+
+Don
+
+
+==============================================================================
+On Tue, Dec 23, 2014 at 1:54 PM, Dan Piponi <dpiponi@google.com> wrote:
+Haven't had a chance to think about this.
+
+The standard tool for solving these kinds of problems is, I think, the Pontryagin Minimum Principle. There are some readable accounts on the web, but wikipedia isn't one of them.
+
+FWIW Using the Pontryagin principle often gives some additional insight into the geometry of the problem.
+--
+Dan
+
+==============================================================================
+On Tue, Dec 23, 2014 at 12:14 PM, Don Hatch <donhatch@google.com> wrote:
+Thinking about this more, I think the proof of Lemma 2
+needs the following additional fact:
+that the set of all centroids of paths of given length from a to b
+is convex.  This is established by the following two additional Lemmas:
+
+Lemma 1.8: Given any two points a and b in R^n, and a length l,
+the set {centroid(P): P is a path of length *at most* l from a to b}
+is convex.
+
+    Sketch of proof of Lemma 1.8: Given c0, c1 in the set, let P0,P1
+    be paths of length <= l from a to b with c0=centroid(P0), c1=centroid(P1).
+    Then for any intermediate point ct = c0+t*(c1-c0) (0<t<1),
+    we can construct a path Pt with centroid ct by "blending" P0 and P1:
+    That is, start with a linear pointwise blend
+    of parametrizations of P0 and P1; the graph of the resulting blended function
+    has length <= l as required, and the blended function has average value ct;
+    however if we reparametrize it by arc length, it may no longer have
+    average value ct.
+    [Not sure what the cleanest way to complete this is.
+    Seems clear that we can "pad out" the graph of the blended function
+    by adding little loops here and there, so that the result
+    has length <= l and average value ct, but details seem messy.]
+
+Lemma 1.9: Given any two points a and b in R^n, and a length l,
+the set {centroid(P): P is a path of length *exactly* l from a to b}
+is convex.
+
+    Proof of Lemma 1.9: Given c0,c1 in the set
+    and intermediate point ct between them, Lemma 1.8 gives
+    a path P with centroid ct and length <= l.
+    Pad P out to a path of length exactly l, as follows:
+    Take any n+1 points (where n is the dimension of the space) on P,
+    having ct in their convex hull. Augment P by adding a little loop
+    at each of these points, in appropriate proportions
+    so that their centroid is ct.  Then the result still has centroid ct.
+
+~~~~~~~~~~~~
+So... proof of Lemma 1.8 needs more work.  I suspect it might
+be worthwhile in the statements of Lemmas 1.8,1.9,2 and maybe 3
+to relax the restriction that the path from a to b be traversed at constant speed; that might make the proofs go through more easily.
+
+==============================================================================
+On Fri, Dec 19, 2014 at 8:55 AM, Don Hatch <donhatch@google.com> wrote:
+Been thinking about the problem a bit as I was driving to and from work
+yesterday, and I think I finally have a proof.
+
+Recall the problem:
+  Given, in R^n (wlog n<=3):
+      p0 = initial position
+      v0 = initial velocity
+      p1 = final position
+      v1 = final velocity
+  Find minimal t1 such that there is a trajectory p(t)
+  with first and second derivatives v(t) and a(t) (velocity and acceleration)
+  such that v(t) is continuous and piecewise differentiable and:
+      p(0) = p0
+      v(0) = v0
+      p(t1) = p1
+      v(t1) = v1
+    ||a(t)|| <= 1 everywhere it's defined (which is everywhere except
+                  possibly some isolated points)
+
+Proposition: if p is an optimal trajectory (i.e. solution to the stated problem)
+then the velocity vector function v(t)=p'(t)
+traces out a catenary in velocity space, at constant speed (namely 1).
+(A straight line segment, with an optional single switchback,
+is considered to be a specific case of a catenary.)
+
+The (sketch of) proof rests on the following Lemmas.
+
+Lemma 1 (well known in kinodynamic programming literature, I believe):
+If p is an optimal trajectory, then ||a(t)|| == 1 everywhere it is defined.
+Sketch of Proof of Lemma 1:
+Let p be such that ||a(t)|| != 1 for some t; we'll show it's not optimal.
+By continuity and compactness or something (not sure at the moment),
+there exists some epsilon such that
+||a(t)|| < 1-epsilon for all t in some small interval of t's.
+This gives some slack so that we can improve p
+while still following exactly the same path,
+by applying slight acceleration and then deceleration
+during that small interval of the path, mild enough so that all the problem
+constraints are still satisfied.
+
+Lemma 2: Given any points a and b in R^n,
+and path P from a to b, if P is not a catenary,
+there exists r>0 such that for any point c~
+within distance r from P's center of mass CM(P),
+there's a path P~ from a to b,
+of same length as P, such that CM(P~) = c~.
+Very handwavy sketch of proof of Lemma 2:
+This follows (somehow) from the fact that, for every direction vector,
+P is not a catenary hanging in that direction
+and therefore, by well-known optimality property of catenaries,
+P does not maximize the dot product of the center-of-mass
+with that direction vector.
+(And probably needs continuity and/or compactness in the argument.)
+
+Lemma 3: Given any points a and b in R^n,
+and path P from a to b, if P is not a catenary,
+there exists r>0 such that for any point m~
+within distance r from P's moment CM(P)*length(P),
+there's a path P~ from a to b,
+of same length as P, such that the moment of P~ is m~.
+Proof:  This is the same as Lemma 2, but with moment(P)=CM(P)*length(P)
+in place of CM(P).  So this follows immediately from Lemma 2
+with r here being length(P) times the r from Lemma 2.
+
+Sketch of proof of Proposition:
+Assume we have a trajectory p(t) satisfying the problem constraints
+but whose velocity v(t) does not trace out a catenary at constant speed
+in velocity space; we will show p can be improved and is therefore not optimal.
+We know by Lemma 1 that v(t) traces out *some* path of length t1
+at constant speed in velocity space, so the assumption is
+that it's not a catenary.
+
+In particular, it's not a straight line segment,
+so we can find an instant t at which its curvature is nonzero
+(or a switchback, at which curvature is undefined but it will work as well).
+For some small epsilon (which we'll nail down later), we'll modify v
+to a new velocity function v~
+by replacing the part of the velocity curve from v(t-epsilon) to v(t+epsilon)
+by its chord, thereby strictly shortening the curve in velocity space
+to some length t1~ < t1.
+Let v~(t) from t=0 to t=t1~
+be the function obtained by following this modified curve
+at speed 1 in velocity space.
+So now v~ has the desired length (shorter than v) and endpoints v0,v1,
+but its integral, i.e. the total position displacement, is wrong;
+it's (most likely) not p1-p0.
+We'll now further modify v~, without changing its length t1~
+or its endpoints v0,v1,
+to get a new function v~~ that has the desired
+original total position displacement p1-p0.
+
+Consider the r of Lemma 3 to be a function r(P) of the path P,
+It's clearly a continuous function of P
+(with respect to some standard notion of distance among functions, I'm sure);
+that is, when P is perturbed by only a small amount,
+then r(P) will change by only a small amount.
+Similary, define r(v) and r(v~) to be r of the respective paths traced out
+by those unit-speed functions;
+then we can make r(v~) arbitrarily close to r(v)
+by making v~ sufficiently close to v.
+
+So... choose epsilon small enough so that
+v~ is close enough to v so that:
+    (1) |r(v~)-r(v)| < r(v)/2, so that r(v~) > r(v)/2
+    (2) ||moment(v~)-moment(v)|| < r(v)/2
+So then
+    ||moment(v)-moment(v~)|| < r(v)/2   by (2)
+                             < r(v~)    by (1)
+so, since r(v~) is the r of Lemma 3,
+there exists a function v~~(t)
+with same length and endpoints as v~,
+such that moment(v~~) = moment(v) = p1-p0.
+
+Define p~~ as the integral of v~~ starting at p~~(0)=p0;
+then p~~ satisfies all the problem constraints
+and is an improvement over p, as desired.
+
+Yeah!
+
+Don
+
+
+
+
+-- 
+--
+Dan
+
+
+
+==============================================================================
