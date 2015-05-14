@@ -52,6 +52,10 @@ A: here's an example, although there are several ways:
           shift
       done
 
+Q: in a wrapper bash script, how do you quote the args so that the exec'ed
+   program sees the exact same args?
+A: exec otherprogram "$@"
+
 Q: boolean expressions?
 A: http://stackoverflow.com/questions/48774/boolean-expressions-in-shell-scripts
 

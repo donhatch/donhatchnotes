@@ -81,6 +81,12 @@ A:  Oh! :help xterm-cursor-keys
         :set notimeout          " don't timeout on mappings
         :set ttimeout           " do timeout on terminal key codes
         :set timeoutlen=100     " timeout after 100 msec
+    Also :help timeout (and following options) suggests
+    the following alternative:
+        :set timeout timeoutlen=3000 ttimeoutlen=100
+        " (time out on mapping after three seconds, time out on key codes after a tenth of a second)
+    The default is apparently:
+        :set timeout timeoutlen=1000 ttimeoutlen=-1
 
 =============================================================
 "Here is my current .exrc  (2015/05/13 at google):
@@ -128,7 +134,13 @@ syntax enable
 set modeline
 set modelines=5
 
-"per :help xterm-cursor-keys, to avoid the <Esc>O problem
+" To avoid the <Esc>O problem...
+" http://vi.stackexchange.com/questions/3261/speed-bump-on-esco-insert-to-normal-to-insert-new-line-above-cursor
+" default is timeout,timeoutlen=1000,ttimeoutlen=-1  (-1 meaning 1000)
+" Recommended in :help timeout  (I don't like this much)
+":set timeout timeoutlen=1000 ttimeoutlen=100
+" Recommended in :help xterm-cursor-keys  (I like this better)
 set notimeout          " don't timeout on mappings
 set ttimeout           " do timeout on terminal key codes
 set timeoutlen=100     " timeout after 100 msec
+

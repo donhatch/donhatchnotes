@@ -36,6 +36,8 @@ Git resources:
             "git diff HEAD" instead of "git diff"
             "git commit -a" instead of "git commit"  (automatically adds all changes to tracked files)
 
+    TODO: check out "vim git gutter"
+
 Awesome interactive cheatsheet:
     http://www.ndpsoftware.com/git-cheatsheet.html
 
@@ -78,24 +80,29 @@ Customizations and aliases I currently use:
 
 
 THINGS IT WOULD BE NICE TO HAVE A HELPER WRAPPER FOR MAYBE:
-    - the stats from "git filelog --stat" are cool but a bit brain dead,
+    - the stats from "git log --stat" are cool but a bit brain dead,
       can't they show changed lines in yellow, in addition to deleted lines in red
       and added lines in green?
       See: 
-          http://stackoverflow.com/questions/9933325/is-there-a-way-of-having-git-show-lines-added-lines-deleted-and-lines-removed
-      It's nice but:
+          http://stackoverflow.com/questions/9933325/is-there-a-way-of-having-git-show-lines-added-lines-changed-and-lines-removed
+      It's a nice little bash fragment but:
         - the patterns aren't quite right, e.g. when adding a line that begins with spaces
         - need to take it a step further and produce the little stat picture.
           Instead of:
                 NEWS |    10 ++++++----
                 1 files changed, 6 insertions(+), 4 deletions(-)
           we'd have:
-                NEWS |    8 ++++cc--
-                1 files changed, 4 insertions(+), 2 changes (c), 2 deletions(-)
+                NEWS |    8 ++++!!--
+                1 files changed, 4 insertions(+), 2 changes (!), 2 deletions(-)
                 
         - is there a way to replace all git diff stat pictures with this? (git diff --stat, git log --stat, ...)
           (hmm, I think it's using the "diffstat" program,
           which, according to man page, is supposed to do this? is it broken or something?)
+      And see:
+          http://stackoverflow.com/questions/23927495/why-does-gits-diffstat-only-show-lines-that-have-been-added-deleted-but-not-lin
+      It's really weird that "man diffstat" and various git things seem to say we should see "!" sometimes,
+      but I never do??
+      NEED TO WRITE THE DAMN THING, OBVIOUSLY :-(
 
     - git log graph is still wicked confusing (even with --date-order).
       can I get exactly one dedicated column per branch?
@@ -411,7 +418,10 @@ QUESTIONS:
 
     Q: what's the difference between git fetch and git pull?
     A: git pull = git fetch + git merge
+         (generally considered evil)
        git pull --rebase = git fetch + git rebase
+         (generally considered good)
+       (holy shit, see https://coderwall.com/p/jiswdq/let-s-all-take-a-moment-of-silence-git-pull-is-dead )
 
     Q: remove untracked files?
 
@@ -645,6 +655,10 @@ Don
     A: git diff <file>
     Q: diff committed against unstaged?
     A: git diff HEAD <file>
+    holy hell! so the picture is:
+        committed                       index/staged              modified/unstaged
+                 <--git diff --cached-->            <--git diff-->
+                 <---------------git diff HEAD <file>------------>
 
 
     Q: how come sometimes when I have edited but not staged a file,

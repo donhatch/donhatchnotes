@@ -217,6 +217,7 @@ QUESTIONS (most recent first):
        to a properly quoted shell command, and back?
     A: shlex.split
        subprocess.list2cmdline
+       although there is some debate on that... pipes.quote() perhaps? see http://code.activestate.com/recipes/498202-quote-python-strings-for-safe-use-in-posix-shells/
 
     Q: how to tell whether an object is (derived from) a given class?
        (something like isa or instanceof)
