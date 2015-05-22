@@ -1,3 +1,5 @@
+Advanced Bash-Scripting Guide: http://www.tldp.org/LDP/abs/html/
+==============================================
 Useful settings:
 
 # from "help set"
@@ -55,6 +57,10 @@ A: here's an example, although there are several ways:
 Q: in a wrapper bash script, how do you quote the args so that the exec'ed
    program sees the exact same args?
 A: exec otherprogram "$@"
+   according to the "Special Shell Variables" section in the advanced scripting
+   guide:
+        "$@" is All the positional parameters (as separate strings)
+        "$*" is All the positional parameters (as a single word) (must be quoted, otherwise it defaults to $@) (which means args with embedded spaces get spilled out into parts, I guess)
 
 Q: boolean expressions?
 A: http://stackoverflow.com/questions/48774/boolean-expressions-in-shell-scripts

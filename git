@@ -448,6 +448,10 @@ QUESTIONS:
                 fatal: ambiguous argument 'backup/master': unknown revision or path not in the working tree.
                 Use '--' to separate paths from revisions
 
+    Q: git status without untracked files?
+    A: git status --untracked-files=no
+       or, equivalently: git status -uno
+
 --------------------
 Subject: git question: diff against remote files?
 
