@@ -36,6 +36,10 @@ Git resources:
             "git diff HEAD" instead of "git diff"
             "git commit -a" instead of "git commit"  (automatically adds all changes to tracked files)
 
+    http://marklodato.github.io/visual-git-guide/index-en.html
+    http://onlywei.github.io/explain-git-with-d3/
+        awesome!!! great exercises!
+
     TODO: check out "vim git gutter"
 
 Awesome interactive cheatsheet:
@@ -56,15 +60,17 @@ Customizations and aliases I currently use:
         alias gb git branch
         alias gs git status
         alias gd git difftool -y
-        alias gl git log --graph --decorate --date-order --stat --summary
+        alias gl 'git log --graph --decorate --date-order --stat --summary'
             # note, the --stat --summary foils other things like --oneline
-        alias gl0 'git log --graph --decorate --date-order --oneline `cd .git/refs/heads && /bin/ls | grep -v .-work`' --
-        alias gl1 git log --graph --decorate --date-order --oneline --branches=*
+        alias gl0 'git log --graph --decorate --date-order --oneline `cd .git/refs/heads && /bin/ls | grep -v .-work` --'
+            # I guess the -- was because I was using this and appending branch names?
+            # but it keeps me from being able to add other args like -10, so I don't think I like it...
+        alias gl1 'git log --graph --decorate --date-order --oneline --branches=*'
             Other useful options:
                 -<n>  limit to last n
-                --all
-                FETCH_HEAD (not included in --all, and not labeled in output for somer reason... although usually same as origin/master or something)
-                --oneline
+                --all - show more of the graph (start with all refs)
+                FETCH_HEAD (not included in --all, and not labeled in output for some reason... although usually same as origin/master or something)
+                --oneline - much easier to get sense of entire graph this way!
                 --pretty=[oneline|short|medium|full|fuller]  (default is medium)
     Customizations (mostly from http://nuclearsquid.com/writings/git-tricks-tips-workflows/):
         # Allow all Git commands to use colored output, if possible:
@@ -80,6 +86,8 @@ Customizations and aliases I currently use:
 
 
 THINGS IT WOULD BE NICE TO HAVE A HELPER WRAPPER FOR MAYBE:
+    - git diff has --word-diff but it still spews way more than it needs to a lot. would be nice to have it even more fine-grained, on a char level even.
+
     - the stats from "git log --stat" are cool but a bit brain dead,
       can't they show changed lines in yellow, in addition to deleted lines in red
       and added lines in green?
@@ -376,10 +384,13 @@ QUESTIONS:
     Q: p4 filelog?
     A: git log dl-fini.c
        git log --color --graph --stat --summary --decorate --date-order
-            -<n>  limit to last n
-            --all
-            --oneline
-            --pretty=[oneline|short|medium|full|fuller]  (default is medium)
+       explanation of those options:
+          --color - use color
+          --graph - show the nice graph on the LHS
+          --stat - show added/deleted lines stats (but never changed lines, that I've ever seen...!?)
+          --summary - also show extended info such as creations, renames and mode changes
+          --decorate - show ref names. essential!
+          --date-order - instead of some weird arbitrary topsort order or something
 
     Q: p4 describe?
     A: git show 28363b
@@ -561,6 +572,8 @@ Don
        Yup, that branch is GONE.  Wtf?  That's scary.
        Even if it's not reachable, it is history.
        We never lose that stuff in perforce, right?
+
+       And it still *is* still in the raw data blobs, right??
 
        Idea: whenever doing one of:
            git branch -d
@@ -849,6 +862,16 @@ Don
     Q: man gittutorial says gitk does a better job than git log.
        exactly how?
        (not in a position to run it and find out at the moment I'm writing this)
+
+
+    Q: how to convert RCS history to git history?
+    A: someone has a tool called rcs-fast-export
+        cd gitrepos
+        git clone https://github.com/Oblomov/rcs-fast-export.git
+        cd <dir to convert>
+        git init
+        ../rcs-fast-export/rcs-fast-export.rb . | git fast-import
+        git reset
 
 
 

@@ -1,0 +1,6 @@
+To run a simple httpd server:
+   python -m SimpleHTTPServer [port]
+Default port is 8000.
+That will start with a directory listing of the directory
+in which the server was started.
+

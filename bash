@@ -1,4 +1,7 @@
 Advanced Bash-Scripting Guide: http://www.tldp.org/LDP/abs/html/
+Internal Bash functions, useful when writing loadable builtins: https://gist.github.com/sshaw/8017032
+The Ultimate Bash Array Tutorial with 15 Examples: http://www.thegeekstuff.com/2010/06/bash-array-tutorial/
+Handling positional parameters: http://wiki.bash-hackers.org/scripting/posparams
 ==============================================
 Useful settings:
 
@@ -12,6 +15,28 @@ set -u # Treat unset variables as an error when substituting.
 
 ==============================================
 Questions about bash:
+
+Q: unshift?
+A: set -- foo "$@"
+
+Q: set a variable to something that acts exactly like positional parameters?
+   e.g. so that the following will work.
+       set -- a "b c" d
+       echo '${#@} is now' ${#@}
+       # $@ is now: a "b c" d, same as if given that way on command line
+       otherprogram "$@" # this works
+       args="$@"  # WRONG
+       # $args is now: a b c d
+       echo '${#args} is now' ${#args}
+       [[ ${#@} -eq ${#args} ]] || (echo WRONG; exit)
+       otherprogram "${args}" # this does not!
+PA: maybe impossible. wrapper script example here:
+    http://wiki.bash-hackers.org/scripting/posparams
+    it requires the final usage to be: "${options[@]}"
+
+Q: nested backticks?
+A: use $(command) instead of `command`, then you can nest.
+
 
 Q: how to make an alias understand commands?
 A: you can't; use functions

@@ -213,11 +213,13 @@ QUESTIONS (most recent first):
        why, for heaven's sake?? Backslashes aren't even treated specially,
        otherwise!
 
-    Q: what are the utilities for converting an arg list
+    Q: what are good utilities for converting an arg list
        to a properly quoted shell command, and back?
     A: shlex.split
-       subprocess.list2cmdline
-       although there is some debate on that... pipes.quote() perhaps? see http://code.activestate.com/recipes/498202-quote-python-strings-for-safe-use-in-posix-shells/
+       python 3.3: shlex.quote
+       python 2: ' '.join([pipes.quote(arg) for arg in argv])
+       Do NOT use subprocess.list2cmdline!
+       It's only for MS windows, it does *not* do the right thing on Posix! E.g. it does not escape '|'.
 
     Q: how to tell whether an object is (derived from) a given class?
        (something like isa or instanceof)

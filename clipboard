@@ -1,7 +1,84 @@
+On Linux/X:
+
+  A good way to debug what's going on is to use "xclip -o" with one of various
+  -sel options.
+  Here's the story.
+
+  xclip (from man page):
+    -sel p[rimary] (default)
+    -sel s[econdary]
+    -sel c[lipboard]
+  vim (from help):
+    :help clipboard
+    :help x11-selection
+    :help x11-cut-buffer
+    "* is PRIMARY
+    "+ is CLIPBOARD
+  gnome-terminal
+    dragging out or double-clicking to select puts it into PRIMARY
+    middle-clicking to paste gets it from PRIMARY
+  chrome (and other gui apps, no doubt):
+    selecting (or things like ctrl-a) puts it in PRIMARY
+    ctrl-c copies selection to both PRIMARY (if someone stole it) and CLIPBOARD
+    ctrl-v pastes from CLIPBOARD
+
+    Note: single clicking on URL highlights/selects but doesn't
+    put it anywhere! If you want it in primary, you have to either:
+        - ctrl-a or triple-click to get it in PRIMARY
+        - ctrl-c to get it in both PRIMARY and CLIPBOARD
+
+  Possibly useful programs to have running:
+    - klipper (seems to be broken on latest ubuntu)
+    - glipper
+    - parcellite
+
+
+  great page on X clipboard (but maybe even more detail than I need?):
+  http://www.freedesktop.org/wiki/Specifications/ClipboardsWiki
+
+  Q: how the hell do I copy-paste from a terminal window into acroread??
+     problem is copying from terminal window only puts it into PRIMARY
+         (no access to CLIPBOARD I don't think)
+     and acroread only pastes from CLIPBOARD
+         (no access to PRIMARY I don't think).
+  PA: klipper and parcellite have options for "synchronize contents
+      of clipboard and selection", but they aren't great
+      since they short-circuit the ctrl-c/ctrl-v functionality
+      of programs like chrome.
+  A: xclip -o -sel p | xclip -sel c
+     Or use vim:
+        - "+yy or whatever to yank into clipboard.
+        - :let @+ = @*
+
+  Q: copy something from a cmd or console2 on windows...
+     can paste it back,
+     but can NOT paste it into thunderbird on linux (through synergy).
+     but, can paste it into gnome-terminal on linux (through synergy),
+     then copy-paste it from there to thunderbird.  what the fuck??
+     Really need to monitor what's happening to get a clear idea of how things work.
+     TODO: revisit this using xclip to see what's going on
+
+
+Q: (linux) when I've selected lots,
+   how do I paste it?  the following methods suck:
+    cat >> myfile, and paste
+            prematurely eofs, giving lots of errors
+    vim myfile, and paste
+            takes a ridiculously long time... O(n^2)?
+A: A couple of nice ways:
+     - xclip:
+         echo foo | xclip
+         xclip -o > outfile
+     - vim:
+         "*p
+         "+p
+
+
 On Windows:
     Clipboard stack would be nice.
     People have suggested:
         ClipX
+        Clipmate (not free)
         ClipBoard Diary
         clipmagic
         Ditto
@@ -37,19 +114,4 @@ On Windows:
                 in which ctrl-c and ctrl-v don't mean copy and paste!
                 so, guess I can't use this?  :-(
 
-On Linux/X:
-
-
-    great page on X clipboard:
-    http://www.freedesktop.org/wiki/Specifications/ClipboardsWiki
-
-
-    Still tons of mysteries.  I don't like not knowing what's going on.
-    For example...
-
-    Q: copy something from a cmd or console2 on windows...
-       can paste it back,
-       but can NOT paste it into thunderbird on linux (through synergy).
-       but, can paste it into gnome-terminal on linux (through synergy),
-       then copy-paste it from there to thunderbird.  what the fuck??
-       Really need to monitor what's happening to get a clear idea of how things work.
+==========================================================================

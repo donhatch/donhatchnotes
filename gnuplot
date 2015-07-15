@@ -3,6 +3,9 @@ Great reference: "not so Frequently Asked Questions"
     http://lowrank.net/gnuplot/index-e.html (update 2005/11/19)
 
 ANSWERED QUESTIONS:
+
+Q: wtf is wrong with my history? when ~/.gnuplot_history gets longer than 961 or so... ?
+
 Q: how to separate curves when plotting datafiles with lines?
 A: According to "help datafile":
    In datafiles, blank records (records with no characters other than blanks and
@@ -46,23 +49,23 @@ A: Keep track of recursion level and max recursion level seen.
    Then print the max recursion level and offending params at the end.
 
 Q: Can I print during function evaluation/recursion, for debugging?
-A: No but try accumulating into a string and printing it afterwards,
-   like so:
+A: Accumulate into a string and printing it afterwards, like so:
       traceString = ""
       f(x) = (traceString = traceString . sprintf("f(%.17g) called\n",x), x**2)
       set samples 11
       plot [-1:1] f(x)
       print traceString
 
-Q: Say I have a complex-valued (or multi-valued) function that's expensive to compute,
-   and I want to use both parts of it in a parametric plot.
+Q: Say I have a complex-valued (or multi-valued) function
+   that's expensive to compute, and I want to use both parts
+   of it (or two functions of it) in a parametric plot.
    Do I have to evaluate the expensive function twice at every plot point?
    E.g.
         set parametric
         i = {0,1}
         f(x,y) = exp(x + y*i) # or something more expensive
         splot real(f(u,v)), imag(f(u,v)), v
-PA: Haven't tried this yet, but here's an idea: cache the most recently
+   Here's an idea: cache the most recently
     computed value:
         xOfCachedF = NaN
         yOfCachedF = NaN
@@ -126,3 +129,20 @@ A:
    t0 = time(0.)
    t1 = time(0.)
    print sprintf("splot took %.6f seconds.", (t1-t0))
+
+Q: file name extension that's clearly gnuplot?
+A: .gnuplot!
+
+Q: can I get command-line arguments into a gnuplot script?
+PA:
+    Looks like some day "#!/usr/bin/gnuplot -c" will work, but not today.
+
+    See https://groups.google.com/forum/#!topic/comp.graphics.apps.gnuplot/sCOqvk7EzRU, Laurianne Gardeux's answer looks promising:
+    Sometimes, I use gnuplot in a here-document:
+          #!/bin/sh
+          gnuplot <<EOF
+             [...] "$VARIABLE" [...]
+          EOF
+    Unfortunately it doesn't seem to interact well with "pause -1" :-(
+
+
