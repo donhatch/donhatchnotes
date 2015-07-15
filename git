@@ -857,10 +857,10 @@ Don
              would be:
                  git pull
                  git remote show origin | grep pushes
-         (XXX not sure about that last part...)
-            Ignoring local diffs:
-                   If everything is completely synced: "(up to date)"
-                   If I have made local commits: "(fast-forwardable)"
+             I'm not completely sure about that last part, but here's what I see in the output:
+               If everything is completely synced: "(up to date)"
+               If I have made local commits: "(fast-forwardable)"
+               If I have fetched but not merged: "(local out of date)"
 
      # XXX is there a better way!? XXX oh wait, that's showing status for pulls, not for pushes... !?
              Really isn't this what I want to know: is my HEAD
@@ -924,29 +924,34 @@ Don
         git reset
 
 POSSIBLE BUG: weird behavior on --dry-run
-    - "git pull" (= fetch+merge) man page doesn't mention -n or --dry-run,
+    - "git pull" (= fetch+merge) man page doesn't mention --dry-run or -n,
       and it's not quite clear on what it does with args it doesn't recognize.
       Empirically, it seems to pass them to "git fetch" (as evidenced by the fact
       that "git fetch" identifies itself when giving an error message on unrecognized flag).
-      So I conclude it just passes -n and --dry-run on to "git fetch".
+      So I conclude it just passes --dry-run and -n on to "git fetch".
+      (Not sure about -n and don't care, it's not relevant, don't use it)
     - "git fetch" has a --dry-run option and a -n option; however -n doesn't mean dry run,
       it means --no-tags
     - "git merge" has no --dry-run option; it has a -n option but doesn't mean dry run,
       it means --no-stat
-
-    - But "git pull --dry-run" is *not* doing a dry run!  This is evidenced by
-      the fact that if I do it twice (and there's something to pull),
-      it does something different the second time!
-
-
-
-
-    - first of all, don't say "git pull -n" or "git fetch -n"; -n doesn't mean dry-run, it means something else!
-    - "git pull --dry-run" -- option not mentioned in man page, but it's accepted...
-      but I don't think it does anything!?  That is, the "git fetch" runs non-dry-run!
-    - "git fetch --dry-run" -- option mentioned in man page-- seems to work XXX check
-    - "git merge --dry-run" does not exist
-   
+    - okay so the bug, I think is: do the following twice in a row:
+        $ git fetch -v --dry-run
+        POST git-upload-pack (960 bytes)
+        remote: Counting objects: 3, done.
+        remote: Compressing objects: 100% (3/3), done.
+        remote: Total 3 (delta 0), reused 0 (delta 0), pack-reused 0
+        Unpacking objects: 100% (3/3), done.
+        From https://github.com/donhatch/donhatchnotes
+           cc792b3..a04a233  master     -> origin/master
+         = [up to date]      wiki       -> origin/wiki
+        $ git fetch -v --dry-run
+        From https://github.com/donhatch/donhatchnotes
+           cc792b3..a04a233  master     -> origin/master
+         = [up to date]      wiki       -> origin/wiki
+      It did less the second time!? So was it not a dry run!?
+      (same for "git pull").
+      However "git log --graph --decorate --all" seems to indicate that it was
+      indeed dry... hmm.
 
 
      
