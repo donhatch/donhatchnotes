@@ -923,6 +923,30 @@ Don
         ../rcs-fast-export/rcs-fast-export.rb . | git fast-import
         git reset
 
+POSSIBLE BUG: weird behavior on --dry-run
+    - "git pull" (= fetch+merge) man page doesn't mention -n or --dry-run,
+      and it's not quite clear on what it does with args it doesn't recognize.
+      Empirically, it seems to pass them to "git fetch" (as evidenced by the fact
+      that "git fetch" identifies itself when giving an error message on unrecognized flag).
+      So I conclude it just passes -n and --dry-run on to "git fetch".
+    - "git fetch" has a --dry-run option and a -n option; however -n doesn't mean dry run,
+      it means --no-tags
+    - "git merge" has no --dry-run option; it has a -n option but doesn't mean dry run,
+      it means --no-stat
+
+    - But "git pull --dry-run" is *not* doing a dry run!  This is evidenced by
+      the fact that if I do it twice (and there's something to pull),
+      it does something different the second time!
+
+
+
+
+    - first of all, don't say "git pull -n" or "git fetch -n"; -n doesn't mean dry-run, it means something else!
+    - "git pull --dry-run" -- option not mentioned in man page, but it's accepted...
+      but I don't think it does anything!?  That is, the "git fetch" runs non-dry-run!
+    - "git fetch --dry-run" -- option mentioned in man page-- seems to work XXX check
+    - "git merge --dry-run" does not exist
+   
 
 
      
