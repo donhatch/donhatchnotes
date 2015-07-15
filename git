@@ -856,7 +856,13 @@ Don
              So really I think the correct but hard-to-remember workflow for syncing
              would be:
                  git pull
-                 git remote show origin | grep pushes     # XXX is there a better way!? XXX oh wait, that's showing status for pulls, not for pushes... !?
+                 git remote show origin | grep pushes
+         (XXX not sure about that last part...)
+            Ignoring local diffs:
+                   If everything is completely synced: "(up to date)"
+                   If I have made local commits: "(fast-forwardable)"
+
+     # XXX is there a better way!? XXX oh wait, that's showing status for pulls, not for pushes... !?
              Really isn't this what I want to know: is my HEAD
              the same as origin/master?  Can see that via:
                  git log --graph --decorate --all
