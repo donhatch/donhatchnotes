@@ -431,8 +431,10 @@ QUESTIONS:
     A: git pull = git fetch + git merge
          (generally considered evil)
        git pull --rebase = git fetch + git rebase
-         (generally considered good)
+         (generally considered good... but it changes history?)
        (holy shit, see https://coderwall.com/p/jiswdq/let-s-all-take-a-moment-of-silence-git-pull-is-dead )
+       (I guess I need to completely understand that??  For now, using git pull I think,
+       at least for my private repos)
 
     Q: remove untracked files?
 
@@ -843,6 +845,48 @@ Don
               CApath: none while accessing https://code.google.com/p/donhatchnotes/info/refs
             fatal: HTTP request failed
     PA: setenv GIT_SSL_NO_VERIFY true
+
+    Q: "git push" to github asks for password even in cases when it then says everything is up to date.
+       Can I avoid that? -n/--dry-run doesn't help since it requires a password too (why??)
+       Possibilities:
+           - switch from https to ssh for push only (see below)
+           - But figuring out whether a push is needed is something that can be done
+             locally, I think?  (Well, it will fail if a git pull is needed, so should do that
+             first.)
+             So really I think the correct but hard-to-remember workflow for syncing
+             would be:
+                 git pull
+                 git remote show origin | grep pushes     # XXX is there a better way!? XXX oh wait, that's showing status for pulls, not for pushes... !?
+             Really isn't this what I want to know: is my HEAD
+             the same as origin/master?  Can see that via:
+                 git log --graph --decorate --all
+             and verify that HEAD->master, origin/master, origin/HEAD are all same place?
+             if not, we need to push.
+    PA: switch from https to ssh, but *for push only* so as not to slow down "git pull"
+        (which doesn't need a password anyway assuming a public repo, and which takes .35 secs using git:,
+        .4 to .7 secs using https:, 2.5 secs using ssh). That is, have the following
+        in the [remote "origin"] part of .ssh/config:
+            url = https://github.com/MYNAME/MYREPO.git
+            pushUrl = git@github.com:MYNAME/MYREPO.git
+        and go through the instructions on github for setting up and adding the ssh public key.
+        To see what it's using:
+            $ git remote -v
+                origin      https://github.com/MYNAME/MYREPO.git (fetch)
+                origin      git@github.com:MYNAME/MYREPO.git (push)
+            $ git remote show origin
+                * remote origin
+                  Fetch URL: https://github.com/MYNAME/MYREPO.git
+                  Push  URL: git@github.com:MYNAME/MYREPO.git
+                  HEAD branch: master
+                  Remote branches:
+                    master tracked
+                    wiki   tracked
+                  Local branch configured for 'git pull':
+                    master merges with remote master
+                  Local ref configured for 'git push':
+                    master pushes to master (up to date)
+        Hey WAIT a minute-- "git remote show origin" showed everything is up to date!!!!
+        Oh wait that's saying "everything already pulled", not "everything already pushed".
 
     Q: is there a nice way of preparing a commit,
        including message, like in perforce?
