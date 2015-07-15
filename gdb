@@ -57,6 +57,7 @@ This is supposedly much better than the one in /usr/bin:
 Commands I always forget:
     finish - continues until return
     info b - show breakpoints
+    info th - show threads
     info r - show registers
         on my amd64 machine:
                 $rdi = first param
@@ -69,7 +70,7 @@ Commands I always forget:
 
     stepi
     nexti
-    disassemble $pc $pc+1
+    disassemble $pc,$pc+1
     or:
         x/i <addr>
     or:
@@ -82,6 +83,10 @@ Commands I always forget:
 
 
 QUESTIONS:
+
+Q: how do I debug particular threads?
+PA: http://www.qnx.com/developers/docs/660/index.jsp?topic=%2Fcom.qnx.doc.neutrino.prog%2Ftopic%2Fusing_gdb_DebuggingMultithreads.html
+
 
 
 PARTIALLY ANSWERED QUESTIONS:
@@ -169,6 +174,12 @@ PA: info files
 
 ANSWERED QUESTIONS:
 
+Q: delete all breakpoints?
+A: d
+
+Q: how do I turn paging completely off?
+A: set height 0
+
 Q: how to go to a particular numbered stack frame (not using "up" or "down"
    which are relative?)
 A: frame <n>
@@ -200,6 +211,7 @@ A:
 
 Q: how to stop on terminal output?
 A: b write if $rdi==1||$rdi==2
+   (since the args are fd=$rdi, buf=$rsi, n=$rdx)
 
 Q: how to tell the source file it's looking at?
    (strace gdb's pid and see what it's opening, is one way,
