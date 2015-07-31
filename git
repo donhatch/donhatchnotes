@@ -395,6 +395,7 @@ SWIMLANES!
      Interesting passage:
          "Look, I wasn't kidding when I said that you can do a round-trip conversion of a Git repository into and back out of Mercurial without losing any data. There's even a way to do that in the other direction as long as the Git commit logs adhere to the convention required my Mercurial for storing the branch name."
      So... what is that convention?
+     TODO: ask!
 
      Uh oh, I'm getting deja vu...
      The feature in mercurial is called "named branches" which you can choose
@@ -403,8 +404,9 @@ SWIMLANES!
      (and its "bookmarks" are like git branches).  Does git
      actually have something corresponding to mercurial's named branches now?
 
-
-
+    TODO: read this and the answer, thoroughly:
+    http://stackoverflow.com/questions/16466994/how-to-get-more-useful-branch-diagrams-in-git
+    It might actually explain the git rationale somewhat coherently.
 
 
 SETTING UP DIFFTOOLS (work in progress):
