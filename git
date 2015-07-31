@@ -143,6 +143,7 @@ NICE GIT LOG ALIASES:
       (Note, most people would probably use %an "author name" instead of %ae "author email"
       but at the moment I'm dealing with repos for which I'm the only committer
       and I commit from multiple email addrs, so that's more interesting)
+    TODO: check out nice "git log" aliases in http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs, they look great
 
 BEST PRACTICES:
     - hmm, empty commit at root of repo?  yeah, I think so.
@@ -410,8 +411,6 @@ SWIMLANES!
 
 
 SETTING UP DIFFTOOLS (work in progress):
-
-
 
 First of all, there are many references on the web
 to methods that create wrapper scripts such as "git-diff-wrapper"...
