@@ -126,6 +126,16 @@ NICE GIT LOG ALIASES:
       Is there a nice command to exercise a lot of this?
       Let's put one together for the colors at least, in bash:
         git log -1 --format="`for color in black red green yellow blue magenta cyan white normal; do for modifier in "bold " "" "dim "; do echo -n "%C($modifier$color)$modifier$color %Creset "; done; echo; done`" 
+      Note can also do full matrix of foreground and background; not interesting enough to polish:
+        git log -1 --format="`
+            for fgcolor in normal black red green yellow blue magenta cyan white; do \
+            for fgmodifier in "bold " "" "dim "; do \
+            for bgcolor in normal black red green yellow blue magenta cyan white; do \
+            echo -n "%C($fgcolor $bgcolor $fgmodifier)$fgmodifier$fgcolor on $bgcolor%Creset "; done; echo; done; done`" 
+      Hmm and maybe full 24-bit colors available?  See https://jpace.wordpress.com/2013/05/04/extended-colors-with-git/
+      Yeah instead of a color name, can use an ansi code... which is two numbers!?  fg and bg.
+        one of them is, if r,g,b are values in [0..5]: 6*16 + 36*r + 6*g + b !?  and what's the other one?
+      Holy moly that's arcane!  And not quite it, either... need to experiment.
 
       So let's see, what do *I* like?
       I want to use the default colors as much as possible but add stuff like everyone else does.
