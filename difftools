@@ -146,7 +146,7 @@ diffuse notes:
     it has sophisticated integration with git (e.g. doc mentions viewing inputs to octopus merge)
   - "Copy Selection Left/Right" and "Copy Right/Left into selection" could be called
     "Push to Left/Right" and "Pull from Left/Right"
-  - default fond is a bit big for me: monospace 9. changing it to monospace 8.
+  - default font is a bit big for me: monospace 9. changing it to monospace 8.
     Ideally I'd like a different font for non-diff and diff regions
     (like tkdirr allows), in which case I think I'd choose monospace 7
     and monospace 9.
