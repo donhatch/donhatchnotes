@@ -87,6 +87,36 @@ Customizations and aliases I currently use:
 
         - Put a "git" wrapper in my ~/bin, see below
           (but I think probably the paging problem it's working around has been fixed)
+    TODO: check out nice "git log" aliases in http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs, they look great
+
+BEST PRACTICES:
+    - hmm, empty commit at root of repo?  yeah, I think so.
+          http://stackoverflow.com/questions/645450/git-how-to-insert-a-commit-as-the-first-shifting-all-the-others
+
+          mkdir myNewRepo
+          cd myNewRepo
+          git init
+          git commit --allow-empty -m "Initial empty commit"
+
+    - when deleting a branch with -D, or resetting it,
+      if you don't want it to disappear, tag it first:
+          git tag myBranch-about-to-delete-2013-01-01
+
+    - when creating a new branch, I like to always make an empty commit:
+          git branch B A
+          git checkout B
+          git commit --allow-empty -m "Create branch 'B' from 'A'"
+      this makes 'git log --graph' much easier to read!
+
+
+    - hmm! don't use aliases for branches.  I think it breaks various scripts
+      that aren't expecting the output of "git branch" to contain that stuff.
+        - breaks git-rebase-all (that guy's script)
+        - gives useless extra columns in "git show-branch"
+
+    - never use -n thinking it will mean --dry-run.
+      It means that in some tools but not others.
+
 
 
 THINGS IT WOULD BE NICE TO HAVE A HELPER WRAPPER FOR MAYBE:
@@ -116,30 +146,8 @@ THINGS IT WOULD BE NICE TO HAVE A HELPER WRAPPER FOR MAYBE:
       but I never do??
       NEED TO WRITE THE DAMN THING, OBVIOUSLY :-(
 
-    - git log graph is still wicked confusing (even with --date-order).
-      can I get exactly one dedicated column per branch?
-      hmm, I'm getting the feeling a branch is just a (moving) label for a commit...
-      so after it gets moved (via git reset), I lose the record of where it was before, is that right?
-      yeah, that's right :-(
-      I'm getting more of a handle on this, by tagging branch heads that I delete or move
-      and by making empty commits at the beginning of each branch (see BEST PRACTICES below)
-
-      hmm, git show-branch gives one column per branch...
-      that's *almost* what I want but not quite...
-      it's rather cluttered since it shows all branches
-      back to infinity in time, past when the branch was created... ?
-      maybe I can make something more intuitive?
-      Really I think I just want git log to allocate a "swim lane"
-      for each branch, I think?  Various discussion the web refers to this
-      as a swimlane.
-      See this for maybe some more thoughts; their screenshots look nice:
-          https://confluence.atlassian.com/display/FISHEYE/Ordering+of+Branches+Important+When+Visualising+Git+Changesets
-      and supposedly "github network view" tries to give swim lanes?
-          https://github.com/git/git/network
-      It's a pain though-- lots of bitching about it, see for example: http://subimage.com/blog/2011/08/30/github-your-network-graph-sucks/
-      Q: other nice tools?
-      PA:
-          - see nice aliases in http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs
+    - swim lanes!!! devoted a whole section to this, below.
+      It is git's foremost deficiency.
 
 
     - Pisses me off when quitting out of git log makes tcsh say "Broken Pipe" which makes the top line scroll
@@ -282,33 +290,45 @@ THINGS IT WOULD BE NICE TO HAVE A HELPER WRAPPER FOR MAYBE:
       just shows output of "git branch", single-click switches branches (using "git checkout")
       also uses fam to notice when anything changes in the refs directory
 
-BEST PRACTICES:
-    - hmm, empty commit at root of repo?  yeah, I think so.
-          http://stackoverflow.com/questions/645450/git-how-to-insert-a-commit-as-the-first-shifting-all-the-others
+SWIMLANES!
+    - git log graph is still wicked confusing (even with --date-order).
+      can I get exactly one dedicated column per branch?
+      hmm, I'm getting the feeling a branch is just a (moving) label for a commit...
+      so after it gets moved (via git reset), I lose the record of where it was before, is that right?
+      yeah, that's right :-(
+      I'm getting more of a handle on this, by tagging branch heads that I delete or move
+      and by making empty commits at the beginning of each branch (see BEST PRACTICES below)
 
-          mkdir myNewRepo
-          cd myNewRepo
-          git init
-          git commit --allow-empty -m "Initial empty commit"
+      hmm, git show-branch gives one column per branch...
+      that's *almost* what I want but not quite...
+      it's rather cluttered since it shows all branches
+      back to infinity in time, past when the branch was created... ?
+      maybe I can make something more intuitive?
+      Really I think I just want git log to allocate a "swim lane"
+      for each branch, I think?  Various discussion the web refers to this
+      as a swimlane.
+      See this for maybe some more thoughts; their screenshots look nice:
+          https://confluence.atlassian.com/display/FISHEYE/Ordering+of+Branches+Important+When+Visualising+Git+Changesets
+      and theyr tutorial is full of great pictures, all of which have
+      swimlanes:
+          https://www.atlassian.com/git/tutorials/comparing-workflows
+      and supposedly "github network view" tries to give swim lanes?
+          https://github.com/git/git/network
+      It's a pain though-- lots of bitching about it, see for example: http://subimage.com/blog/2011/08/30/github-your-network-graph-sucks/
 
-    - when deleting a branch with -D, or resetting it,
-      if you don't want it to disappear, tag it first:
-          git tag myBranch-about-to-delete-2013-01-01
+    Q: Lack of swimlanes just isn't okay.  Perforce thinks in terms of the swimlanes
+       (what it calls "branches" but I'm not attached to that),
+       and its history visualization is simply *better* than git's--
+       trying to figure out what was done in what branch (swimlane) in git amounts
+       to fumbling around in the dark.
+       What exactly do I need to add to my git workflow to get back that essential
+       functionality?
+       Partial answers in my BEST PRACTICES section but it's still not okay.
+       tags? notes?
+       I think the correct answer is that every normal commit should be marked with the branch
+       it came from... I guess with a tag?  is that feasible?
 
-    - when creating a new branch, I like to always make an empty commit:
-          git branch B A
-          git checkout B
-          git commit --allow-empty -m "Create branch 'B' from 'A'"
-      this makes 'git log --graph' much easier to read!
 
-
-    - hmm! don't use aliases for branches.  I think it breaks various scripts
-      that aren't expecting the output of "git branch" to contain that stuff.
-        - breaks git-rebase-all (that guy's script)
-        - gives useless extra columns in "git show-branch"
-
-    - never use -n thinking it will mean --dry-run.
-      It means that in some tools but not others.
 
 
 SETTING UP DIFFTOOLS (work in progress):
@@ -408,18 +428,6 @@ QUESTIONS:
           --summary - also show extended info such as creations, renames and mode changes
           --decorate - show ref names. essential!
           --date-order - instead of some weird arbitrary topsort order or something
-
-    Q: Lack of swimlanes just isn't okay.  Perforce thinks in terms of the swimlanes
-       (what it calls "branches" but I'm not attached to that),
-       and its history visualization is simply *better* than git's--
-       trying to figure out what was done in what branch (swimlane) in git amounts
-       to fumbling around in the dark.
-       What exactly do I need to add to my git workflow to get back that essential
-       functionality?
-       Partial answers in my BEST PRACTICES section but it's still not okay.
-       tags? notes?
-       I think the correct answer is that every normal commit should be marked with the branch
-       it came from... I guess with a tag?  is that feasible?
 
     Q: p4 describe?
     A: git show 28363b
