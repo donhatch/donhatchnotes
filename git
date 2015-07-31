@@ -26,7 +26,7 @@ Git resources:
 
     http://nuclearsquid.com/writings/git-tricks-tips-workflows/
         really good advice
-        TODO: check out his git-wtf
+        TODO: check out his git-wtf script
 
     http://www.fini.net/v/RichmondPM/JohnLundinDevel
         really good overview of git and other version control systems, with more links
@@ -39,6 +39,8 @@ Git resources:
     http://marklodato.github.io/visual-git-guide/index-en.html
     http://onlywei.github.io/explain-git-with-d3/
         awesome!!! great exercises!
+
+    brilliant github visualization: http://ghv.artzub.com/
 
     TODO: check out "vim git gutter"
 
@@ -72,17 +74,19 @@ Customizations and aliases I currently use:
                 FETCH_HEAD (not included in --all, and not labeled in output for some reason... although usually same as origin/master or something)
                 --oneline - much easier to get sense of entire graph this way!
                 --pretty=[oneline|short|medium|full|fuller]  (default is medium)
+
     Customizations (mostly from http://nuclearsquid.com/writings/git-tricks-tips-workflows/):
         # Allow all Git commands to use colored output, if possible:
         git config --global color.ui auto
         # Allow git diff to do basic rename and copy detection:
         git config --global diff.renames copies
-        # Tell git diff to use mnemonic prefixes (index, work tree, commit, object) instead of the standard a and b notation:
+        # Tell git diff to use mnemonic prefixes (i[ndex], w[ork tree], c[ommit], o[bject]) instead of the standard a and b notations, where appropriate
         git config --global diff.mnemonicprefix true
         # Always show a diffstat at the end of a merge:
         git config --global merge.stat true
 
         - Put a "git" wrapper in my ~/bin, see below
+          (but I think probably the paging problem it's working around has been fixed)
 
 
 THINGS IT WOULD BE NICE TO HAVE A HELPER WRAPPER FOR MAYBE:
@@ -128,10 +132,14 @@ THINGS IT WOULD BE NICE TO HAVE A HELPER WRAPPER FOR MAYBE:
       Really I think I just want git log to allocate a "swim lane"
       for each branch, I think?  Various discussion the web refers to this
       as a swimlane.
-      See this for maybe some more thoughts:
+      See this for maybe some more thoughts; their screenshots look nice:
           https://confluence.atlassian.com/display/FISHEYE/Ordering+of+Branches+Important+When+Visualising+Git+Changesets
       and supposedly "github network view" tries to give swim lanes?
           https://github.com/git/git/network
+      It's a pain though-- lots of bitching about it, see for example: http://subimage.com/blog/2011/08/30/github-your-network-graph-sucks/
+      Q: other nice tools?
+      PA:
+          - see nice aliases in http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs
 
 
     - Pisses me off when quitting out of git log makes tcsh say "Broken Pipe" which makes the top line scroll
@@ -157,6 +165,7 @@ THINGS IT WOULD BE NICE TO HAVE A HELPER WRAPPER FOR MAYBE:
                 status=0
             fi
             exit $status
+      (Actually I think maybe this has been fixed)
 
     - I'm working on a clone of a central repository,
       and I currently have about 10 topic branches
@@ -274,16 +283,6 @@ THINGS IT WOULD BE NICE TO HAVE A HELPER WRAPPER FOR MAYBE:
       also uses fam to notice when anything changes in the refs directory
 
 BEST PRACTICES:
-    - when deleting a branch with -D, or resetting it,
-      if you don't want it to disappear, tag it first:
-          git tag myBranch-about-to-delete-2013-01-01
-
-    - when creating a new branch, I like to always make an empty commit:
-          git branch B A
-          git checkout B
-          git commit --allow-empty -m "Create branch 'B' from A"
-      this makes 'git log --graph' much easier to read!
-
     - hmm, empty commit at root of repo?  yeah, I think so.
           http://stackoverflow.com/questions/645450/git-how-to-insert-a-commit-as-the-first-shifting-all-the-others
 
@@ -292,10 +291,24 @@ BEST PRACTICES:
           git init
           git commit --allow-empty -m "Initial empty commit"
 
-    - hmm! maybe don't use aliases for branches.  I think it breaks various scripts
+    - when deleting a branch with -D, or resetting it,
+      if you don't want it to disappear, tag it first:
+          git tag myBranch-about-to-delete-2013-01-01
+
+    - when creating a new branch, I like to always make an empty commit:
+          git branch B A
+          git checkout B
+          git commit --allow-empty -m "Create branch 'B' from 'A'"
+      this makes 'git log --graph' much easier to read!
+
+
+    - hmm! don't use aliases for branches.  I think it breaks various scripts
       that aren't expecting the output of "git branch" to contain that stuff.
         - breaks git-rebase-all (that guy's script)
         - gives useless extra columns in "git show-branch"
+
+    - never use -n thinking it will mean --dry-run.
+      It means that in some tools but not others.
 
 
 SETTING UP DIFFTOOLS (work in progress):
@@ -376,6 +389,10 @@ TODO: Check out:
     - SourceGear DiffMerge? this says it may be decent: http://therightstuff.de/2009/01/28/Setting-Up-SourceGear-DiffMerge-With-Git.aspx
     - araxis merge
 TODO: get straight on how to allow different tool options and how to set up scripts for each one
+    - http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs -- super nice!
+TODO: think about the possibility of a branch-specific README as suggested in http://stackoverflow.com/questions/2108405/branch-descriptions-in-git
+TODO: check out qgit
+
 
 
 
@@ -391,6 +408,18 @@ QUESTIONS:
           --summary - also show extended info such as creations, renames and mode changes
           --decorate - show ref names. essential!
           --date-order - instead of some weird arbitrary topsort order or something
+
+    Q: Lack of swimlanes just isn't okay.  Perforce thinks in terms of the swimlanes
+       (what it calls "branches" but I'm not attached to that),
+       and its history visualization is simply *better* than git's--
+       trying to figure out what was done in what branch (swimlane) in git amounts
+       to fumbling around in the dark.
+       What exactly do I need to add to my git workflow to get back that essential
+       functionality?
+       Partial answers in my BEST PRACTICES section but it's still not okay.
+       tags? notes?
+       I think the correct answer is that every normal commit should be marked with the branch
+       it came from... I guess with a tag?  is that feasible?
 
     Q: p4 describe?
     A: git show 28363b
@@ -523,8 +552,18 @@ Don
        also this:
            http://docs.mathjax.org/en/latest/installation.html
        seems to imply that "git remote show origin"
-       is the dry run of "git pull origin" (haven't tried it yet)
+       is the dry run of "git pull origin",
+       which seems to be essentially correct.
 
+       I'm thinking "git fetch" perhaps doesn't strongly need a dry run?  Could just do it,
+       it updates our picture of what remote looks like, without causing local damage...
+       right?  It does have a --dry-run option though.
+       (With some weirdness though-- it gives two different outputs if you run it twice
+       in a row.)
+       
+       WARNING: do *not* use -n thinking it means --dry-run; it doesn't!
+       (for fetch it means --no-tags, for merge it means --no-stat, for pull I have no
+       idea what it means, for push it *does* mean --dry-run-- don't use it!!)
 
     Q: why is "git status" not showing files ending in .orig?
     A: it's listed in .gitignore
@@ -846,8 +885,9 @@ Don
             fatal: HTTP request failed
     PA: setenv GIT_SSL_NO_VERIFY true
 
-    Q: "git push" to github asks for password even in cases when it then says everything is up to date.
-       Can I avoid that? -n/--dry-run doesn't help since it requires a password too (why??)
+    Q: "git push" to github asks for password even in cases when it then says everything
+       is up to date.
+       Can I avoid that? --dry-run doesn't help since it requires a password too (why??)
        Possibilities:
            - switch from https to ssh for push only (see below)
            - But figuring out whether a push is needed is something that can be done
@@ -858,16 +898,24 @@ Don
                  git pull
                  git remote show origin | grep pushes
              I'm not completely sure about that last part, but here's what I see in the output:
-               If everything is completely synced: "(up to date)"
-               If I have made local commits: "(fast-forwardable)"
-               If I have fetched but not merged: "(local out of date)"
 
-     # XXX is there a better way!? XXX oh wait, that's showing status for pulls, not for pushes... !?
-             Really isn't this what I want to know: is my HEAD
-             the same as origin/master?  Can see that via:
+               If everything is completely synced: "(up to date)"
+               If I have made local commits but haven't pushed them: "(fast-forwardable)"
+               If remote has changes I haven't fetched yet: "(local out of date)"
+               If I have fetched but not merged: "(local out of date)" (still)
+                   (in this case I think it means origin/master is ahead of master
+                   in local repo)
+                   (to see that: "git log --graph --decorate --all")
+
+             Really isn't this what I want to know, assuming I've just "git pull"ed:
+             is my HEAD the same as origin/master?  Can see that via:
                  git log --graph --decorate --all
-             and verify that HEAD->master, origin/master, origin/HEAD are all same place?
-             if not, we need to push.
+             and verify that HEAD->master, origin/master, origin/HEAD are all same place,
+             and if not, we need to push?
+             I guess "git remote show origin" doesn't take very long usually,
+             but it *does* do something over the connection, which can be slow,
+             and seems unnecessary.
+
     PA: switch from https to ssh, but *for push only* so as not to slow down "git pull"
         (which doesn't need a password anyway assuming a public repo, and which takes .35 secs using git:,
         .4 to .7 secs using https:, 2.5 secs using ssh). That is, have the following
@@ -923,18 +971,10 @@ Don
         ../rcs-fast-export/rcs-fast-export.rb . | git fast-import
         git reset
 
-POSSIBLE BUG: weird behavior on --dry-run
-    - "git pull" (= fetch+merge) man page doesn't mention --dry-run or -n,
-      and it's not quite clear on what it does with args it doesn't recognize.
-      Empirically, it seems to pass them to "git fetch" (as evidenced by the fact
-      that "git fetch" identifies itself when giving an error message on unrecognized flag).
-      So I conclude it just passes --dry-run and -n on to "git fetch".
-      (Not sure about -n and don't care, it's not relevant, don't use it)
-    - "git fetch" has a --dry-run option and a -n option; however -n doesn't mean dry run,
-      it means --no-tags
-    - "git merge" has no --dry-run option; it has a -n option but doesn't mean dry run,
-      it means --no-stat
-    - okay so the bug, I think is: do the following twice in a row:
+POSSIBLE BUG: weird behavior on "git fetch --dry-run"
+    - don't use git pull for this, it gets confusing.
+    - and especially don't use -n, it does *not* mean --dry-run in general
+    - do the following twice in a row:
         $ git fetch -v --dry-run
         POST git-upload-pack (960 bytes)
         remote: Counting objects: 3, done.
@@ -954,10 +994,20 @@ POSSIBLE BUG: weird behavior on --dry-run
       indeed dry... hmm.
 
 
-     
-       
+Answered this: http://stackoverflow.com/questions/4750845/how-do-you-annotate-a-branch
 
+I like to make an empty commit whenever I create a new branch,
+with a commit message saying whatever needs to be said.
 
+git branch B A
+git checkout B
+git commit --allow-empty -m "Created branch 'B' from 'A'"
 
-
+This also has a wonderful side effect of making the history
+shown in "git log --graph" much clearer--
+namely it shows a clearly labelled fork in the tree
+at the time I created the branch,
+instead of what I'd normally get which is an unclear unlabelled fork at some later time
+when I happen to make my first commit while in B--
+that kind of thing keeps me in a constant fog.
 
