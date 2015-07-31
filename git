@@ -87,7 +87,62 @@ Customizations and aliases I currently use:
 
         - Put a "git" wrapper in my ~/bin, see below
           (but I think probably the paging problem it's working around has been fixed)
-    TODO: check out nice "git log" aliases in http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs, they look great
+        - throw the git aliases lg(=lg1) and lg2 in my ~/.gitconfig, see http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs,
+          they look great.
+          But added --date-order to both of them.
+          TODO: the tag colors aren't as nice and varied as in the default-- should figure out how to tweak them
+
+NICE GIT LOG ALIASES:
+    Various people have aliases for formatting that looks great.
+      http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs
+        Suggests the following:
+          [alias]
+          lg1 = log --graph --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
+          lg2 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
+          lg = !"git lg1"
+        - but add --date-order
+        - and change "bold yellow" to "auto" (to get HEAD in bold cyan, master in bold green, remote branches in bold red, tags in bold yellow)
+
+      http://stackoverflow.com/questions/15458237/git-pretty-format-colors
+          git log --graph --pretty=format:'%C(magenta)%h%Creset -%C(red)%d%Creset %s %C(dim green)(%cr) %C(cyan)<%an>%Creset' --abbrev-commit
+        - but add --all --date-order
+      http://sweetme.at/2013/09/13/git-logs-with-color/
+        Suggests the following:
+          git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+        - but add --all --date-order
+      http://blog.n.vasilak.is/post/51402193733/playing-with-git-log-pretty-format-color
+        Suggests the following:
+          lg = log --graph --pretty=format:'%C(yellow)%h\t[%ad]%C(reset) -%C(yellow) %d% C(reset) %s %C(green)(%cr) %C(blue)%an %C(reset)' --abbrev-commit --date=short
+          git log --graph --pretty=format:'%C(yellow)%h\t[%ad]%C(reset) -%C(yellow)%d%C(reset) %s %C(green)(%cr) %C(blue)%an %C(reset)' --abbrev-commit --date=short
+
+      To see available colors, start with this answer from the git-pretty-format-colors answer:
+        git log --pretty=format:"%Credred%Creset %Cgreengreen%Creset %C(Yellow)yellow%Creset %Cblueblue%Creset %C(magenta)magenta%Creset %C(cyan)cyan%Creset %C(white)white%Creset"
+      Available colors: black red green yellow blue magenta cyan white normal
+      Available modifiers: bold dim ul blink reverse
+      Observations:
+        - blink doesn't work in gnome-terminal (it works in konsole though :-( )
+        - on konsole, all the normal colors are same as dim colors
+        - and dim cyan is same as cyan even on gnome-terminal :-(
+      Is there a nice command to exercise a lot of this?
+      Let's put one together for the colors at least, in bash:
+        git log -1 --format="`for color in black red green yellow blue magenta cyan white normal; do for modifier in "bold " "" "dim "; do echo -n "%C($modifier$color)$modifier$color %Creset "; done; echo; done`" 
+
+      So let's see, what do *I* like?
+      I want to use the default colors as much as possible but add stuff like everyone else does.
+      Except the "yellow" for the abbreviated hashes looks yucky, so maybe change that to something like "magenta" or "bold black".
+      Actually I think I really like the format and color scheme of http://stackoverflow.com/questions/15458237/git-pretty-format-colors;
+      the only thing I'd change is:
+          - add --all --date-order
+          - change red to auto for the %d
+          - remove the " - ", yeah it's nice but it takes up precious real estate
+          - don't need the --abbrev-commit since using %h explicitly
+          - change %an to %ae since email addr is more interesting to me at the moment
+                (there's just one person making commits, but submitting from various email addrs)
+      So my alternative to --decorate --oneline is the following --format:
+          git log --graph --format='%C(magenta)%h%C(reset) -%C(auto)%d%C(reset) %s %C(dim green)(%cr) %C(cyan)<%ae>%C(reset)' --date-order --all -15
+      (Note, most people would probably use %an "author name" instead of %ae "author email"
+      but at the moment I'm dealing with repos for which I'm the only committer
+      and I commit from multiple email addrs, so that's more interesting)
 
 BEST PRACTICES:
     - hmm, empty commit at root of repo?  yeah, I think so.
@@ -101,6 +156,12 @@ BEST PRACTICES:
     - when deleting a branch with -D, or resetting it,
       if you don't want it to disappear, tag it first:
           git tag myBranch-about-to-delete-2013-01-01
+      NOTE: I'm probably not understanding or using tags correctly.
+            Evidently you have to say "git push --tag" if you want to push it.
+            And, deletion of the tag or branch doesn't get pushed.  Confusing,
+            if I want all my repos to be in sync.
+            (Hmm I guess "push --mirror" does this... but, that's scary!
+            Did it anyway. And really confused :-( )
 
     - when creating a new branch, I like to always make an empty commit:
           git branch B A
@@ -316,17 +377,32 @@ SWIMLANES!
           https://github.com/git/git/network
       It's a pain though-- lots of bitching about it, see for example: http://subimage.com/blog/2011/08/30/github-your-network-graph-sucks/
 
-    Q: Lack of swimlanes just isn't okay.  Perforce thinks in terms of the swimlanes
-       (what it calls "branches" but I'm not attached to that),
-       and its history visualization is simply *better* than git's--
-       trying to figure out what was done in what branch (swimlane) in git amounts
-       to fumbling around in the dark.
-       What exactly do I need to add to my git workflow to get back that essential
-       functionality?
-       Partial answers in my BEST PRACTICES section but it's still not okay.
-       tags? notes?
-       I think the correct answer is that every normal commit should be marked with the branch
-       it came from... I guess with a tag?  is that feasible?
+    - Lack of swimlanes just isn't okay.  Perforce thinks in terms of the swimlanes
+     (what it calls "branches" but I'm not attached to that),
+     and its history visualization is simply *better* than git's--
+     trying to figure out what was done in what branch (swimlane) in git amounts
+     to fumbling around in the dark.
+     What exactly do I need to add to my git workflow to get back that essential
+     functionality?
+     Partial answers in my BEST PRACTICES section but it's still not okay.
+     tags? notes?
+     I think the correct answer is that every normal commit should be marked with the branch
+     it came from... I guess with a tag?  is that feasible?
+
+     See http://jhw.dreamwidth.org/1868.html "Why i like mercurial more than git".
+     It talks about this and how git could be fixed.
+
+     Interesting passage:
+         "Look, I wasn't kidding when I said that you can do a round-trip conversion of a Git repository into and back out of Mercurial without losing any data. There's even a way to do that in the other direction as long as the Git commit logs adhere to the convention required my Mercurial for storing the branch name."
+     So... what is that convention?
+
+     Uh oh, I'm getting deja vu...
+     The feature in mercurial is called "named branches" which you can choose
+     to use or not.  It also uses terminology like "embedded", that is,
+     the branch name is embedded in changeset metadata)
+     (and its "bookmarks" are like git branches).  Does git
+     actually have something corresponding to mercurial's named branches now?
+
 
 
 
@@ -425,7 +501,8 @@ QUESTIONS:
           --color - use color
           --graph - show the nice graph on the LHS
           --stat - show added/deleted lines stats (but never changed lines, that I've ever seen...!?)
-          --summary - also show extended info such as creations, renames and mode changes
+          --summary - also show extended info such as creations, renames and mode changes.
+                (OUCH! when added to that guy's alias lg, it makes an extra blank line after each line!?)
           --decorate - show ref names. essential!
           --date-order - instead of some weird arbitrary topsort order or something
 
