@@ -2,6 +2,7 @@ Advanced Bash-Scripting Guide: http://www.tldp.org/LDP/abs/html/
 Internal Bash functions, useful when writing loadable builtins: https://gist.github.com/sshaw/8017032
 The Ultimate Bash Array Tutorial with 15 Examples: http://www.thegeekstuff.com/2010/06/bash-array-tutorial/
 Handling positional parameters: http://wiki.bash-hackers.org/scripting/posparams
+Bash Pitfalls: http://mywiki.wooledge.org/BashPitfalls
 ==============================================
 Useful settings:
 
@@ -134,6 +135,12 @@ PA: it's something that happens inside
     OR... maybe I just need to clobber it with the "minimal" thing instead?
     Yeah that works:
         complete -F _minimal ci
+
+Q: why the hell do commands that begin with a space get excluded from being
+   stored in history???
+A: actually this may have just been a google-specific setting:
+   my HISTCONTROL was set to ignoreboth, which includes ignorespace.
+   Need to set it to ignoredups or nothing.
 
 =========================================================================
 Completion screwups (some local to google, some not):
