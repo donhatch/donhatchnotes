@@ -1,0 +1,64 @@
+http://askubuntu.com/questions/82045/whats-a-simple-colour-picker-app-for-gnome
+
+Web based:
+   - http://www.colorzilla.com/ "Advanced Colorful Goodies"
+     - cool!
+     - install colorzilla extension, its eyedropper is limited to within chrome,
+       but it's cool-- it continuously shows rgb!
+     - and has a color chooser, similar to the ones fin other apps
+
+I have (or can easily install) the following on ubuntu;
+they all have color choosers with eyedroppers:
+
+- gimp has most awesome color chooser:
+   - "GIMP Selector":
+       - slider (any of h,s,v,r,g,b) and square for other two--
+         this is actually awesome!
+         could maybe enhance by adding all of gpick's
+         other 3-slider schemes too?
+   - CMYK
+     - kind of lame:
+       - the gradient should appear on the slider like fo h,s,v,r,g,b
+       - should be able to show this at same time as the GIMP
+         selector, and make it one of the options (I think?
+         not clear how the 4 dimensions work and map to 3)
+   - Triangle selector
+       hue circle, sat/val triangle that's kind of a pointer
+       this is actually pretty sweet! tri more elegant
+       than square in this case.
+   - watercolor mode doesn't seem to relevant or useful to me
+- gpick is quite awesome as well
+   - it has an eyedropper that shows the rgb under mouse continuously...
+     it's the only standard tool I know that does!
+     hit spacebar to put the picked color on the palette.
+   - extensive 3-slider options (and cmyk which is 4-slider),
+     can show them all simultaneously and updating.  Bravo!
+   - and also a selector something like gimp's triangle selector,
+     for the scheme generation pane... and can show that at same time
+     as the Color picker (View -> Secondary View -> Sceme Generation;
+     if secondary view has zero height at bottom, stretch it)
+     except they don't update each other so not that useful to have them up
+     at the same time
+- agave
+  - seems like it was beta software that never really got off the ground--
+    seems like everything it does, gpick can do better,
+    except its doc is what helped me understand what the scheme types
+    are doing, gpick doesn't have doc
+
+Actually I think I can do better than any of these!
+Should experiment.
+
+Should include best of everything:
+    - all of what the GIMP Selector shows
+      - actually maybe all 6 slices at once? hmm!
+        - well certainly the ones for r,g,b can be shown naturally
+          as different cross-sections of the same color cube...
+        - and maybe the hsv ones can be shown as simultaneous
+          cross sections of something too? a double-cone?
+    - all of gpick's 3-and-4-slider options
+      at same time, like gpick does, and at same time as GIMP selector
+      (gimp does rgb and hsv as part of GIMP Selector)
+    - html
+    - eyedropper with little mag window, like gpick-- nice
+    - note that colorzilla has a colorchooser with 2d gradients, in chrome--
+      so it is possible-- not sure whether it uses opengl acceleration or not.

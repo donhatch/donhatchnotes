@@ -1,0 +1,277 @@
+https://en.wikipedia.org/wiki/Comparison_of_file_comparison_tools
+http://fedoramagazine.org/compare-files-with-these-graphical-diff-tools-in-fedora/ reviews meld,diffuse,kompare
+http://stackoverflow.com/questions/137102/whats-the-best-visual-merge-tool-for-git
+http://www.quora.com/What-is-the-best-visual-Git-merge-tool-for-Ubuntu
+http://www.gitguys.com/topics/merging-with-a-gui/
+   nice description of merge workflows using kdiff3 and meld
+
+It's pointed out in the above discussions, and I think I agree,
+that for modern merge options, I should be looking for ones that can do 4 panes (theirs,orig,mine,output).
+Supposedly:
+  - Beyond Compare 3 supposedly does it but expensive and a pain to keep installed
+  - latest p4merge has 4 panes (base,local,remote,merged)
+  - and actually kdiff3 does too-- might be the best available option. supposedly far more
+    options than meld.  Hmm but no undo??
+  - someone they tried diffuse and it does the 4 panes, but they are side-by-side,
+    and they wanted the output at the bottom... ?
+
+Options, available via apt-get on goobuntu:
+  kompare
+  tkdiff
+  meld
+  kdiff3
+  diffuse
+  vimdiff
+  critique's browser-based diff is awesome (only tool I know
+    that can track moved sections)-- can I get that on regular files??
+  diffmerge (not installed, recommended on https://sites.google.com/a/google.com/earthclient/Home/diff-merge-tools) (but that might be directed at windows)
+
+Currently using tkdiff mostly, but might switch.
+I think diffuse is my current frontrunner.
+
+tkdiff and diffuse work trivially with rcs, nice!
+
+Ok, matrix of features relevant to me:
+                   track moved sections?  max files  rcs trivially?  git trivially?
+  kompare          no                     2          no              no
+  tkdiff           no                     2          yes             no
+  meld             no                     3          no              yes
+  kdiff3           no                     3          no              no
+  diffuse          no                     infinity   yes             yes
+  vimdiff          no                     4          no              no
+  critique's diff  yes                    2?         n/a             n/a
+
+
+
+xxdiff
+  I like xxdiff but it doesn't seem to exist any more in latest goobuntu :-(
+  Its merging model was extremely usable, and I'd really like that to remain my workflow model,
+  but none of the modern tools really think that way.
+
+  They (e.g. diffuse, probably others) can do this though:
+        THEIRS ORIG MINE
+  so maybe in general that's the way I want to bring it up...
+  but, then there's a 4th one which is merged?  And maybe I never really need to see that,
+  but it can be optional... or something? Not sure.
+  I sort of like what I sort of see in http://meldmerge.org/features.html "Merge mode (in development)",
+  but I'm not totally sure, and it's probably not available yet.
+
+
+Q: Exactly why do I like it?  Describe the exact workflow.
+A: Mostly I'm resolving conflicts during something like a "P4DIFF=xxdiff p4 resolve"
+   (which happens automatically, at google, during "g4 sync" which is like "p4 sync; p4 resolve").
+   I've got two (or more) versions of a file side by side.
+   Wherever there's a diff, I want to be able to choose:
+      Pick this part from the LHS,
+      Pick that part from the RHS,
+      ...
+   with global menu options:
+      Select All from Left
+      Select All from Right
+      Select nothing (how it comes up originally)
+   Once I've made a decision on each diff,
+   I want to save the merged result, most often clobbering either
+   the LHS or RHS file,
+   which I do using the "Save as Left" or Save as Right" option,
+   or "Save as..." to save it to a different file.
+
+   It seems most of the modern ones let you transfer stuff among the different views,
+   but that's pretty confusing compared to the above simple model.
+   Is there some way I can get it to work the way I want?
+   Maybe start with 2 copies of the rightmost,
+   and then copy over what I want from the leftmost?  Not sure.
+
+   Just tried merging in tkdiff.  Really truly inadequate.
+     - selecting left or right sections for merge is painful and error prone, can't see clearly what I'm getting
+     - "save left" or "save right" doesn't exist, have to painfully find the file name from elsewhere
+
+kdiff3 notes:
+  - color scheme is not too jarring but a bit weird and not sure it's completely useful:
+        selected region: yellow
+        LHS: green on (configurable) gray
+        RHS: blue on (configurable) gray
+    sure would be more useful if, during merge, there was a visual indication of which side got selected for each conflict.
+    oh if I go to Settings -> Configure kdiff3..., it explains. wow that's a lot of colors.
+  - global overview in the scrollbar is pretty cool-- can config in the DiffView menu-- but actually
+    I don't understand it, and why isn't there an option for all 3??
+  - preferences dialog is modal :-(
+  - I noticed the color chooser is quite usable (except I wish there was an Apply button, so wouldn't have to close it to apply).
+    I guess it's the default kde color chooser (same as for kompare)-- nice!
+  - max of 3 files (not sure what it does if I specify 4 or more)
+kdiff3 questions:
+  Q: doc? (Help -> "Could not launch the KDE Help Center: Could not find service 'khelpcenter'")
+  A: http://kdiff3.sourceforge.net/doc
+  Q: how to wire it to p4?
+  A: haven't tried this yet, but Andrew Suffield said this on some mailing list:
+      If you want a drop-in replacement for meld on goobuntu, kdiff3 does the thing that you really wanted.
+      I wire kdiff3 to g4 with this script in ~/bin:
+      #!/bin/sh
+      exec /usr/bin/kdiff3 "$1" "$2" "$3" -o "$4"
+      and then set P4MERGE to that script.
+  Q: permute panes?
+  Q: I totally don't get the Overview options when 3 files, they aren't making sense... is it buggy?
+     I think it makes more sense when 2 files-- yeah it looks sensible...
+     hmm except I think I'd like to see the red in the indiv overviews
+     as well as the combined?  I'm confused.
+     And why isn't there an option for showing all 3 columns at once?
+     Just show the same colors that are in the individual overviews.
+  Q: I don't get the coloring scheme?
+  A: It's a bit intricate, but according to the doc:
+     Panes are A,B,C. Their colors are blue,green,magenta.
+     In the bar by each one, it's colored red if different from both others,
+     and the other two are set to the color of the differing one.  Bizarro!
+     I think this makes more sense when 2 files than when 3, too.
+  Q: merge workflow?
+  A: hmm! it actually seems to exist.
+      tkdiff3 the two files,
+      Merge -> Merge Current File, to get it in a mode where you are resolving conflicts, with result in bottom pane.
+      it shows where each section is coming from.
+      Can right click on a "<Merge Conflict>" in the bottom pane,
+      and select from any of the inputs.
+      Still not as clear as xxdiff, but maybe I could get used to it.
+      And http://www.gitguys.com/topics/merging-with-a-gui/ walks through how this looks with git.
+
+      Weird though... man page says:
+        kdiff3 file1 file2 file3 -o outputfile
+        Note that file1 will be treated as base of file2 and file3.
+      So I get orig on the far left??  That's weird :-(
+      Although maybe I can permute the panes?  Or maybe I'll get used to this,
+      it might actually be more useful, not sure.
+  Q: ouch, is there no undo??
+
+diffuse notes:
+  - ooh pretty color scheme, but is it useful?
+  - claims to do n-way merge? hmm sounds cool
+  - built-in rcs support on command line (like tkdiff, maybe not exactly same syntax)
+  - sweet elegant global view on slider
+  - nice syntax highlighting, if distracting can easily turn it off in View menu
+  - hmm I think a lot of thought and love went into this. Kudos to Derrick Moser.
+    And it looks like
+    it has sophisticated integration with git (e.g. doc mentions viewing inputs to octopus merge)
+  - "Copy Selection Left/Right" and "Copy Right/Left into selection" could be called
+    "Push to Left/Right" and "Pull from Left/Right"
+  - default font is a bit big for me: monospace 9. changing it to monospace 8.
+    Ideally I'd like a different font for non-diff and diff regions
+    (like tkdirr allows), in which case I think I'd choose monospace 7
+    and monospace 9.
+diffuse questions:
+  Q: is color scheme configurable?
+  A: sure, doc mentions resources... but probably I like the scheme
+  Q: looks like I can move material between adjacent views, but not from far right to far left.
+     is there a way to do that?
+  A: yes, to Pull, select the source and then right click on the destination -> Merge Selection
+  Q: can I permute the views once I've started?
+  A: yes!  View -> Shift Pane Left/Right, shortcuts Shift+Ctrl+paren
+  Q: merge workflow?
+  PA: well, can do same as meld and others for starters...
+      but this is tantalizing--
+      maybe I can put the target in the middle,
+      and move material from left and right into it?
+      (and maybe I can do that with other tools like meld??)
+      Not sure how to set that up though. Hmm.
+      Really what I want is: center should show conflicts initally as neutral (i.e. haven't selected either side yet).
+      I guess the most configurable option might be:
+      Bleah!
+      Well I think if I want to hack up something, maybe this is the place to start?
+
+meld notes:
+  - default color scheme is pleasant
+  - syntax highlighting is maybe cool but actually maybe distracting? not sure
+  - continuous differential scroll method is rather nice I think (but see BUG below)
+  - oh hmm, the interface for transfering diffs back and forth is kind of nice--
+    hold down ctrl to get little buttons for copying-above-or-below-without-clobbering.
+meld questions:
+  Q: doc?
+  A: Help menu
+  BUG: (I think)  my grok++.py 1.7 vs. 1.8, scroll to the bottom and then up slowly, there's a discontinuity.
+        XXX TODO: find a simple example I can make public and describe here.
+        oh hmm, I'm understanding the behavior better.
+        look at the little black blip in the center of the screen--
+        it aligns the two sides around that...
+        and for diffs, it matches up percentage of each side.
+        So if you scroll past a section that's tiny on current side
+        but big on the other, it will flip past discontinuously.
+        Hmm still seems kind of unfriendly though, doesn't it?
+        Shouldn't it be possible to make a common scrollbar
+        that does both sides smoothly? or maybe prefer one side but at least make it not 100%? have to think about it.
+  Q: I see how to copy between adjacent views,
+     but not between far left and far right, like diffuse lets me.  Is there a way?
+  Q: can I permute the views, like diffuse lets me? I don't see a way
+  Q: merge workflow?
+  A: see http://www.gitguys.com/topics/merging-with-a-gui/ :
+      when hooked up to git, puts the work copy (originally with conflict markers)
+      in the middle, theirs on LHS, yours on RHS,
+      and you copy stuff from LHS and RHS to middle til it's the way you want.
+     Also I see something called "merge mode (in development)" on http://meldmerge.org/features.html,
+     which may be more usable, though not available yet...  it shows THEIRS,ORIG,YOURS, and target at the bottom.
+
+kompare notes:
+  - default color scheme is pleasant (all h=vary, s=50 v=237) but mixed up:
+        removed: green #BEEDBE
+        changed: red #EDBEBE
+        added: blue #BEBEED
+        applied: yellow #EDEDBE
+    wouldn't this be better? (like meld, duh.)
+        removed: red #EDBEBE
+        changed: blue #BEBEED
+        added: green #BEEDBE
+        applied: yellow #EDEDBE
+  - ooh it has the nice continuous differential scroll like meld.
+    visually very similar to meld, but reduced functionality:
+        - no global view in the scrollbars :-(
+        - no within-line diffs :-(
+        - no editing (not that I care much)
+        - no undo
+  - interesting, man page talks in terms of URLs... and does in fact diff pages sources of web pages
+kompare questions:
+  Q: doc? (Help -> Kompare Handbook -> "Could not launch the KDE Help Center: Could not find service 'khelpcenter'")
+  A: man kompare, and
+     The Kompare Handbook (which is what Help is supposed to show): https://docs.kde.org/trunk5/en/kdesdk/kompare/index.html
+  Q: merge workflow?
+  PA: does not exist.  I guess you consider the RHS as the scratch/target area
+      (so it's like meld except you can't use the LHS) (which is maybe a good thing? not sure)
+
+tkdiff notes:
+  - default color scheme is atrocious, though mostly easy to understand:
+        LHS: blue for current region, gray for others
+        RHS: red for deleted, green for added, DodgerBlue1 for changed
+    might be possible to get the nice scheme shown on the wikipedia page? see question below
+  - hmm, interesting, can use a different font for diff regions from the rest!
+    defaults are 6x13 for non-diff and 6x13bold for diff,
+    I'm trying 6x10 for non-diff.  I think I like it!
+    
+tkdiff questions:
+  Q: usage message?
+  A: nope. but there's some doc in the "Help" menu.
+
+  Q: man page?
+  A: just look on line I guess: http://linux.math.tifr.res.in/manuals/man/tkdiff.html
+
+  Q: how to change the color scheme from that awful default?
+     but the colors on https://en.wikipedia.org/wiki/Tkdiff actually look better.
+     Can I get those?  (it's for a perl file)
+  A: Can get some immediate relief by changing to similar to what I did for kompare,
+      and actually I think I like this better than what I see on wikipedia:
+        Edit->Preferences->Appearance
+            change "deleted diff region" background from red1 to #EDBEBE (pink)
+            change "inserted diff region" background from green3 to #BEEDBE (green)
+            change "changed diff region" background from DodgerBlue1 to #BEBEED (blue)
+            change "current diff region" background from blue to orange, foreground black
+      one problem is it doesn't seem to apply to the scroll bar... so it's a good thing
+      the default color scheme is fairly sensible, aside from being too saturated.
+
+  Q: can I get it to take one of the two files from stdin?
+     (needed for xrcsdiff) (actually this is silly, tkdiff supports RCS directly (and perforce?), see below)
+  Q: the wikipedia page says it can be used for RCS browsing... how?
+  A: from man page:
+      tkdiff -conflict <file> to merge a file with conflict markers generated by "merge" or "cvs", The file is split into two temporary files which you can then merge as usual.
+      tkdiff <file> to compare <file> with the most recent version checked into CVS/SCCS/RCS (checked for in that order).
+      tkdiff -r <file> to compare <file> with the most recent version checked in.
+      tkdiff -r<rev> <file> to compare <file> with revision <rev> of <file>.
+      tkdiff -r<rev> -r <file> to compare revision <rev> of <file> with the most recent version checked in.
+      tkdiff -r<rev1> -r<rev2> <file> to compare revisions <rev1> and <rev2> of <file>.
+  Q: can I get it to use labels of my choice for the LHS and RHS?
+  Q: How do I do my common xxdiff merge workflow (described above) in tkdiff?
+  PA: kind of described in the Gui Help.
+      Seems to be pretty much there, but not quite usable since it's difficult to tell at a glance which pieces came from which sides.
+

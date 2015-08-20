@@ -1,0 +1,21 @@
+To run a simple httpd server:
+   python -m SimpleHTTPServer [port]
+Default port is 8000.
+That will start with a directory listing of the directory
+in which the server was started.
+
+Alternatives here:
+http://stackoverflow.com/questions/12905426/what-is-a-faster-alternative-to-pythons-simplehttpserver
+I've tried:
+  twistd -no web --path=.
+    - seems to work fine. maybe better performance than the python way, not sure
+  go myserver.go
+    - requires making a little source file
+    - doesn't sort the directory entries!? so not very usable
+  hg serve
+    - only serves an hg repository, so not generally useful
+  git instaweb --start
+    - like hg serve but should be more useful to me since I actually use git
+    - on ubuntu, required "sudo apt-get install lighttpd"
+    - not exactly obvious where to click: it's the summary/shortlog/log/tree links
+

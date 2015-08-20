@@ -26,15 +26,21 @@ Git resources:
 
     http://nuclearsquid.com/writings/git-tricks-tips-workflows/
         really good advice
-        TODO: check out his git-wtf
+        TODO: check out his git-wtf script
 
     http://www.fini.net/v/RichmondPM/JohnLundinDevel
         really good overview of git and other version control systems, with more links
 
     http://blogs.gnome.org/newren/2007/12/08/limbo-why-users-are-more-error-prone-with-git-than-other-vcses/
         recommends:
-            "git diff HEAD" instead of "git diff"
+            "git diff HEAD" instead of "git diff"    (shows diffs from head whether marked for commit or not)
             "git commit -a" instead of "git commit"  (automatically adds all changes to tracked files)
+
+    http://marklodato.github.io/visual-git-guide/index-en.html
+    http://onlywei.github.io/explain-git-with-d3/
+        awesome!!! great exercises!
+
+    brilliant github visualization: http://ghv.artzub.com/
 
     TODO: check out "vim git gutter"
 
@@ -56,30 +62,139 @@ Customizations and aliases I currently use:
         alias gb git branch
         alias gs git status
         alias gd git difftool -y
-        alias gl git log --graph --decorate --date-order --stat --summary
+        alias gl 'git log --graph --decorate --date-order --stat --summary'
             # note, the --stat --summary foils other things like --oneline
-        alias gl0 'git log --graph --decorate --date-order --oneline `cd .git/refs/heads && /bin/ls | grep -v .-work`' --
-        alias gl1 git log --graph --decorate --date-order --oneline --branches=*
+        alias gl0 'git log --graph --decorate --date-order --oneline `cd .git/refs/heads && /bin/ls | grep -v .-work` --'
+            # I guess the -- was because I was using this and appending branch names?
+            # but it keeps me from being able to add other args like -10, so I don't think I like it...
+        alias gl1 'git log --graph --decorate --date-order --oneline --branches=*'
             Other useful options:
                 -<n>  limit to last n
-                --all
-                FETCH_HEAD (not included in --all, and not labeled in output for somer reason... although usually same as origin/master or something)
-                --oneline
+                --all - show more of the graph (start with all refs)
+                FETCH_HEAD (not included in --all, and not labeled in output for some reason... although usually same as origin/master or something)
+                --oneline - much easier to get sense of entire graph this way!
                 --pretty=[oneline|short|medium|full|fuller]  (default is medium)
+
     Customizations (mostly from http://nuclearsquid.com/writings/git-tricks-tips-workflows/):
         # Allow all Git commands to use colored output, if possible:
         git config --global color.ui auto
         # Allow git diff to do basic rename and copy detection:
         git config --global diff.renames copies
-        # Tell git diff to use mnemonic prefixes (index, work tree, commit, object) instead of the standard a and b notation:
+        # Tell git diff to use mnemonic prefixes (i[ndex], w[ork tree], c[ommit], o[bject]) instead of the standard a and b notations, where appropriate
         git config --global diff.mnemonicprefix true
         # Always show a diffstat at the end of a merge:
         git config --global merge.stat true
 
         - Put a "git" wrapper in my ~/bin, see below
+          (but I think probably the paging problem it's working around has been fixed)
+        - throw the git aliases lg(=lg1) and lg2 in my ~/.gitconfig, see http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs,
+          they look great.
+          But added --date-order to both of them.
+          TODO: the tag colors aren't as nice and varied as in the default-- should figure out how to tweak them
+
+NICE GIT LOG ALIASES:
+    Various people have aliases for formatting that looks great.
+      http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs
+        Suggests the following:
+          [alias]
+          lg1 = log --graph --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
+          lg2 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
+          lg = !"git lg1"
+        - but add --date-order
+        - and change "bold yellow" to "auto" (to get HEAD in bold cyan, master in bold green, remote branches in bold red, tags in bold yellow)
+
+      http://stackoverflow.com/questions/15458237/git-pretty-format-colors
+          git log --graph --pretty=format:'%C(magenta)%h%Creset -%C(red)%d%Creset %s %C(dim green)(%cr) %C(cyan)<%an>%Creset' --abbrev-commit
+        - but add --all --date-order
+      http://sweetme.at/2013/09/13/git-logs-with-color/
+        Suggests the following:
+          git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+        - but add --all --date-order
+      http://blog.n.vasilak.is/post/51402193733/playing-with-git-log-pretty-format-color
+        Suggests the following:
+          lg = log --graph --pretty=format:'%C(yellow)%h\t[%ad]%C(reset) -%C(yellow) %d% C(reset) %s %C(green)(%cr) %C(blue)%an %C(reset)' --abbrev-commit --date=short
+          git log --graph --pretty=format:'%C(yellow)%h\t[%ad]%C(reset) -%C(yellow)%d%C(reset) %s %C(green)(%cr) %C(blue)%an %C(reset)' --abbrev-commit --date=short
+
+      To see available colors, start with this answer from the git-pretty-format-colors answer:
+        git log --pretty=format:"%Credred%Creset %Cgreengreen%Creset %C(Yellow)yellow%Creset %Cblueblue%Creset %C(magenta)magenta%Creset %C(cyan)cyan%Creset %C(white)white%Creset"
+      Available colors: black red green yellow blue magenta cyan white normal
+      Available modifiers: bold dim ul blink reverse
+      Observations:
+        - blink doesn't work in gnome-terminal (it works in konsole though :-( )
+        - on konsole, all the normal colors are same as dim colors
+        - and dim cyan is same as cyan even on gnome-terminal :-(
+      Is there a nice command to exercise a lot of this?
+      Let's put one together for the colors at least, in bash:
+        git log -1 --format="`for color in black red green yellow blue magenta cyan white normal; do for modifier in "bold " "" "dim "; do echo -n "%C($modifier$color)$modifier$color %Creset "; done; echo; done`" 
+      Note can also do full matrix of foreground and background; not interesting enough to polish:
+        git log -1 --format="`
+            for fgcolor in normal black red green yellow blue magenta cyan white; do \
+            for fgmodifier in "bold " "" "dim "; do \
+            for bgcolor in normal black red green yellow blue magenta cyan white; do \
+            echo -n "%C($fgcolor $bgcolor $fgmodifier)$fgmodifier$fgcolor on $bgcolor%Creset "; done; echo; done; done`" 
+      Hmm and maybe full 24-bit colors available?  See https://jpace.wordpress.com/2013/05/04/extended-colors-with-git/
+      Yeah instead of a color name, can use an ansi code... which is two numbers!?  fg and bg.
+        one of them is, if r,g,b are values in [0..5]: 6*16 + 36*r + 6*g + b !?  and what's the other one?
+      Holy moly that's arcane!  And not quite it, either... need to experiment.
+
+      So let's see, what do *I* like?
+      I want to use the default colors as much as possible but add stuff like everyone else does.
+      Except the "yellow" for the abbreviated hashes looks yucky, so maybe change that to something like "magenta" or "bold black".
+      Actually I think I really like the format and color scheme of http://stackoverflow.com/questions/15458237/git-pretty-format-colors;
+      the only thing I'd change is:
+          - add --all --date-order
+          - change red to auto for the %d
+          - remove the " - ", yeah it's nice but it takes up precious real estate
+          - don't need the --abbrev-commit since using %h explicitly
+          - change %an to %ae since email addr is more interesting to me at the moment
+                (there's just one person making commits, but submitting from various email addrs)
+      So my alternative to --decorate --oneline is the following --format:
+          git log --graph --format='%C(magenta)%h%C(reset) -%C(auto)%d%C(reset) %s %C(dim green)(%cr) %C(cyan)<%ae>%C(reset)' --date-order --all -15
+      (Note, most people would probably use %an "author name" instead of %ae "author email"
+      but at the moment I'm dealing with repos for which I'm the only committer
+      and I commit from multiple email addrs, so that's more interesting)
+    TODO: check out nice "git log" aliases in http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs, they look great
+
+BEST PRACTICES:
+    - empty commit at root of repo, for various reasons
+      having to do with the fact that without it you can't do certain
+      rebase operations at the root, see:
+          http://stackoverflow.com/questions/645450/git-how-to-insert-a-commit-as-the-first-shifting-all-the-others
+          mkdir myNewRepo
+          cd myNewRepo
+          git init
+          git commit --allow-empty -m "Initial empty commit"
+
+    - when deleting a branch with -D, or resetting it,
+      if you don't want it to disappear, tag it first:
+          git tag myBranch-about-to-delete-2013-01-01
+      NOTE: I'm probably not understanding or using tags correctly.
+            Evidently you have to say "git push --tag" if you want to push it.
+            And, deletion of the tag or branch doesn't get pushed.  Confusing,
+            if I want all my repos to be in sync.
+            (Hmm I guess "push --mirror" does this... but, that's scary!
+            Did it anyway. And really confused :-( )
+
+    - when creating a new branch, I like to always make an empty commit:
+          git branch B A
+          git checkout B
+          git commit --allow-empty -m "Create branch 'B' from 'A'"
+      this makes 'git log --graph' much easier to read!
+
+
+    - Don't use aliases for branches.  it breaks various scripts
+      that aren't expecting the output of "git branch" to contain that stuff.
+        - breaks git-rebase-all (that guy's script)
+        - gives useless extra columns in "git show-branch"
+
+    - Never use -n thinking it will mean --dry-run.
+      It means that in some tools but not others, and it will bite you.
+
 
 
 THINGS IT WOULD BE NICE TO HAVE A HELPER WRAPPER FOR MAYBE:
+    - git diff has --word-diff but it still spews way more than it needs to a lot. would be nice to have it even more fine-grained, on a char level even.
+
     - the stats from "git log --stat" are cool but a bit brain dead,
       can't they show changed lines in yellow, in addition to deleted lines in red
       and added lines in green?
@@ -104,27 +219,8 @@ THINGS IT WOULD BE NICE TO HAVE A HELPER WRAPPER FOR MAYBE:
       but I never do??
       NEED TO WRITE THE DAMN THING, OBVIOUSLY :-(
 
-    - git log graph is still wicked confusing (even with --date-order).
-      can I get exactly one dedicated column per branch?
-      hmm, I'm getting the feeling a branch is just a (moving) label for a commit...
-      so after it gets moved (via git reset), I lose the record of where it was before, is that right?
-      yeah, that's right :-(
-      I'm getting more of a handle on this, by tagging branch heads that I delete or move
-      and by making empty commits at the beginning of each branch (see BEST PRACTICES below)
-
-      hmm, git show-branch gives one column per branch...
-      that's *almost* what I want but not quite...
-      it's rather cluttered since it shows all branches
-      back to infinity in time, past when the branch was created... ?
-      maybe I can make something more intuitive?
-      Really I think I just want git log to allocate a "swim lane"
-      for each branch, I think?  Various discussion the web refers to this
-      as a swimlane.
-      See this for maybe some more thoughts:
-          https://confluence.atlassian.com/display/FISHEYE/Ordering+of+Branches+Important+When+Visualising+Git+Changesets
-      and supposedly "github network view" tries to give swim lanes?
-          https://github.com/git/git/network
-
+    - swim lanes!!! devoted a whole section to this, below.
+      It is git's foremost deficiency, in my opinion.
 
     - Pisses me off when quitting out of git log makes tcsh say "Broken Pipe" which makes the top line scroll
       off the top of the terminal
@@ -149,6 +245,7 @@ THINGS IT WOULD BE NICE TO HAVE A HELPER WRAPPER FOR MAYBE:
                 status=0
             fi
             exit $status
+      (Problem never happened in bash, I don't think)
 
     - I'm working on a clone of a central repository,
       and I currently have about 10 topic branches
@@ -265,34 +362,65 @@ THINGS IT WOULD BE NICE TO HAVE A HELPER WRAPPER FOR MAYBE:
       just shows output of "git branch", single-click switches branches (using "git checkout")
       also uses fam to notice when anything changes in the refs directory
 
-BEST PRACTICES:
-    - when deleting a branch with -D, or resetting it,
-      if you don't want it to disappear, tag it first:
-          git tag myBranch-about-to-delete-2013-01-01
+SWIMLANES!
+    - git log graph is still wicked confusing (even with --date-order).
+      can I get exactly one dedicated column per branch?
+      hmm, I'm getting the feeling a branch is just a (moving) label for a commit...
+      so after it gets moved (via git reset), I lose the record of where it was before, is that right?
+      yeah, that's right :-(
+      I'm getting more of a handle on this, by tagging branch heads that I delete or move
+      and by making empty commits at the beginning of each branch (see BEST PRACTICES below)
 
-    - when creating a new branch, I like to always make an empty commit:
-          git branch B A
-          git checkout B
-          git commit --allow-empty -m "Create branch 'B' from A"
-      this makes 'git log --graph' much easier to read!
+      hmm, git show-branch gives one column per branch...
+      that's *almost* what I want but not quite...
+      it's rather cluttered since it shows all branches
+      back to infinity in time, past when the branch was created... ?
+      maybe I can make something more intuitive?
+      Really I think I just want git log to allocate a "swim lane"
+      for each branch, I think?  Various discussion the web refers to this
+      as a swimlane.
+      See this for maybe some more thoughts; their screenshots look nice:
+          https://confluence.atlassian.com/display/FISHEYE/Ordering+of+Branches+Important+When+Visualising+Git+Changesets
+      and theyr tutorial is full of great pictures, all of which have
+      swimlanes:
+          https://www.atlassian.com/git/tutorials/comparing-workflows
+      and supposedly "github network view" tries to give swim lanes?
+          https://github.com/git/git/network
+      It's a pain though-- lots of bitching about it, see for example: http://subimage.com/blog/2011/08/30/github-your-network-graph-sucks/
 
-    - hmm, empty commit at root of repo?  yeah, I think so.
-          http://stackoverflow.com/questions/645450/git-how-to-insert-a-commit-as-the-first-shifting-all-the-others
+    - Lack of swimlanes just isn't okay.  Perforce thinks in terms of the swimlanes
+     (what it calls "branches" but I'm not attached to that),
+     and its history visualization is simply *better* than git's--
+     trying to figure out what was done in what branch (swimlane) in git amounts
+     to fumbling around in the dark.
+     What exactly do I need to add to my git workflow to get back that essential
+     functionality?
+     Partial answers in my BEST PRACTICES section but it's still not okay.
+     tags? notes?
+     I think the correct answer is that every normal commit should be marked with the branch
+     it came from... I guess with a tag?  is that feasible?
 
-          mkdir myNewRepo
-          cd myNewRepo
-          git init
-          git commit --allow-empty -m "Initial empty commit"
+     See http://jhw.dreamwidth.org/1868.html "Why i like mercurial more than git".
+     It talks about this and how git could be fixed.
 
-    - hmm! maybe don't use aliases for branches.  I think it breaks various scripts
-      that aren't expecting the output of "git branch" to contain that stuff.
-        - breaks git-rebase-all (that guy's script)
-        - gives useless extra columns in "git show-branch"
+     Interesting passage:
+         "Look, I wasn't kidding when I said that you can do a round-trip conversion of a Git repository into and back out of Mercurial without losing any data. There's even a way to do that in the other direction as long as the Git commit logs adhere to the convention required my Mercurial for storing the branch name."
+     So... what is that convention?
+     TODO: ask!
+
+     Uh oh, I'm getting deja vu...
+     The feature in mercurial is called "named branches" which you can choose
+     to use or not.  It also uses terminology like "embedded", that is,
+     the branch name is embedded in changeset metadata)
+     (and its "bookmarks" are like git branches).  Does git
+     actually have something corresponding to mercurial's named branches now?
+
+    TODO: read this and the answer, thoroughly:
+    http://stackoverflow.com/questions/16466994/how-to-get-more-useful-branch-diagrams-in-git
+    It might actually explain the git rationale somewhat coherently.
 
 
 SETTING UP DIFFTOOLS (work in progress):
-
-
 
 First of all, there are many references on the web
 to methods that create wrapper scripts such as "git-diff-wrapper"...
@@ -368,6 +496,10 @@ TODO: Check out:
     - SourceGear DiffMerge? this says it may be decent: http://therightstuff.de/2009/01/28/Setting-Up-SourceGear-DiffMerge-With-Git.aspx
     - araxis merge
 TODO: get straight on how to allow different tool options and how to set up scripts for each one
+    - http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs -- super nice!
+TODO: think about the possibility of a branch-specific README as suggested in http://stackoverflow.com/questions/2108405/branch-descriptions-in-git
+TODO: check out qgit
+
 
 
 
@@ -376,10 +508,14 @@ QUESTIONS:
     Q: p4 filelog?
     A: git log dl-fini.c
        git log --color --graph --stat --summary --decorate --date-order
-            -<n>  limit to last n
-            --all
-            --oneline
-            --pretty=[oneline|short|medium|full|fuller]  (default is medium)
+       explanation of those options:
+          --color - use color
+          --graph - show the nice graph on the LHS
+          --stat - show added/deleted lines stats (but never changed lines, that I've ever seen...!?)
+          --summary - also show extended info such as creations, renames and mode changes.
+                (OUCH! when added to that guy's alias lg, it makes an extra blank line after each line!?)
+          --decorate - show ref names. essential!
+          --date-order - instead of some weird arbitrary topsort order or something
 
     Q: p4 describe?
     A: git show 28363b
@@ -420,8 +556,10 @@ QUESTIONS:
     A: git pull = git fetch + git merge
          (generally considered evil)
        git pull --rebase = git fetch + git rebase
-         (generally considered good)
+         (generally considered good... but it changes history?)
        (holy shit, see https://coderwall.com/p/jiswdq/let-s-all-take-a-moment-of-silence-git-pull-is-dead )
+       (I guess I need to completely understand that??  For now, using git pull I think,
+       at least for my private repos)
 
     Q: remove untracked files?
 
@@ -510,8 +648,18 @@ Don
        also this:
            http://docs.mathjax.org/en/latest/installation.html
        seems to imply that "git remote show origin"
-       is the dry run of "git pull origin" (haven't tried it yet)
+       is the dry run of "git pull origin",
+       which seems to be essentially correct.
 
+       I'm thinking "git fetch" perhaps doesn't strongly need a dry run?  Could just do it,
+       it updates our picture of what remote looks like, without causing local damage...
+       right?  It does have a --dry-run option though.
+       (With some weirdness though-- it gives two different outputs if you run it twice
+       in a row.)
+       
+       WARNING: do *not* use -n thinking it means --dry-run; it doesn't!
+       (for fetch it means --no-tags, for merge it means --no-stat, for pull I have no
+       idea what it means, for push it *does* mean --dry-run-- don't use it!!)
 
     Q: why is "git status" not showing files ending in .orig?
     A: it's listed in .gitignore
@@ -561,6 +709,8 @@ Don
        Yup, that branch is GONE.  Wtf?  That's scary.
        Even if it's not reachable, it is history.
        We never lose that stuff in perforce, right?
+
+       And it still *is* still in the raw data blobs, right??
 
        Idea: whenever doing one of:
            git branch -d
@@ -831,6 +981,63 @@ Don
             fatal: HTTP request failed
     PA: setenv GIT_SSL_NO_VERIFY true
 
+    Q: "git push" to github asks for password even in cases when it then says everything
+       is up to date.
+       Can I avoid that? --dry-run doesn't help since it requires a password too (why??)
+       Possibilities:
+           - switch from https to ssh for push only (see below)
+           - But figuring out whether a push is needed is something that can be done
+             locally, I think?  (Well, it will fail if a git pull is needed, so should do that
+             first.)
+             So really I think the correct but hard-to-remember workflow for syncing
+             would be:
+                 git pull
+                 git remote show origin | grep pushes
+             I'm not completely sure about that last part, but here's what I see in the output:
+
+               If everything is completely synced: "(up to date)"
+               If I have made local commits but haven't pushed them: "(fast-forwardable)"
+               If remote has changes I haven't fetched yet: "(local out of date)"
+               If I have fetched but not merged: "(local out of date)" (still)
+                   (in this case I think it means origin/master is ahead of master
+                   in local repo)
+                   (to see that: "git log --graph --decorate --all")
+
+             Really isn't this what I want to know, assuming I've just "git pull"ed:
+             is my HEAD the same as origin/master?  Can see that via:
+                 git log --graph --decorate --all
+             and verify that HEAD->master, origin/master, origin/HEAD are all same place,
+             and if not, we need to push?
+             I guess "git remote show origin" doesn't take very long usually,
+             but it *does* do something over the connection, which can be slow,
+             and seems unnecessary.
+
+    PA: switch from https to ssh, but *for push only* so as not to slow down "git pull"
+        (which doesn't need a password anyway assuming a public repo, and which takes .35 secs using git:,
+        .4 to .7 secs using https:, 2.5 secs using ssh). That is, have the following
+        in the [remote "origin"] part of .ssh/config:
+            url = https://github.com/MYNAME/MYREPO.git
+            pushUrl = git@github.com:MYNAME/MYREPO.git
+        and go through the instructions on github for setting up and adding the ssh public key.
+        To see what it's using:
+            $ git remote -v
+                origin      https://github.com/MYNAME/MYREPO.git (fetch)
+                origin      git@github.com:MYNAME/MYREPO.git (push)
+            $ git remote show origin
+                * remote origin
+                  Fetch URL: https://github.com/MYNAME/MYREPO.git
+                  Push  URL: git@github.com:MYNAME/MYREPO.git
+                  HEAD branch: master
+                  Remote branches:
+                    master tracked
+                    wiki   tracked
+                  Local branch configured for 'git pull':
+                    master merges with remote master
+                  Local ref configured for 'git push':
+                    master pushes to master (up to date)
+        Hey WAIT a minute-- "git remote show origin" showed everything is up to date!!!!
+        Oh wait that's saying "everything already pulled", not "everything already pushed".
+
     Q: is there a nice way of preparing a commit,
        including message, like in perforce?
        it's disorienting having to compose the message
@@ -851,11 +1058,52 @@ Don
        (not in a position to run it and find out at the moment I'm writing this)
 
 
+    Q: how to convert RCS history to git history?
+    A: someone has a tool called rcs-fast-export
+        cd gitrepos
+        git clone https://github.com/Oblomov/rcs-fast-export.git
+        cd <dir to convert>
+        git init
+        ../rcs-fast-export/rcs-fast-export.rb . | git fast-import
+        git reset
 
-     
-       
+POSSIBLE BUG: weird behavior on "git fetch --dry-run"
+    - don't use git pull for this, it gets confusing.
+    - and especially don't use -n, it does *not* mean --dry-run in general
+    - do the following twice in a row:
+        $ git fetch -v --dry-run
+        POST git-upload-pack (960 bytes)
+        remote: Counting objects: 3, done.
+        remote: Compressing objects: 100% (3/3), done.
+        remote: Total 3 (delta 0), reused 0 (delta 0), pack-reused 0
+        Unpacking objects: 100% (3/3), done.
+        From https://github.com/donhatch/donhatchnotes
+           cc792b3..a04a233  master     -> origin/master
+         = [up to date]      wiki       -> origin/wiki
+        $ git fetch -v --dry-run
+        From https://github.com/donhatch/donhatchnotes
+           cc792b3..a04a233  master     -> origin/master
+         = [up to date]      wiki       -> origin/wiki
+      It did less the second time!? So was it not a dry run!?
+      (same for "git pull").
+      However "git log --graph --decorate --all" seems to indicate that it was
+      indeed dry... hmm.
 
 
+Answered this: http://stackoverflow.com/questions/4750845/how-do-you-annotate-a-branch
 
+I like to make an empty commit whenever I create a new branch,
+with a commit message saying whatever needs to be said.
 
+git branch B A
+git checkout B
+git commit --allow-empty -m "Created branch 'B' from 'A'"
+
+This also has a wonderful side effect of making the history
+shown in "git log --graph" much clearer--
+namely it shows a clearly labelled fork in the tree
+at the time I created the branch,
+instead of what I'd normally get which is an unclear unlabelled fork at some later time
+when I happen to make my first commit while in B--
+that kind of thing keeps me in a constant fog.
 
