@@ -1,0 +1,14 @@
+The following are getting me down:
+  - click-to-type, and can't interact with a non-topmost window, on mac;
+    point-to-type less and less supported even though it leads to better
+    productivity
+  - scroll bars on the right
+  - scroll bars that snap back when I drift too far away from them
+  - those crappy scroll bars on ubuntu desktop
+  - 1-pixel-wide window borders
+  - no usable workflow for file merging exists any more
+    - I miss xxdiff-- all alternatives are confusing and can't see what
+      I'm doing or keep my bearings easily
+  - git log can't do swimlanes because it doesn't remember what branch
+      you checked things in on
+  - google thinks one shoe fits all people all the time for all tasks

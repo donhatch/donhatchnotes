@@ -156,9 +156,10 @@ NICE GIT LOG ALIASES:
     TODO: check out nice "git log" aliases in http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs, they look great
 
 BEST PRACTICES:
-    - hmm, empty commit at root of repo?  yeah, I think so.
+    - empty commit at root of repo, for various reasons
+      having to do with the fact that without it you can't do certain
+      rebase operations at the root, see:
           http://stackoverflow.com/questions/645450/git-how-to-insert-a-commit-as-the-first-shifting-all-the-others
-
           mkdir myNewRepo
           cd myNewRepo
           git init
@@ -181,13 +182,13 @@ BEST PRACTICES:
       this makes 'git log --graph' much easier to read!
 
 
-    - hmm! don't use aliases for branches.  I think it breaks various scripts
+    - Don't use aliases for branches.  it breaks various scripts
       that aren't expecting the output of "git branch" to contain that stuff.
         - breaks git-rebase-all (that guy's script)
         - gives useless extra columns in "git show-branch"
 
-    - never use -n thinking it will mean --dry-run.
-      It means that in some tools but not others.
+    - Never use -n thinking it will mean --dry-run.
+      It means that in some tools but not others, and it will bite you.
 
 
 
@@ -219,8 +220,7 @@ THINGS IT WOULD BE NICE TO HAVE A HELPER WRAPPER FOR MAYBE:
       NEED TO WRITE THE DAMN THING, OBVIOUSLY :-(
 
     - swim lanes!!! devoted a whole section to this, below.
-      It is git's foremost deficiency.
-
+      It is git's foremost deficiency, in my opinion.
 
     - Pisses me off when quitting out of git log makes tcsh say "Broken Pipe" which makes the top line scroll
       off the top of the terminal
@@ -245,7 +245,7 @@ THINGS IT WOULD BE NICE TO HAVE A HELPER WRAPPER FOR MAYBE:
                 status=0
             fi
             exit $status
-      (Actually I think maybe this has been fixed)
+      (Problem never happened in bash, I don't think)
 
     - I'm working on a clone of a central repository,
       and I currently have about 10 topic branches

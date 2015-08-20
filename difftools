@@ -70,7 +70,8 @@ A: Mostly I'm resolving conflicts during something like a "P4DIFF=xxdiff p4 reso
       Select All from Right
       Select nothing (how it comes up originally)
    Once I've made a decision on each diff,
-   I want to save the merged result, clobbering either the LHS or RHS file,
+   I want to save the merged result, most often clobbering either
+   the LHS or RHS file,
    which I do using the "Save as Left" or Save as Right" option,
    or "Save as..." to save it to a different file.
 
@@ -80,6 +81,9 @@ A: Mostly I'm resolving conflicts during something like a "P4DIFF=xxdiff p4 reso
    Maybe start with 2 copies of the rightmost,
    and then copy over what I want from the leftmost?  Not sure.
 
+   Just tried merging in tkdiff.  Really truly inadequate.
+     - selecting left or right sections for merge is painful and error prone, can't see clearly what I'm getting
+     - "save left" or "save right" doesn't exist, have to painfully find the file name from elsewhere
 
 kdiff3 notes:
   - color scheme is not too jarring but a bit weird and not sure it's completely useful:
