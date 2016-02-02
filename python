@@ -36,6 +36,86 @@ GOOD INTERESTING READING AND REFS:
             wrong thing if you use "is True". 
 
 GOTCHAS:
+    - Do not ever use "for line in sys.stdin():"; it will ruin your day!
+      If pauses for a while, it won't see any lines even if many are buffered.
+      Good workaround here, although it doesn't state that this is what
+      it's good for:
+        https://docs.python.org/2/library/functions.html#iter
+      Several stackoverflow questions related to it, everyone seems
+      to miss the point that it's just a heinous bug:
+        http://stackoverflow.com/questions/6033781/how-to-avoid-python-fileinput-buffering/6033880?noredirect=1#comment57974746_6033880
+        http://stackoverflow.com/questions/3670323/setting-smaller-buffer-size-for-sys-stdin
+      I think I want to file a bug report on it. Similar to:
+        http://bugs.python.org/issue1195 Problems on Linux with Ctrl-D and Ctrl-C during raw_input
+        http://bugs.python.org/issue1633941 for line in sys.stdin: doesn't notice EOF the first time
+      Possible contents:
+      ============================================================
+      Title: fileinput and 'for line in sys.stdin' do strange mockery of input buffering
+
+      Iterating over input using either 'for line in fileinput.input():'
+      or 'for line in sys.stdin:' has the following unexpected behavior:
+      no matter how many lines of input the process reads, the loop body is not entered until either
+      (1) at least 8193 chars have been read and at least one of them was a newline, or
+      (2) EOF is read (i.e. the read() system call returns a zero-length string).
+
+      The behavior I expect instead is what "for line in iter(sys.stdin.readline, ''):" does:
+      that is, the loop body is entered for the first time as soon as a newline or EOF is read.
+      Furthermore strace reveals that this well-behaved alternative code does sensible
+      input buffering, in the sense that the underlying system call being made is read(0,buf,8192),
+      thereby allowing it to get as many characters as are available on input, up to 8192 of them,
+      to be buffered and used in subsequent loop iterations.
+      This is familiar and sensible behavior, and is what I think of as "input buffering".
+
+      I anticipate there will be responses to this bug report of the form
+      "this is documented behavior; the fileinput and sys.stdin iterators do input buffering".
+      To that, I say: no, these iterators' unfriendly behavior is *not* input buffering
+      in any useful sense; my impression is someone may have implemented
+      what they thought the words "input buffering" meant, but if so, they really botched it.
+
+      This bug is most noticeable and harmful when using a filter written in python
+      to filter the output of an ongoing process that may have long pauses between lines
+      of output; e.g. running "tail -f" on a log file.  In this case, the python filter
+      spends a lot of time in a state where it is paused without reason,
+      having read many input lines that it has not yet processed.
+
+      If there is any suspicion that the delayed output is due to the previous program in the pipeline buffering its output instead, 
+      strace can be used on the python filter process to confirm that its input lines are in fact being read in a timely manner.
+      This is certainly true if the previous process in the pipeline is "tail -f", at least on my ubuntu linux system.
+
+      To demonstrate, run each of the following from the bash command line.
+      This was observed using bash 4.3.11(1), python 2.7.6, and python 3.4.3, on ubuntu 14.04 linux.
+
+      ----------------------------------------------
+      { echo a;echo b;echo c;sleep 1;} | python2.7 -c $'import fileinput,sys\nfor line in fileinput.input(): sys.stdout.write("line: "+line)'
+          # result (BAD): pauses for 1 second, prints the three lines, returns to prompt
+
+      { echo a;echo b;echo c;sleep 1;} | python2.7 -c $'import sys\nfor line in sys.stdin: sys.stdout.write("line: "+line)'
+          # result (BAD): pauses for 1 second, prints the three lines, returns to prompt
+
+      { echo a;echo b;echo c;sleep 1;} | python2.7 -c $'import sys\nfor line in iter(sys.stdin.readline, ""): sys.stdout.write("line: "+line)'
+          # result (GOOD): prints the three lines, pauses for 1 second, returns to prompt
+
+      { echo a;echo b;echo c;sleep 1;} | python3.4 -c $'import fileinput,sys\nfor line in fileinput.input(): sys.stdout.write("line: "+line)'
+          # result (BAD): pauses for 1 second, prints the three lines, returns to prompt
+
+      { echo a;echo b;echo c;sleep 1;} | python3.4 -c $'import sys\nfor line in sys.stdin: sys.stdout.write("line: "+line)'
+          # result (GOOD): pauses for 1 second, prints the three lines, returns to prompt
+
+      { echo a;echo b;echo c;sleep 1;} | python3.4 -c $'import sys\nfor line in iter(sys.stdin.readline, ""): sys.stdout.write("line: "+line)'
+          # result (GOOD): prints the three lines, pauses for 1 second, returns to prompt
+      ----------------------------------------------
+
+      Note that the 'for line in sys.stdin:' behavior is apparently fixed in python 3.4.
+      So the matrix of behavior observed above can be summarized as follows:
+
+                                                 2.7  3.4
+      for line in fileinput.input():             BAD  BAD
+      for line in sys.stdin:                     BAD  GOOD
+      for line in iter(sys.stdin.readline, ""):  GOOD GOOD
+
+      Note that adding '-u' to the python args makes no difference in behavior, in any of the above 6 command lines.
+      ===============================================
+
     - To get the last suffixLength elements of a list or tuple,
       listOrTuple[-suffixLength:] works most of the time,
       but it fails unexpectedly if suffixLength is 0,
@@ -105,9 +185,14 @@ GOTCHAS:
           >>> print [x for x in bar]
           []
        XXX give example from work
-      
+      See this for quite excellent workaround: http://stackoverflow.com/questions/1376438/how-to-make-a-repeating-generator-in-python
+      which is supposedly same as this:
+        http://bugs.python.org/msg89898
+      TODO: explore the difference.
+      Note the question itself proposes a third implementation, which I'm
+      having trouble following; I added a request for clarification.
 
-    - XXX MERGE THE FOLLOWING TWO GRIPES
+    - XXX MERGE THE FOLLOWING TWO GRIPES and refer to https://docs.python.org/3/faq/programming.html#why-do-lambdas-defined-in-a-loop-with-different-values-all-return-the-same-result  and http://stackoverflow.com/questions/938429/scope-of-python-lambda-functions-and-their-parameters
         - lambda contexts don't work sanely, apparently.
             >>> print [f() for f in [lambda:range(n) for n in range(4)]]
             [[0, 1, 2], [0, 1, 2], [0, 1, 2], [0, 1, 2]]
@@ -132,6 +217,37 @@ GOTCHAS:
             [4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
           see:
               http://math.andrej.com/2009/04/09/pythons-lambda-is-broken/
+
+      UPDATE: wait a minute, I think I'm changing my position on this.
+      see mcmanus's comment, April 9, 2009 at 19:44:
+          Take the following Python example:
+          >>> i = 1
+          >>> def f(): return i
+          >>> f()
+          1
+          >>> i = 2
+          >>> f()
+          2
+          I think that everybody expect this behavior and nobody would want
+          the second call to f() to return 1.
+      I don't think I can have it both ways!
+      Default args are cute, but certainly abusive.
+      Perhaps:
+          >>> makeIncrementor = lambda i: lambda n: n+i
+      or:
+          >>> def makeIncrementor(i): return lambda n: n+i
+      and then:
+          >>> fs = [makeIncrementor(i) for i in range(10)]
+          >>> [f(4) for f in fs]
+
+
+    - leaky scopes, see http://functional-orbitz.blogspot.com/2011/05/sometimes-i-forget-full-degree-in-which.html
+        >>> [s for s in [1, 2,3]]
+        [1, 2, 3]
+        >>> s
+        3
+      (fixed in python3)
+
 
     - 1==True and 13==True evaluate to False, but
       bool(1)==True and bool(13)==True evaluate to True
@@ -173,8 +289,6 @@ TRICKS:
 
 
 TO EXPERIMENT WITH:
-    - generator functions: see http://www.secnetix.de/~olli/Python/examples.hawk
-      I don't think this is mentioned in the Beazley book at all!
     - hmm! all standard types (string, integer) are classes and so can be
       sublassed?
     - http://www.secnetix.de/~olli/Python/dynamic_typing.hawk mentions
@@ -207,6 +321,8 @@ FEATURES TO KEEP IN MIND:
 
 
 QUESTIONS (most recent first):
+    Q: Can I make a PRINT function?
+
     Q: beazley p.16 it says "s1" u "s2" can be different from u"s1s2" ...
        what's an example of this? (It says details in Ch.4 and Appendix A)
     Q: beazley p.16 says raw strings can't end in a single backslash--
@@ -468,3 +584,5 @@ PYTHON PROS AND CONS:
     CON: requiring \ at end of line when splitting lines
       is somewhat error prone-- extra space can get inserted
       when cutting and pasting or moving from unix to dos file systems
+
+
