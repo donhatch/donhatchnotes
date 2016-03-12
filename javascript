@@ -1,17 +1,26 @@
+Great book: "Javascript: The Good Parts" by Douglas Crockford
+
+Nice tool, should be very useful for, e.g., mitigating variable scoping surprises:
+  http://jshint.com/
+
 Great doc about mouse events and what happens in different
 browsers: "Javascript Madness"
     http://unixpapa.com/js/mouse.html
 
-
-
 Clearest description of automatic semicolon insertion, maybe:
 
-http://lucumr.pocoo.org/2011/2/6/automatic-semicolon-insertion/
-http://cjihrig.com/blog/the-dangers-of-javascripts-automatic-semicolon-insertion/
+  http://lucumr.pocoo.org/2011/2/6/automatic-semicolon-insertion/
+  http://cjihrig.com/blog/the-dangers-of-javascripts-automatic-semicolon-insertion/
+
+  http://inimino.org/~inimino/blog/javascript_semicolons
+  http://blog.izs.me/post/2353458699/an-open-letter-to-javascript-leaders-regarding
+
+Good debugging tips: (TODO: read it thoroughly)
+  http://alistapart.com/article/advanced-debugging-with-javascript
 
 
-http://inimino.org/~inimino/blog/javascript_semicolons
-http://blog.izs.me/post/2353458699/an-open-letter-to-javascript-leaders-regarding
+QUESTIONS:
+==========
 
 Q: still don't have a good mnemonic for what I have to remember :-(
 
@@ -22,3 +31,13 @@ A: typeof x == "string"
    inexact: x instanceof String
 
 Q: stringify/EXACT function?
+
+More Gotchas:
+ - NEVER use "for i in array" to iterate over an array! Lots of explanations on the web,
+   but the jist of it is that it will work but i will be a string, not an int--
+   lots of unnecessary conversion back and forth!
+
+
+GIANT WTF:
+// http://stackoverflow.com/questions/1063007/how-to-sort-an-array-of-integers-correctly
+someone gives a function that only returns bools, when it should return ints... but it seems to work regardless!? wtf!?

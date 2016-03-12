@@ -3,15 +3,22 @@ Internal Bash functions, useful when writing loadable builtins: https://gist.git
 The Ultimate Bash Array Tutorial with 15 Examples: http://www.thegeekstuff.com/2010/06/bash-array-tutorial/
 Handling positional parameters: http://wiki.bash-hackers.org/scripting/posparams
 Bash Pitfalls: http://mywiki.wooledge.org/BashPitfalls
+Fantastic series of articles: http://www.catonmat.net/series/bash-one-liners-explained
+With cheat sheets.
+
+Grouping cheat sheet: http://stackoverflow.com/questions/2188199/how-to-use-double-or-single-bracket-parentheses-curly-braces#answer-8552128
+Redirections cheat sheet: http://www.catonmat.net/download/bash-redirections-cheat-sheet.pdf
+History cheat sheet: http://www.catonmat.net/download/bash-history-cheat-sheet.pdf
+Command line editing cheat sheet: http://www.catonmat.net/blog/bash-emacs-editing-mode-cheat-sheet/
 ==============================================
 Useful settings:
 
 # from "help set"
 set -e # Exit immediately if a command exits with a non-zero status.
 set -u # Treat unset variables as an error when substituting.
+set -o pipefail # Fail if any command in pipeline fails
 #set -v # Print shell input lines as they are read. (like set verbose in tcsh)
 #set -x # Print commands and their arguments as they are executed. (like set echo in tcsh)
-
 
 
 ==============================================
@@ -103,6 +110,7 @@ A:
    for x in *.cc; do echo $x; done
    for x in a b c; do echo $x; done
    for x in `echo a b c`; do echo $x; done
+   for x in `seq 1 10`; do echo $x; done
 
 Q: if true?
 A: if true; then echo foo; fi

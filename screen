@@ -1,6 +1,30 @@
+Gnu screen program
+
+  http://aperiodic.net/screen/quick_reference
+  http://tomlee.co/2011/10/gnu-screen-splitting/
+
+Q: how do I split a region and open a new bash shell in the new region?
+A:   to split: ^a S or ^a |
+     to navigate among panes: ^a tab,
+        also useful to add bindings as suggested in man page:
+            bind j focus down                 
+            bind k focus up                   
+            bind t focus top                  
+            bind b focus bottom               
+       XXX wait, that didn't work like I thought it would
+
+     to "create a new window with a command prompt in this pane":
+       ^a c
+
+Q: if am split vertically, can I add
+   another pane across the bottom?
+
 Q: can't scroll using terminal window scroll bars or mouse,
    at least when ssh'ed in from mac to linux
 A: http://slaptijack.com/system-administration/mac-os-x-terminal-and-gnu-screen-scrollback/
    says add this to .screenrc:
      defscrollback 5000
      termcapinfo xterm* ti@:te@
+
+
+
