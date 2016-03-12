@@ -9,6 +9,7 @@ http://stackoverflow.com/questions/12905426/what-is-a-faster-alternative-to-pyth
 I've tried:
   twistd -no web --path=.
     - seems to work fine. maybe better performance than the python way, not sure
+    - nicer than python since annotates with sizes and types
   go myserver.go
     - requires making a little source file
     - doesn't sort the directory entries!? so not very usable
