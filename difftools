@@ -141,6 +141,8 @@ kdiff3 questions:
 
 diffuse notes:
   - ooh pretty color scheme, but is it useful?
+    - actually it's *not* useful-- if I have a single-char difference
+      on a very long line, it's really hard to find it.
   - claims to do n-way merge? hmm sounds cool
   - built-in rcs support on command line (like tkdiff, maybe not exactly same syntax)
   - sweet elegant global view on slider

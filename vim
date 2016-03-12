@@ -312,6 +312,18 @@ PA: I don't think I can do exactly that,
           first Tab: expand to longest common prefix of all expansions
           second Tab: show list of all possible expansions
 
+Q: how do I get it to ignore the frickin mouse wheel?
+   when I accidentally scroll and paste, NO I don't want it to paste
+   at whatever place the cursor scrollwheeled to.
+     http://superuser.com/questions/610937/how-to-disable-scroll-wheel-in-vim
+   does not work for me on Linux! (because on X11, scroll wheel actually
+   generates key events!?)
+PA: might be unique to gnome-terminal, see:
+http://unix.stackexchange.com/questions/44513/disabling-mouse-support-in-vim-in-a-gnome-terminal-environment
+   yeah, problem doesn't happen in xterm.
+   more info:
+     https://bugs.kde.org/show_bug.cgi?id=170582
+
 
 
 =============================================================

@@ -114,4 +114,7 @@ On Windows:
                 in which ctrl-c and ctrl-v don't mean copy and paste!
                 so, guess I can't use this?  :-(
 
+On Mac:
+  Generally cmd-c to copy and cmd-v to paste, cmd-x to cut.
+  To view clipboard contents: Finder->Edit -> Show Clipboard
 ==========================================================================

@@ -32,7 +32,7 @@ Git resources:
         really good overview of git and other version control systems, with more links
 
     http://blogs.gnome.org/newren/2007/12/08/limbo-why-users-are-more-error-prone-with-git-than-other-vcses/
-        recommends:
+        recommends, for common use:
             "git diff HEAD" instead of "git diff"    (shows diffs from head whether marked for commit or not)
             "git commit -a" instead of "git commit"  (automatically adds all changes to tracked files)
 

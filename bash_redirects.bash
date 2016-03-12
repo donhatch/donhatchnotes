@@ -49,11 +49,11 @@ function brightgreen() { printf "\x1b[32;1m$@\x1b[0m\n" ; }
 function test_abcd() {
   echo "    Testing a=$a b=$b c=$c d=$d"
 
-  echo_and_eval "         (command $a>&$b  $c>&$d) 6>OUT6 7>OUT7 8>OUT8 9>OUT9"
+  echo_and_eval "          { command $a>&$b   $c>&$d; } 6>OUT6 7>OUT7 8>OUT8 9>OUT9"
   unparenthesized_behavior=`analyze_and_remove_outputs`
   darkgreen "$unparenthesized_behavior"
 
-  echo_and_eval "        ((command $a>&$b) $c>&$d) 6>OUT6 7>OUT7 8>OUT8 9>OUT9"
+  echo_and_eval "        { { command $a>&$b;} $c>&$d;} 6>OUT6 7>OUT7 8>OUT8 9>OUT9"
   left_to_right_behavior=`analyze_and_remove_outputs`
   if [ "$left_to_right_behavior" = "$unparenthesized_behavior" ]; then
     darkgreen "$left_to_right_behavior"
@@ -61,7 +61,7 @@ function test_abcd() {
     brightred "$left_to_right_behavior"
   fi
 
-  echo_and_eval "        ((command $c>&$d) $a>&$b) 6>OUT6 7>OUT7 8>OUT8 9>OUT9"
+  echo_and_eval "        { { command $c>&$d;} $a>&$b;} 6>OUT6 7>OUT7 8>OUT8 9>OUT9"
   right_to_right_behavior=`analyze_and_remove_outputs`
   if [ "$right_to_right_behavior" = "$unparenthesized_behavior" ]; then
     darkgreen "$right_to_right_behavior"

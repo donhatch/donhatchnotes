@@ -276,3 +276,38 @@ A: History -> Clear browsing data... -> Browsing history (and maybe download his
    Note however that the autosuggest drop-down
    also looks at bookmarks!  So if you really don't want any dropdowns,
    you'd have to remove all your bookmarks.
+
+Q: I know an extension can't have multiple icons.
+   But I'd like two readily accessible buttons:
+    1. "Clear App Cache and Cache"
+    2. "Clear App Cache, Cache, and Cookies".
+   Having to switch the Clear Cache options back and forth just sucks!
+
+A:
+  Strategy 1: Make 1 or more copies of the Clear Cache extension,
+   with separate icon and options for each.
+     [is the source available?]
+     [can just copy the dir, change the version, and reload it?]
+     [bleah! how to make it appear separately?]
+     [too hard :-( ]
+
+  Strategy 2: Make two very simple special purpose extensions,
+   with distinguishable icons, that do exactly the two actions I want.
+   Maybe:
+        Clear Cache icon with an exclamation point
+        Clear Cache icon with two exclamation points
+     [The "Delete All Cookies From Javascript" extension might
+      be a good reference.]
+
+  Strategy 3: Enhance Clear Cache extension to support configurable
+   entries in the right-click menu.
+   The options page should allow editing them:
+        - rename an entry
+        - clone an entry
+        - add an entry (or maybe just clone?)
+        - delete an entry (unless it's the default one)
+        - swap order of two entries (or move entry left/right earlier/later)
+        - show/hide entry in menu
+        - different keyboard shortcuts for different entries
+    [Yow! Way too ambitious.]
+
