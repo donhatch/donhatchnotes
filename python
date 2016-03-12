@@ -48,73 +48,87 @@ GOTCHAS:
       I think I want to file a bug report on it. Similar to:
         http://bugs.python.org/issue1195 Problems on Linux with Ctrl-D and Ctrl-C during raw_input
         http://bugs.python.org/issue1633941 for line in sys.stdin: doesn't notice EOF the first time
-      Possible contents:
-      ============================================================
-      Title: fileinput and 'for line in sys.stdin' do strange mockery of input buffering
+      I filed a bug http://bugs.python.org/issue26290 , with the following contents:
+        ============================================================
+        Title: fileinput and 'for line in sys.stdin' do strange mockery of input buffering
 
-      Iterating over input using either 'for line in fileinput.input():'
-      or 'for line in sys.stdin:' has the following unexpected behavior:
-      no matter how many lines of input the process reads, the loop body is not entered until either
-      (1) at least 8193 chars have been read and at least one of them was a newline, or
-      (2) EOF is read (i.e. the read() system call returns a zero-length string).
+        Iterating over input using either 'for line in fileinput.input():'
+        or 'for line in sys.stdin:' has the following unexpected behavior:
+        no matter how many lines of input the process reads, the loop body is not
+        entered until either (1) at least 8193 chars have been read and at least one of
+        them was a newline, or (2) EOF is read (i.e. the read() system call returns
+        zero bytes).
 
-      The behavior I expect instead is what "for line in iter(sys.stdin.readline, ''):" does:
-      that is, the loop body is entered for the first time as soon as a newline or EOF is read.
-      Furthermore strace reveals that this well-behaved alternative code does sensible
-      input buffering, in the sense that the underlying system call being made is read(0,buf,8192),
-      thereby allowing it to get as many characters as are available on input, up to 8192 of them,
-      to be buffered and used in subsequent loop iterations.
-      This is familiar and sensible behavior, and is what I think of as "input buffering".
+        The behavior I expect instead is what
+        "for line in iter(sys.stdin.readline, ''):" does: that is, the loop body is
+        entered for the first time as soon as a newline or EOF is read.
+        Furthermore strace reveals that this well-behaved alternative code does
+        sensible input buffering, in the sense that the underlying system call being
+        made is read(0,buf,8192), thereby allowing it to get as many characters as are
+        available on input, up to 8192 of them, to be buffered and used in subsequent
+        loop iterations.  This is familiar and sensible behavior, and is what I think
+        of as "input buffering".
 
-      I anticipate there will be responses to this bug report of the form
-      "this is documented behavior; the fileinput and sys.stdin iterators do input buffering".
-      To that, I say: no, these iterators' unfriendly behavior is *not* input buffering
-      in any useful sense; my impression is someone may have implemented
-      what they thought the words "input buffering" meant, but if so, they really botched it.
+        I anticipate there will be responses to this bug report of the form "this is
+        documented behavior; the fileinput and sys.stdin iterators do input buffering".
+        To that, I say: no, these iterators' unfriendly behavior is *not* input
+        buffering in any useful sense; my impression is that someone may have
+        implemented what they thought the words "input buffering" meant, but if so,
+        they really botched it.
 
-      This bug is most noticeable and harmful when using a filter written in python
-      to filter the output of an ongoing process that may have long pauses between lines
-      of output; e.g. running "tail -f" on a log file.  In this case, the python filter
-      spends a lot of time in a state where it is paused without reason,
-      having read many input lines that it has not yet processed.
+        This bug is most noticeable and harmful when using a filter written in python
+        to filter the output of an ongoing process that may have long pauses between
+        lines of output; e.g. running "tail -f" on a log file.  In this case, the
+        python filter spends a lot of time in a state where it is paused without
+        reason, having read many input lines that it has not yet processed.
 
-      If there is any suspicion that the delayed output is due to the previous program in the pipeline buffering its output instead, 
-      strace can be used on the python filter process to confirm that its input lines are in fact being read in a timely manner.
-      This is certainly true if the previous process in the pipeline is "tail -f", at least on my ubuntu linux system.
+        If there is any suspicion that the delayed output is due to the previous
+        program in the pipeline buffering its output instead, strace can be used on the
+        python filter process to confirm that its input lines are in fact being read in
+        a timely manner.  This is certainly true if the previous process in the
+        pipeline is "tail -f", at least on my ubuntu linux system.
 
-      To demonstrate, run each of the following from the bash command line.
-      This was observed using bash 4.3.11(1), python 2.7.6, and python 3.4.3, on ubuntu 14.04 linux.
+        To demonstrate the bug, run each of the following from the bash command line.
+        This was observed using bash 4.3.11(1), python 2.7.6, and python 3.4.3,
+        on ubuntu 14.04 linux.
 
-      ----------------------------------------------
-      { echo a;echo b;echo c;sleep 1;} | python2.7 -c $'import fileinput,sys\nfor line in fileinput.input(): sys.stdout.write("line: "+line)'
-          # result (BAD): pauses for 1 second, prints the three lines, returns to prompt
+        ----------------------------------------------
+        { echo a;echo b;echo c;sleep 1;} | python2.7 -c $'import fileinput,sys\nfor line in fileinput.input(): sys.stdout.write("line: "+line)'
+            # result (BAD): pauses for 1 second, prints the three lines, returns to prompt
 
-      { echo a;echo b;echo c;sleep 1;} | python2.7 -c $'import sys\nfor line in sys.stdin: sys.stdout.write("line: "+line)'
-          # result (BAD): pauses for 1 second, prints the three lines, returns to prompt
+        { echo a;echo b;echo c;sleep 1;} | python2.7 -c $'import sys\nfor line in sys.stdin: sys.stdout.write("line: "+line)'
+            # result (BAD): pauses for 1 second, prints the three lines, returns to prompt
 
-      { echo a;echo b;echo c;sleep 1;} | python2.7 -c $'import sys\nfor line in iter(sys.stdin.readline, ""): sys.stdout.write("line: "+line)'
-          # result (GOOD): prints the three lines, pauses for 1 second, returns to prompt
+        { echo a;echo b;echo c;sleep 1;} | python2.7 -c $'import sys\nfor line in iter(sys.stdin.readline, ""): sys.stdout.write("line: "+line)'
+            # result (GOOD): prints the three lines, pauses for 1 second, returns to prompt
 
-      { echo a;echo b;echo c;sleep 1;} | python3.4 -c $'import fileinput,sys\nfor line in fileinput.input(): sys.stdout.write("line: "+line)'
-          # result (BAD): pauses for 1 second, prints the three lines, returns to prompt
+        { echo a;echo b;echo c;sleep 1;} | python3.4 -c $'import fileinput,sys\nfor line in fileinput.input(): sys.stdout.write("line: "+line)'
+            # result (BAD): pauses for 1 second, prints the three lines, returns to prompt
 
-      { echo a;echo b;echo c;sleep 1;} | python3.4 -c $'import sys\nfor line in sys.stdin: sys.stdout.write("line: "+line)'
-          # result (GOOD): pauses for 1 second, prints the three lines, returns to prompt
+        { echo a;echo b;echo c;sleep 1;} | python3.4 -c $'import sys\nfor line in sys.stdin: sys.stdout.write("line: "+line)'
+            # result (GOOD): prints the three lines, pauses for 1 second, returns to prompt
 
-      { echo a;echo b;echo c;sleep 1;} | python3.4 -c $'import sys\nfor line in iter(sys.stdin.readline, ""): sys.stdout.write("line: "+line)'
-          # result (GOOD): prints the three lines, pauses for 1 second, returns to prompt
-      ----------------------------------------------
+        { echo a;echo b;echo c;sleep 1;} | python3.4 -c $'import sys\nfor line in iter(sys.stdin.readline, ""): sys.stdout.write("line: "+line)'
+            # result (GOOD): prints the three lines, pauses for 1 second, returns to prompt
+        ----------------------------------------------
 
-      Note that the 'for line in sys.stdin:' behavior is apparently fixed in python 3.4.
-      So the matrix of behavior observed above can be summarized as follows:
+        Notice the 'for line in sys.stdin:' behavior is apparently fixed in python 3.4.
+        So the matrix of behavior observed above can be summarized as follows:
 
-                                                 2.7  3.4
-      for line in fileinput.input():             BAD  BAD
-      for line in sys.stdin:                     BAD  GOOD
-      for line in iter(sys.stdin.readline, ""):  GOOD GOOD
+                                                   2.7  3.4
+        for line in fileinput.input():             BAD  BAD
+        for line in sys.stdin:                     BAD  GOOD
+        for line in iter(sys.stdin.readline, ""):  GOOD GOOD
 
-      Note that adding '-u' to the python args makes no difference in behavior, in any of the above 6 command lines.
-      ===============================================
+        Note that adding '-u' to the python args makes no difference in behavior, in
+        any of the above 6 command lines.
+
+        Finally, if I insert "strace -T" before "python" in each of the 6 command lines
+        above, it confirms that the python process is reading the 3 lines of input
+        immediately in all cases, in a single read(..., ..., 4096 or 8192) which seems
+        reasonable.
+        ===============================================
+
 
     - To get the last suffixLength elements of a list or tuple,
       listOrTuple[-suffixLength:] works most of the time,
@@ -402,6 +416,12 @@ QUESTIONS (most recent first):
     Q: Why would I want to use a tuple instead of a list? (Faster for const?)
 
 ANSWERED QUESTIONS (most recent first):
+    Q: where's that cool writeup of datetime,time,etc stuff with diagrams?
+    A: a few different nice ones
+        https://wiki.python.org/moin/WorkingWithTime
+        http://www.logophile.org/blog/2010/08/15/python-datetime-conversions/
+        http://stackoverflow.com/questions/13703720/converting-between-datetime-timestamp-and-datetime64#answer-21916253
+
     Q: beazley p.17 says "..." is used in extended slicing operations,
        but I don't see that on p.24?
     A: see p.33.  E.g. a[i:j:stride], a[i:j, n:m], or a[..., i:j]
