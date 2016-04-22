@@ -1,0 +1,14 @@
+Q: Why aren't paper-thin magnets the strongest magnets of a given volume?
+
+I'm reading the "Force between magnets" wikipedia page https://en.wikipedia.org/wiki/Magnetic_dipole%E2%80%93dipole_interaction,
+in which I'm having trouble reconciling the following statements:
+
+"If all of the magnetic dipoles that make up two magnets are known then the net force on both magnets can be determined by summing up all these interactions between the dipoles of the first magnet and that of the second."
+
+"
+
+which says the following:
+https://en.wikipedia.org/wiki/Magnetic_dipole
+
+
+Oh... I see. I was assuming uniform distribution and properties-- bad assumption.

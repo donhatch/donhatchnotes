@@ -163,3 +163,6 @@ Completion screwups (some local to google, some not):
         (OH, the completion for ci seems to be some sort of automatic one,
         it doesn't appear til I try it for the first time,
         then it reappears even after removed!?)
+        (see the explanation and workaround above)
+    - alias pppp ~/<tab>  doesn't work.  (not that it really makes sense, but I might do that when composing the line and then backfix it afterwards)
+        (this is another automatic one, see workaround above)

@@ -2,6 +2,13 @@ Linux chrome shortcuts: https://support.google.com/chrome/answer/171571?hl=en
 ==============================================
 Questions about chrome:
 
+Q: what's that chrome request debugger?
+PA: well there's an extension called HTTP Trace: https://chrome.google.com/webstore/detail/http-trace/idladlllljmbcnfninpljlkaoklggknp/related?hl=en-US
+    And mine works pretty well: webRequestExample
+      https://github.com/donhatch/chromeWebRequestExample
+    Currently have to edit source to change params though.
+
+
 Q: close a tab?
 A: ctrl-w (linux), cmd-w (mac)
 Q: close a window?
@@ -142,6 +149,8 @@ Hmm, it says initiator was Other,
 and does not look like it's coming from a redirect.  Where the hell is it coming from???
 
 And strategy for more intelligent redirecting if possible?
+
+Also to look into:  "meta refresh", which apparently does a redirect without clobbering back button history (but it has an annoying delay)
 
 
 Older material (should merge with the above at some point)

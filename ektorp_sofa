@@ -1,0 +1,5 @@
+2000x2000 image: http://www.ikea.com/PIAimages/0096948_PE237110_S5.JPG
+
+Actual imagery is:
+    [42..1958]x[513..1490]
+(some jpg artifacts at least 5 pixels lower in y, but whatever)

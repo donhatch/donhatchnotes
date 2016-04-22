@@ -1,0 +1,88 @@
+https://en.wikipedia.org/wiki/Lightweight_markup_language
+http://hyperpolyglot.org/lightweight-markup
+http://self.gutenberg.org/articles/List_of_lightweight_markup_languages
+http://blog.codinghorror.com/the-future-of-markdown/
+http://dpk.io/simplemarkup - good thoughts on the issue
+https://gist.github.com/dupuy/1855764
+  - says github supports markdown and rst - markdown more popular,
+    rst more powerful.
+
+Unacceptable things about HTML/XHTML/XML:
+It's pretty awful to edit.
+I'd like to edit something that is predictably converted to html,
+but the following need to be easier:
+ - commenting/uncommenting sections
+ - closing links
+ - very easy switching between one set of lines
+   and another (e.g. whether to get d3.js from remote
+   or local file) (actually do that with dynamic scripting, never mind)
+
+HAML:
+  I made a brief ill-advised attempt to port some web pages to haml:
+    http://haml.info/
+  and learned what I don't like about it:
+    - can't put each attr on a separate line (so can be
+      easily reordered and individually commented out or deleted):
+      "However, newlines may only be placed immediately after commas."
+    - whether :javascript puts CDATA tags around the script
+      depends on some ruby configuration setting!? wtf?
+      (I just assume it doesn't, and insert the tags manually)
+    - a bunch of other stuff depends on ruby env too, see http://chriseppstein.github.io/blog/2010/02/08/haml-sucks-for-content/
+    - why couldn't non-html comment char be '#' instead of '-#'?
+      this should be minimal. (I like that html comment char '/' is one char,
+      sort of.) Yeah I know, '#' is used to mean start of a div with id.
+      Whatever.
+    - indenting is too strict: I can't experiment with
+      various alternatives of a % line by commenting
+      all but one of them out, unless the uncommented one
+      is last
+    - very ruby-centric in general
+    - oh no! line numbers in console error message don't match the .haml file!
+      (I guess that will be true for any preprocessor)
+    - error prone: sometimes I edit the .html file when I shouldn't
+    - error prone: sometimes I put stuff in -# comments when they should go in <!-- --> comments
+  And wait, wtf:
+    http://chriseppstein.github.io/blog/2010/02/08/haml-sucks-for-content/
+    http://designshack.net/articles/html/save-loads-of-time-by-writing-your-html-with-haml/
+    Okay so the creator of haml thinks it sucks for content,
+    and I should use the markdown filter?  Jeez.
+    And... markdown filter doesn't work for me :-( It says:
+      Haml error on line 330: "markdown" filter's redcarpet dependency missing: try installing it or adding it to your Gemfile
+    but "gem install redcarpet" fails.
+  Note one of the arguments used is that haml's doc is written in markdown,
+  which I think may just be an artifact of that fact that that's what
+  github supports. 
+
+I think I'm leaning towards markdown or rst.
+Hmm http://blog.codinghorror.com/the-future-of-markdown/
+says rst is the betamax of lightweight markup languages:
+technically superior, but eventually eclipsed.
+See https://gist.github.com/dupuy/1855764 , it's definitely making me
+want to use rst.  Highlights:
+
+MARKDOWN
+ - doesn't support tables- kind of a dealbreaker
+ - no comment syntax!? have to use html comments!? definitely a dealbreaker!
+
+RESTRUCTUREDTEXT
+ + supports tables-- nicely!
+ + DOES support comments
+ - produces quite verbose output (unlike haml which is a direct translation)
+
+Q: workflow for automatically compiling a file to html each time I write to it?
+A: 
+   Use inotifywait, and the specific operations that vim is known to do.
+   The following seems to work pretty well, although there are certainly
+   race conditions (every once in a while one of them will fail and need to be restarted):
+     first window:
+       vim the .markdown (or whatever) file
+     second window: in bash:
+       MYCOOLFILE=myCoolFile
+       while inotifywait -e delete_self $MYCOOLFILE.rst; do make && echo GOOD || echo BAD; done
+     third window:
+       MYCOOLFILE=myCoolFile
+       while true; do echo ===================================; colordiff -c $MYCOOLFILE.html.prev $MYCOOLFILE.html; /bin/cp $MYCOOLFILE.html $MYCOOLFILE.html.prev; echo ===================================; inotifywait -e close_write $MYCOOLFILE.html; done
+     and the .html file will be ready for reloading each save.
+
+Q: actually can I make it even reload in the browser (chrome) on each successful recompile? hmm!
+

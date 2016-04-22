@@ -1,0 +1,7 @@
+unbuffer program!  On ubuntu, it's in the expect-dev package.
+
+Common misconception is that the 'stdbuf' program does it,
+but in fact it's useless.  From its man page:
+"NOTE: If COMMAND adjusts the buffering of its standard  streams  ('tee'
+does  for  e.g.) then that will override corresponding settings changed
+by 'stdbuf'.

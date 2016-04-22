@@ -1,0 +1,10 @@
+What a colossal waste of time.
+
+Should read this, maybe it justifies it, but is a bit hard to understand:
+  https://annevankesteren.nl/2015/02/same-origin-policy
+Others do better:
+  http://stackoverflow.com/questions/4850702/is-cors-a-secure-way-to-do-cross-domain-ajax-requests
+  http://stackoverflow.com/questions/6240212/with-respect-to-client-side-security-does-cors-do-anything-other-than-subvert-s
+  http://www.slideshare.net/null0x00/cors-and-insecurity
+
+Yeah, ok, SOP is necessary :-(

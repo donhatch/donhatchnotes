@@ -1,0 +1,39 @@
+Way cool tool!
+
+QUESTIONS:
+Q:  Is there a way to get a callee map that doesn't lie? According to
+    http://yosefk.com/blog/how-profilers-lie-the-cases-of-gprof-and-kcachegrind.html ,
+    google's cpu profiler gives full information, but then it gets thrown
+    away on conversion to the callgrind format.
+    Can we make that not happen?  Perhaps by tweaking.
+
+Q: Can I get to google's profiler that is talked about on that web page?
+   Instructions inside google refer only to pprof and callgrind,
+   not sure if these are related.
+A: It's pprof.
+
+
+ANSWERED QUESTIONS:
+
+[posted here: http://stackoverflow.com/questions/35647615/how-do-i-get-back-to-the-beginning-in-kcachegrind
+Q: How do I get back to the beginning in kcachegrind?
+  Sometimes I run kcachegrind, click around awhile, hit the little 'x' that closes the left panel (oops! no idea how to get it back), click around some more, get totally lost, then exit kcachegrind.
+
+  Then I later re-run kcachegrind again on the same input file, hoping to start afresh, but instead, kcachegrind "helpfully" remembers the broken state I was in and puts me back there, i.e. totally lost and with a missing panel that I have no idea how to get back.
+
+  How do I recover?
+
+  - Hitting Up,Up,Up... doesn't help me find node "main" because I'm in a cycle, and main isn't even in the current call graph because I'm in a thread.
+  - File->Reload doesn't help.
+  - View->Layout-> Restore To Default doesn't help.
+  - Renaming the input file doesn't help.
+  - Removing and re-installing kcachegrind doesn't help.
+
+  How do I get back to the beginning?  That is, default layout, default node, default everything else.
+
+  I'm using KCachegrind Version 0.7.4kde on ubuntu 14.04.
+
+A:
+  I found this by using the strace program.
+
+  rm ~/.kde/share/config/kcachegrindrc

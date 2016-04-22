@@ -1,0 +1,20 @@
+
+http://stackoverflow.com/questions/5947742/how-to-change-the-output-color-of-echo-in-linux
+
+Tools for figuring it out:
+  - tput (described in the how-to-change-the-output-color-of-echo-in-linux page)
+      (bleah, seems to be lacking)
+  - scriptecho is supposed to be good, haven't installed it
+  - colortest package:
+      colortest-8
+      colortest-16
+      colortest-16b <-- ooh this one is very useful! shows escape sequences!
+                        what it doesn't say is, to get back to normal:
+                        ESC[0m
+                        hmm actually I'm having trouble getting any useful
+                        info out of it.
+      colortest-256
+
+
+
+echo "$(tput setaf 1)Hello, world$(tput sgr0)"

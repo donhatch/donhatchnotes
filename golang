@@ -1,0 +1,4 @@
+
+Q: stringify?
+A: fmt.Printf("%#v", x)
+
