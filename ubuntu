@@ -1,0 +1,206 @@
+Q: screen magnifier? (have xmag, continuous would be better)
+A: kmag
+    and click on Mouse (not sure what weird state it was in before)
+    settings -> Stays on top -> off
+    argh! turned off menu bar, how do I get it back?
+        well, can edit ~/.kde/share/config/kmagrc
+        and change MenuBar=Disabled to MenuBar=Enabled (in 2 places)
+        or just remove the file
+
+Q: in kmag (or something else?) how to see rgb of current pixel?
+A: gpick's eyedropper shows nice mag window with continous rgb,
+   it seems to be the only tool I know of that does.  None of the magnifiers do.
+   (see nonwork/colorchoosers)
+
+
+
+Q: gamma?
+A: xgamma
+   xgamma -?
+   xgamma -gamma 1.2 or whatever
+
+Q: how do I install things?
+   can I just run yum install or something?
+   (not sure what equivalent is on ubuntu)
+PA: sudo apt-get install <package name>
+    or sudo apt install <package name>    (maybe same thing but doesn't prompt?)
+    and, there's something called ineptitude?
+    not sure if that's just a front-end for apt-get or what
+
+Q: how do I tell what's installed? it's not rpm evidently
+    dpkg-query?
+    apt?
+A: http://www.howtogeek.com/howto/linux/show-the-list-of-installed-packages-on-ubuntu-or-debian/
+   To list installed packages:
+       dpkg --get-selections
+           huh? it doesn't list qgis?
+Q: how do I list what files are in an installed package?
+A: dpkg -L perl
+Q: how do I tell what installed package a file came from?
+A: dpkg -S /usr/bin/perl
+
+Q: acroread?
+    hmm, I "ineptitude"d it, but it's not showing up in dpkg...
+    oh, I guess the package doesn't exist... gives the same output
+    if I type garbage.
+
+
+Q: graphical diff?
+A: tkdiff
+   also, sudo apt-get install xxdiff.
+   see ./difftools
+
+Q: xmouse (focus-follows-mouse)?
+A: ccsm (Compiz Config Settings Manager)
+       -> General Options
+       -> Focus & Raise Behavior
+           turn off click to focus
+           turn off raise on click
+           turn off auto-raise
+           leave focus prevention level low
+    Q: there's a delay before focus, so often when I move mouse to a window and hit F1
+       it's not recieved in the desired window.
+       Is the delay intentional, and if so, can I get rid of it?
+    PA: probably not intentional since it's so varying...
+        also went away when I rebooted
+    Q: now windows don't raise even if I click on them, which is great...
+       but they don't raise even when clicked in the title bar or border!
+       can I make them get raised in that case?
+    PA:
+        dconf-editor
+            org/gnome/desktop/wm/preferences
+                focus-mode sloppy (was "click" before even though I set it to sloppy using ccsm)
+                auto-raise leave off
+                raise-on-click on->off
+        seems to work for the gnome-terminal windows but not for chrome? bleah!
+            raise-on-click off:
+                click in gnome-terminal titlebar: raise
+                click in gnome-terminal: no raise
+                click in chrome titlebar: no raise
+                click in chrome: no raise
+            raise-on-click on:
+                click anywhere: raise
+
+Q: how do I make the default terminal font smaller?
+   my preferred terminal font size is what I get from one ctrl-minus.
+PA: rightclick on terminal background -> Profile Preferences
+    uncheck "use the system fixed width font"
+    (makes everything bigger, but now I can select. default is Monospace 12;
+    11 looks like the original,
+    10 seems to be what I want)
+
+Q: I don't like the speed bump between the screens. how do I get rid of it?
+PA: run ccsm
+       Ubuntu Unity Plugin -> Experimental -> Launcher Edge Stop Overcome Pressure
+               change from 20 to 1 (0 isn't allowed apparently)
+           Edge Stop Velocity
+               change from 65 to 1
+   still not perfect but better :-(
+   why the hell can't I change it to 0??
+A: get rid of the center launcher panel, it's an eyesore anyway:
+    settings / Displays
+      changed Launcher Placement from "All Displays" to just the left one
+
+Q: I hate the sticky windows that stick to screen boundaries.  how do I get
+   rid of it?
+A: settings gear -> System Settings -> Displays -> Sticky edges OFF!
+   WOOHOO! that fixed the previous speed bump issue too!
+   But weeks later, the problem is back, and this fix doesn't fix it
+   any more :-(
+   oh wait maybe it's called "window snapping"
+   there are a couple of suggestions here: http://askubuntu.com/questions/105028/force-disable-snapping-windows . namely,
+   under ccsm's "Window Management":
+       - disable "Snapping Windows" (this seems to be the one that does it!)
+       - disable "Place Windows" (no don't! if it's not on, windows appear in a really inconvenient place)
+       - disable "Scale" (but it says it's needed by Ubuntu Unity Plugin so I kept it on)
+
+Q: I hate the automatic blow-window-up-to-full-screen when I accidentally
+   bump into the screen side edge. how do I get rid of it?
+
+Q: system/cpu load monitor applet for the unity plugin thing?
+PA: sudo apt-get install indicator-multiload
+    just run it from command line? hmm
+
+Q: how to add/delete/change things on the launcher panel and the top panel?
+
+Q: is the desktop workspace switcher any more configurable than I can see? (shortcuts? more desktops? quicker switching?)
+A: http://www.howtogeek.com/113330/
+       ctrl-alt-arrow to switch workspaces
+       ctrl-alt-shift-arrow to swtich workspaces bringing the focused window with you
+   Q: more workspaces?
+   A: ccsm (Compiz Config Settings Manager)
+          -> General Options
+          -> Desktop Size
+      or:
+        gconftool-2 --type=int --set /apps/compiz-1/general/screen0/options/vsize 4
+        gconftool-2 --type=int --set /apps/compiz-1/general/screen0/options/hsize 4
+   Q: can I tell what workspace I'm in at a glance? either make icon smarter,
+      or mess with background to make it obvious?
+   PA: to get wallpaper plugin: sudo apt-get install compiz-fusion-plugins-extra
+       ccsm -> Utility -> Wallpaper
+       doesn't seem to do anything??
+       some sources say I need to disable in gconf-editor: apps->nautilus->preferences->show_desktop, but there's no such variable??
+       it just shows the image I set in right-click-on-background -> change desktop background
+
+       whoa wait! this: http://www.techrepublic.com/blog/linux-and-open-source/tweak-ubuntu-unity-get-a-dock-style-launcher-and-unity-dash/
+       has a comment saying "And if you install Compiz Config Settings Manager you can set up different wallpapers for each workspace."
+       that's ccsm... bleah! I guess it doesn't work?
+       http://www.youtube.com/watch?v=FSqDk3I6v8c
+       says ccsm -> Wallpaper
+       but it's not working?
+       OH then it says:
+        sudo apt-get install gnome-tweak-tool
+        gnome-tweak-tool
+            Desktop
+                Have file manager handle the desktop: ON->OFF
+       YES!
+       Then added images... "Scaled" instead of "Scale and crop"
+
+       weird, after rebooting and logging in again,
+       the wallpaper didn't appear...
+       but as soon as I made any edit to the list of wallpapers to use,
+       it appeared??
+       i.e. ccsm -> Utility -> Wallpaper
+            change something from "scale and crop" to "scale" and back
+            suddenly they all appear
+    PA: possibilities for changing the icon:
+            http://askubuntu.com/questions/80627/how-can-i-change-the-icon-of-an-application-in-the-unity-launcher
+            http://askubuntu.com/questions/43278/how-to-change-the-new-workspace-icon-to-the-older-icon
+            http://askubuntu.com/questions/42156/is-there-a-way-to-change-the-icon-of-a-running-application-on-the-gnome-panel
+        the "how-to-change" one says:
+            sudo mv /usr/share/icons/unity-icon-theme/apps/48/workspace-switcher.png{,.bak}
+            sudo convert -background None /usr/share/icons/Humanity/apps/48/gnome-panel-workspace-switcher.svg /usr/share/icons/unity-icon-theme/apps/48/workspace-switcher.png
+            sudo update-icon-caches /usr/share/icons/unity-icon-theme
+            restart unity?  fuck :-(
+            (unity &)
+        maybe hook up something so when I switch desktops, it does that?
+        someone says there's a better way than sudo, by setting something in /usr/share/applications ...
+        but the link is broken :-(
+        oh hell, restarting unity is WAY too intrusive! what the hell do I do?
+        hey wait a minute, maybe add an applet to the top panel (similar to the cpu meter that's there?)
+        is there a generic notification applet, whose icon I can change at will?
+        WAIT a minute, look here:
+            http://www.maketecheasier.com/15-useful-appindicator-applets-for-ubuntu/
+        it says:
+            sudo add-apt-repository ppa:geod/ppa-geod
+            sudo apt-get update
+            sudo apt-get install indicator-workspaces
+        hmm, I don't think I can do that... would need to check with someone.
+        maybe this:
+            http://conjurecode.com/create-indicator-applet-for-ubuntu-unity-with-python/
+
+
+
+Q: F1 to raise window, F2 to lower?
+A:  System Settings icon -> Hardware -> Keyboard -> Shortcuts -> Windows
+        Raise window above other windows: F1
+        Lower window below other windows: F2
+    (also avail via ccsm -> General Options -> Key bindings)
+Q: show window size when resizing?
+A: ccsm -> Utility -> check "Resize Info"
+
+
+Q: keyboard shortcut to lock screen?
+A: ctrl-alt-L
+
+   
