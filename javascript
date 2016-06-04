@@ -18,6 +18,13 @@ Clearest description of automatic semicolon insertion, maybe:
 Good debugging tips: (TODO: read it thoroughly)
   http://alistapart.com/article/advanced-debugging-with-javascript
 
+Javascript frameworks:
+    https://en.wikipedia.org/wiki/Comparison_of_JavaScript_frameworks
+  I'm not really attracted to frameworks in general, except Dojo is appealing
+  because it has a really excellent-looking ui toolkit called Dijit, with a nice demo page:
+    http://archive.dojotoolkit.org/nightly/dojotoolkit/dijit/themes/themeTester.html
+  Haven't explored it much though.
+
 
 QUESTIONS:
 ==========
@@ -31,6 +38,7 @@ A: typeof x == "string"
    inexact: x instanceof String
 
 Q: stringify/EXACT function?
+PA: JSON.stringify
 
 More Gotchas:
  - NEVER use "for i in array" to iterate over an array! Lots of explanations on the web,
