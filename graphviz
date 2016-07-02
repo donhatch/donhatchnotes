@@ -1,0 +1,7 @@
+Q: how to make graph go bottom to top (or other) on command line?
+A:
+  Default is LR
+  -Grankdir=LR
+  -Grankdir=RL
+  -Grankdir=TB
+  -Grankdir=BT
