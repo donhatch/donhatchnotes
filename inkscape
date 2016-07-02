@@ -1,0 +1,72 @@
+Inkscape: really nice tool for editing svg's. Better than gimp for things
+like annotating images with arrows and text.
+
+QUESTIONS:
+  Q: how to white out some of the area behind the text?
+  Q: how to undo selecting? (undo only applies to editing, apparently)
+  Q: how to tell what defaults I've modified?
+  Q: factory reset?
+
+=======================================================================
+How to do some stuff:
+
+  Create segments and turn them into arrows:
+    F6 (or click on pencil tool) to draw line segments
+
+    double-click on the pencil to get pencil prefs
+      change to "Last used style"
+      (not quite sure what semantica are)
+      (unfortunately it remembers from last session!?)
+
+    click,click;click,click  to draw segs
+    F1 (or select tool) to select one of them
+    Object/Fill_and_Stroke (or click on Stroke in lower-left)
+      change color to ff3600ff
+      change width to 3
+      change Start Marker to Arrow2Mstart
+      Extensions > Modify Path > Color Markers to Match Stroke.
+    Once I have one, it's most efficent do just dup it (ctrl-d) and move endpoints.
+
+  Edit segment endpoints:
+    F2 (or click on Edit Paths by Nodes tool)
+    click on object to select it, then drag nodes. simple!
+
+  Text:
+    F8 (or text tool)
+    click on 'T' in lower-right to change font properties,
+      leave font "Sans"
+      hmm I think 18 is thr right size, but it's a bit more wide spaced
+    and apply and set as default.
+
+
+  Drop shadows:
+   select the object(s) (select tool / F1)
+     ctrl-d (or ...) to duplicate it, that's the shadow (one for each selected obj)
+       arrow keys to move it precisely, maybe 6 pixels south, to work with it
+       bottom: shift-color and ctrl-color to change both interior/border color
+         to 40% gray  (or maybe 20% gray and no blur)
+       Object/Fill_and_Stroke...
+         Blur: 1.0 (or not, if 20% gray)
+       arrow keys to move it back precisely, maybe 1 pixel south of where it was originally.
+       page-down/page-up to move it up/down in stacking order.
+       Extensions > Modify Path > Color Markers to Match Stroke.
+         (don't do this til end, because it destroys selection!)
+         Q: is there a way to reselect?
+         PA: I don't think so, but can group using ctrl-G
+
+    if doing lots of them, do them in a group...
+    but the very last operation has to be Ungroup and then Color Markers,
+    since I don't think there's any way to recover from that.
+
+  Undo history:
+    Edit > Undo History
+    note that the cursor is really *after* the selected item.
+    Huh! I like the format! It's hierarchical...
+      (it doesn't retain the whole history tree though...
+       that is, an editing action clears the redo stack)
+
+  Select multiple items:
+    Esc to clear selection (failure to do this was messing me up for a while)
+    shift-click to add to selection, or shift-drag to drag out bounding boxes
+
+=======================================================================

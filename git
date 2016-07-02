@@ -1,5 +1,7 @@
 Git resources:
 
+    https://github.com/blog/2019-how-to-undo-almost-anything-with-git
+
     man gittutorial
 
     https://www.kernel.org/pub/software/scm/git/docs/everyday.html
@@ -41,6 +43,7 @@ Git resources:
         awesome!!! great exercises!
 
     brilliant github visualization: http://ghv.artzub.com/
+      (unfortunately it doesn't recognize my .prejava files as source?)
 
     TODO: check out "vim git gutter"
 

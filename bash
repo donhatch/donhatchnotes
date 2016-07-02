@@ -55,6 +55,9 @@ A: declare
 Q: how to list a function's source?
 A: type <functionName>
 
+Q: how to undefine a function?
+A: unset -f my_function
+
 Q: rehash?
 A: hash -r
 
@@ -166,3 +169,4 @@ Completion screwups (some local to google, some not):
         (see the explanation and workaround above)
     - alias pppp ~/<tab>  doesn't work.  (not that it really makes sense, but I might do that when composing the line and then backfix it afterwards)
         (this is another automatic one, see workaround above)
+    - blaze run myprogram <tab>  doesn't complete to files
