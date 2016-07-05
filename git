@@ -168,17 +168,6 @@ BEST PRACTICES:
           git init
           git commit --allow-empty -m "Initial empty commit"
 
-    - when deleting a branch with -D, or resetting it,
-      if you don't want it to disappear, tag it first:
-          git tag myBranch-about-to-delete-2013-01-01
-      NOTE: I'm probably not understanding or using tags correctly.
-            Evidently you have to say "git push --tag" if you want to push it.
-            And, deletion of the tag or branch doesn't get pushed.  Confusing,
-            if I want all my repos to be in sync.
-            (Hmm I guess "push --mirror" does this... but, that's scary!
-            Did it anyway. And really confused :-( )
-      Ouch!  Creating a tag causes github to create a release!? Way confusing!
-
     - when creating a new branch, I like to always make an empty commit:
           git branch B A
           git checkout B
@@ -192,6 +181,20 @@ BEST PRACTICES:
           git merge --no-ff B
       that will make the default comment "Merge branch 'simplify_listeners'"
       which is good. (Maybe add optional "back into 'A'")
+
+
+    - when deleting a branch with -D, or resetting it,
+      if you don't want it to disappear, tag it first:
+          git tag myBranch-about-to-delete-2013-01-01
+      NOTE: I'm probably not understanding or using tags correctly.
+            Evidently you have to say "git push --tag" if you want to push it.
+            And, deletion of the tag or branch doesn't get pushed.  Confusing,
+            if I want all my repos to be in sync.
+            (Hmm I guess "push --mirror" does this... but, that's scary!
+            Did it anyway. And really confused :-( )
+      Ouch!  Creating a tag causes github to create a release!? Way confusing!
+      Maybe it's adequate to just do the marker commits mentioned previously,
+      instead of this.
 
     - Don't use aliases for branches.  it breaks various scripts
       that aren't expecting the output of "git branch" to contain that stuff.
