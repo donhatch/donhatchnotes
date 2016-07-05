@@ -177,13 +177,15 @@ BEST PRACTICES:
             if I want all my repos to be in sync.
             (Hmm I guess "push --mirror" does this... but, that's scary!
             Did it anyway. And really confused :-( )
+      Ouch!  Creating a tag causes github to create a release!?
 
     - when creating a new branch, I like to always make an empty commit:
           git branch B A
           git checkout B
           git commit --allow-empty -m "Create branch 'B' from 'A'"
       this makes 'git log --graph' much easier to read!
-
+      Also, I'm thinking, always use precisely that format;
+      then maybe future automated tools that make swimlanes can use it.
 
     - Don't use aliases for branches.  it breaks various scripts
       that aren't expecting the output of "git branch" to contain that stuff.
@@ -508,6 +510,11 @@ TODO: check out qgit
 
 QUESTIONS:
 
+    Q: make a new branch with current changes?
+    A: git checkout -b <new-branch>
+       And then, as in BEST PRACTICES section:
+          git commit --allow-empty -m "Create branch 'B' from 'A'"
+
     Q: p4 filelog?
     A: git log dl-fini.c
        git log --color --graph --stat --summary --decorate --date-order
@@ -537,10 +544,15 @@ QUESTIONS:
     Q: where are ~ and ^ documented?
     A: in "man gittutorial" or "man gitrevisions"
        The basic usage is:
-           head^ or head~1 -- parent of head
-           head^^ or head~2 -- grandparent of head
-           head^^^ or head~3 -- great-grandparent of head
+           HEAD^ or HEAD~1 -- parent of HEAD
+           HEAD^^ or HEAD~2 -- grandparent of HEAD
+           HEAD^^^ or HEAD~3 -- great-grandparent of HEAD
            etc.
+       In case of multiple parents:
+           HEAD^2 -- 2nd parent of HEAD
+           HEAD^^3 -- 3nd parent of 1st parent of HEAD
+           HEAD^4^ -- 1st parent of 4th parent of HEAD
+           HEAD~2^5 -- 5nd parent of grandparent of HEAD
        See "man gitrevisions" for more control about which parent and stuff.
 
     Q: p4annotate?
