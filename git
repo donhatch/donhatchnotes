@@ -177,7 +177,7 @@ BEST PRACTICES:
             if I want all my repos to be in sync.
             (Hmm I guess "push --mirror" does this... but, that's scary!
             Did it anyway. And really confused :-( )
-      Ouch!  Creating a tag causes github to create a release!?
+      Ouch!  Creating a tag causes github to create a release!? Way confusing!
 
     - when creating a new branch, I like to always make an empty commit:
           git branch B A
@@ -185,7 +185,13 @@ BEST PRACTICES:
           git commit --allow-empty -m "Create branch 'B' from 'A'"
       this makes 'git log --graph' much easier to read!
       Also, I'm thinking, always use precisely that format;
+      then it can be parsed by automated tools to make swimlanes.
       then maybe future automated tools that make swimlanes can use it.
+      Also when merging back, don't fast-forward:
+          git checkout A
+          git merge --no-ff B
+      that will make the default comment "Merge branch 'simplify_listeners'"
+      which is good. (Maybe add optional "back into 'A'")
 
     - Don't use aliases for branches.  it breaks various scripts
       that aren't expecting the output of "git branch" to contain that stuff.
