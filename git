@@ -158,6 +158,11 @@ NICE GIT LOG ALIASES:
       and I commit from multiple email addrs, so that's more interesting)
     TODO: check out nice "git log" aliases in http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs, they look great
 
+    TODO: sort out how I want to be doing this.  I don't think I like aliases
+    since they are hard to port.  Maybe sticking commands in ~/bin instead?
+    The "git log" I'm currently using most is:
+      git log --graph --dec --date-order --all --oneline
+
 BEST PRACTICES:
     - empty commit at root of repo, for various reasons
       having to do with the fact that without it you can't do certain
@@ -179,9 +184,19 @@ BEST PRACTICES:
       Also when merging back, don't fast-forward:
           git checkout A
           git merge --no-ff B
+          git branch -d B
       that will make the default comment "Merge branch 'simplify_listeners'"
       which is good. (Maybe add optional "back into 'A'")
 
+    - TODO: sometimes I'll have a bunch of commits that I later decide
+      should have been done in a branch
+      (with the appropriate "Create branch 'B' from 'A'" initial empty commit,
+      and the "Merge branch 'B' back into 'A'" if the work is done).
+      Make a recipe for making that happen.
+      In fact, could even theoretically do that for commits
+      that aren't sequential, since git can reorder.
+      Not sure what the chances are though.
+      Maybe this is one of the things that can be done with "git rebase -i"? Not sure.
 
     - when deleting a branch with -D, or resetting it,
       if you don't want it to disappear, tag it first:
