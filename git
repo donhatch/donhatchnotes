@@ -175,7 +175,7 @@ BEST PRACTICES:
 
     - when creating a new branch, I like to always make an empty commit:
           git branch B A
-          git checkout B
+          git checkout B  # or just: git checkout -b B
           git commit --allow-empty -m "Create branch 'B' from 'A'"
       this makes 'git log --graph' much easier to read!
       Also, I'm thinking, always use precisely that format;
@@ -189,13 +189,13 @@ BEST PRACTICES:
       which is good. (Maybe add optional "back into 'A'")
 
     - TODO: sometimes I'll have a bunch of commits that I later decide
-      should have been done in a branch
+      should have been done in a topic/feature branch
       (with the appropriate "Create branch 'B' from 'A'" initial empty commit,
       and the "Merge branch 'B' back into 'A'" if the work is done).
       Make a recipe for making that happen.
       In fact, could even theoretically do that for commits
-      that aren't sequential, since git can reorder.
-      Not sure what the chances are though.
+      that aren't sequential or in order, since git can reorder.
+      Not sure what the chances of success are though.
       Maybe this is one of the things that can be done with "git rebase -i"? Not sure.
 
     - when deleting a branch with -D, or resetting it,
