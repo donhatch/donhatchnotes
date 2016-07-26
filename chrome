@@ -136,7 +136,7 @@ Okay, strategy for trying to get original URL in:
         in this case we'd want to add http://go/who to the history (back button?) so it doesn't get lost.
         another example:
           http://bns/ih/borg/ih/bns/cartewheel-eng/dev-donhatch.processing_servers.workertaskservers/0/statusz                  302
-          https://bns.corp.google.com/ih/borg/ih/bns/cartewheel-eng/dev-donhatch.processing_servers.workertaskservers/0/statusz 302
+          https://bns/ih/borg/ih/bns/cartewheel-eng/dev-donhatch.processing_servers.workertaskservers/0/statusz                 302
           http://ihbne9.prod.google.com:25362/statusz                                                                           200
         another example:
           http://0.dev-donhatch.processing_servers.workertaskservers.cartewheel-eng.ih.borg.google.com/statusz       302
