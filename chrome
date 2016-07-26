@@ -62,20 +62,20 @@ Q: vim hotkey to open cs to the right place?
      https://sites.google.com/a/google.com/codesearch/Home/users-manual?pli=1#TOC-...-vim
      https://sites.google.com/a/google.com/codesearch/faq
    Let's see, the search would be something like:
-       google-chrome-beta "https://cs.corp.google.com/#search/&q=file:geo/vectordb/util/geometry/bottom_up_geometry_tiler.cc"
+       google-chrome-beta "https://cs/#search/&q=file:geo/vectordb/util/geometry/bottom_up_geometry_tiler.cc"
    or just the following which gets converted to it:
-       google-chrome-beta "https://cs.corp.google.com/?q=file:geo/vectordb/util/geometry/bottom_up_geometry_tiler.cc"
+       google-chrome-beta "https://cs/?q=file:geo/vectordb/util/geometry/bottom_up_geometry_tiler.cc"
    oh bleah! but if I add &l=123, it gets lost in translation...
    bleah!
    oh wait, this works:
-     google-chrome-beta "https://cs.corp.google.com/#search&q=geo/vectordb/util/geometry/bottom_up_geometry_tiler.cc:123"
+     google-chrome-beta "https://cs/#search&q=geo/vectordb/util/geometry/bottom_up_geometry_tiler.cc:123"
    as does this:
-     google-chrome-beta "https://cs.corp.google.com/?q=geo/vectordb/util/geometry/bottom_up_geometry_tiler.cc:123"
+     google-chrome-beta "https://cs/?q=geo/vectordb/util/geometry/bottom_up_geometry_tiler.cc:123"
 
    so here's a decent map (the "silent" and <C-l> avoid the "Press ENTER or type command to continue":
-       :map * :silent !google-chrome-beta "https://cs.corp.google.com/?q=geo/vectordb/util/geometry/bottom_up_geometry_tiler.cc:123" \| grep -v "Created new window in existing browser session." &<CR><C-l>
+       :map * :silent !google-chrome-beta "https://cs/?q=geo/vectordb/util/geometry/bottom_up_geometry_tiler.cc:123" \| grep -v "Created new window in existing browser session." &<CR><C-l>
    and to get the real file and line number in there:
-       :map * :exe 'silent !google-chrome-beta "https://cs.corp.google.com/?q=%:'.line(".").'" \| grep -v "Created new window in existing browser session." &'<CR><C-l>
+       :map * :exe 'silent !google-chrome-beta "https://cs/?q=%:'.line(".").'" \| grep -v "Created new window in existing browser session." &'<CR><C-l>
    (special chars in the file name could theoretically mess things up, but this seems unlikely to happen)
 
 Q: argh! if I've inserted stuff so that line number is > original file size, the search fails! in that case I'd like it to just go to the end, I think
