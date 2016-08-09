@@ -27,4 +27,9 @@ A: http://slaptijack.com/system-administration/mac-os-x-terminal-and-gnu-screen-
      termcapinfo xterm* ti@:te@
 
 
-
+Q: I don't like that the primary command key is ^a since that conflicts with bash
+   command line editing. What can I do?
+A:
+    ^a a sends ^a
+    Or, can change it to, e.g. ^b, by putting this in ~/.screenrc:
+    escape ^Bb

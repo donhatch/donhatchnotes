@@ -170,3 +170,51 @@ Completion screwups (some local to google, some not):
     - alias pppp ~/<tab>  doesn't work.  (not that it really makes sense, but I might do that when composing the line and then backfix it afterwards)
         (this is another automatic one, see workaround above)
     - blaze run myprogram <tab>  doesn't complete to files
+
+
+Posted: http://stackoverflow.com/questions/38843719/emergency-override-of-broken-command-completions-in-bash
+    ==============================================================
+    Q: emergency override of broken command completions in bash?
+
+    One of my biggest aggravations with working in bash is the chronically broken command completions.
+    There are hundreds of programmed command completions, more being written each day, some by the distro (I'm currently using ubuntu linux) or upstream,
+    and some by people at my company.  It's inevitable that at any given time, dozens of them are broken.  I accept that.
+
+    What I don't accept is when broken command completions prevent me from being able to do filename completion.
+    Filename completion is essential to my work efficiency; when I can't access it, it's extremely distressing and disruptive to my workflow.
+
+    For a while, I simply disabled all command completions, since I judged
+    that reliable filename completion is more important to me than the value
+    of all the other command completions combined.
+
+    But... then I decided to give them another try, so instead of disabling
+    them all, I'm blacklisting the ones I know to be broken, one by one, in my .bashrc:
+
+        #
+        # Blacklist for known broken command completions
+        #
+
+          # Command completions prevent vim'ing .jpg files!? Not ok.
+          complete -r vi
+          complete -r vim
+          complete -r view
+
+          complete -r google-chrome # google-chrome ./myFil<tab>
+
+          # The rest of these are gratuitous strong evil magic
+          # that can't be killed by "complete -r",
+          # so stronger good magic "complete -F _minimal" is necessary instead.
+          complete -F _minimal ci    # ci -l ./java<tab> when ./javacpp and ./javarenumber both exist but only javarenumber has been previously checked in
+          complete -F _minimal alias # alias pppp ~/<tab>
+
+    The blacklist works for me, for the most part,
+    *except* at that awful moment when I first discover another command completion
+    is broken, when I'm in the middle of trying to complete a filename quickly.
+    At that moment I need some kind of "in case of emergency break glass" emergency override.
+
+    What I'm asking for is one of the following:
+    (a) a way to bind a key/keys to filename completion only, bypassing programmable command completion
+    (b) a way to bind a key/keys to temporarily disable programmable command completion for the current command that I have partially typed
+    (c) some other clever non-intrusive way to get at filename completion at the moment I discover it's being hidden by a broken programmable command completion.
+    ==============================================================
+    A: Alt-/. (complete-filename)
