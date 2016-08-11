@@ -366,6 +366,23 @@ Q: repeat indent-to-previous-position in vim?
 PA: (per romainl's answer there) >''>']..
 PA: look into repeat.vim and either make my own command, or look into reprogramming >
 
+gitgutter
+  infeasible to install this without a plug-in manager.
+  Which one?
+  Well, git-plug has a snazzy demo, and the articles say he cares about startup time.
+  ok I'm sold on git-plug,... maybe.
+  he does warn he's not very receptive to feature requests,
+  which might be a good thing.
+    http://junegunn.kr/2013/09/writing-my-own-vim-plugin-manager/
+    http://junegunn.kr/2014/07/vim-plugins-and-startup-time/
+  Download it, put it in ~/vim/autoload/plug.vim,
+  then put this at end of my .vimrc:
+    " assumes ~/.vim/autoload/plug.vim exists, see https://github.com/junegunn/vim-p
+    lug
+    call plug#begin('~/.vim/plugged')
+      Plug 'airblade/vim-gitgutter'
+    call plug#end()
+  Not sure it's all that great though... in particular, it breaks multiline copy-pasting for the most part.
 
 =============================================================
 "Here is my current .exrc  (2015/05/13 at google):
