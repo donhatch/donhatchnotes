@@ -324,44 +324,47 @@ http://unix.stackexchange.com/questions/44513/disabling-mouse-support-in-vim-in-
    more info:
      https://bugs.kde.org/show_bug.cgi?id=170582
 
+
 Q: repeat indent-to-previous-position in vim?
+  [asked on http://vi.stackexchange.com/questions/9121/repeat-indent-to-previous-position-in-vim]
 
-I very often want to do the following or similar:
-  - indent all lines from previous position to current position inclusive
-  - repeat, repeat, repeat (to further indent the same lines)
+  I very often want to do the following or similar:
+    - indent all lines from previous position to current position inclusive
+    - repeat, repeat, repeat (to further indent the same lines)
 
-I feel I should be able to do that by saying:
-  >''...
-(greater-than single-quote single-quote period period period).
+  I feel I should be able to do that by saying:
+    >''...
+  (greater-than single-quote single-quote period period period).
 
-But it doesn't work.  The first >'' successfully indents the desired lines,
-but then "previous position" is lost, and each "." only indents the current line
-(which is always the *first* of the desired lines, for some reason,
-no matter whether I started at the beginning or end of the desired lines).
+  But it doesn't work.  The first >'' successfully indents the desired lines,
+  but then "previous position" is lost, and each "." only indents the current line
+  (which is always the *first* of the desired lines, for some reason,
+  no matter whether I started at the beginning or end of the desired lines).
 
-So, instead, my recipe for indent-and-repeat is:
-    '' if necessary to get to first line to be indented
-    ma to mark it "a"
-    '' if necessary to get to last line to be indented
-    mb to mark it "b"
-    >'a to indent from mark "a" to current position (mark "b")
-    >'b to do it again (since the >'a moved me to mark "a" for some reason)
-    >'b to do it again (since the >'b did *not* move me to mark "b" for some reason)
-    >'b to do it again
+  So, instead, my recipe for indent-and-repeat is:
+      '' if necessary to get to first line to be indented
+      ma to mark it "a"
+      '' if necessary to get to last line to be indented
+      mb to mark it "b"
+      >'a to indent from mark "a" to current position (mark "b")
+      >'b to do it again (since the >'a moved me to mark "a" for some reason)
+      >'b to do it again (since the >'b did *not* move me to mark "b" for some reason)
+      >'b to do it again
 
-In other words, to indent the lines 4 times and retain ability to jump to previous position, I say:
-  ''ma''mb>'a>'b>'b>'b
-Instead of simply the following which doesn't work:
-  >''...
-That is WAY more time and effort and mental burden than I would like.
+  In other words, to indent the lines 4 times and retain ability to jump to previous position, I say:
+    ''ma''mb>'a>'b>'b>'b
+  Instead of simply the following which doesn't work:
+    >''...
+  That is WAY more time and effort and mental burden than I would like.
 
-Is there a way to make >''... work as I would like it to?
-Perhaps by some clever rebinding of the '>' key.
+  Is there a way to make >''... work as I would like it to?
+  Perhaps by some clever rebinding of the '>' key.
 
-Requirement: >'' must indent the lines *without* changing the current
-cursor position (regardless of whether '' refers to earlier or later in the file)
-Requirement: . must do the same, as must subsequent .'s.
-
+  Requirement: >'' must indent the lines *without* changing the current
+  cursor position (regardless of whether '' refers to earlier or later in the file)
+  Requirement: . must do the same, as must subsequent .'s.
+PA: (per romainl's answer there) >''>']..
+PA: look into repeat.vim and either make my own command, or look into reprogramming >
 
 
 =============================================================
