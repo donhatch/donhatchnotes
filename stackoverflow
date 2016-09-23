@@ -27,3 +27,6 @@ http://stackoverflow.com/questions/2342826/how-to-pipe-stderr-and-not-stdout#ans
 My addition:
   @KurtPfeifle I'm amused by "we have to read from right to left" and "no, we must read from left to right".  Both statements are wrong, of course, since there are valid interpretations that could reasonably be labelled each way.  Personally my brain always wants `command $a>&$b $c>&d $e>&$f` to do `((command $a>&$b) $c>&d) $e>&$f` (i.e. "left-to-right" in a sense), but that's wrong.  Instead, it does `((command $e>&$f) $c>&d) $a>&$b` (i.e. a "right-to-left" reading of the unparenthesized pipeline, in a sense).  Others have given "left-to-right" explanations which are valid as well.
 ===================================================================
+Q: what should printf("%.17g\n", .1) print?
+http://stackoverflow.com/questions/39652130/what-should-printf-17g-n-1-print
+===================================================================
