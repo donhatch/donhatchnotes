@@ -36,6 +36,15 @@ GOOD INTERESTING READING AND REFS:
             wrong thing if you use "is True". 
 
 GOTCHAS:
+    - "".split(",") returns [""].
+      I actually think maybe this is the best answer, now that I've thought about it.
+      Originally I thought was insane, so I wrote this:
+        Aut 31 at 4:19
+        http://stackoverflow.com/questions/14972174/splitting-an-empty-string-with-a-specified-separator-returns-but-id-pref#answer-39240665
+          It's a chronic unfortunate situation. When I care about readability of the calling code, I'll hide the conditional inside a helper function:
+              def non_insane_split(s,sep): return [] if s=="" else s.split(sep)
+      But then I deleted it on 9/7.
+
     - Do not ever use "for line in sys.stdin():"; it will ruin your day!
       If pauses for a while, it won't see any lines even if many are buffered.
       Good workaround here, although it doesn't state that this is what
