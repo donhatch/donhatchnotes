@@ -200,7 +200,7 @@ A: Well, "resolve" and "then" have to return a value, but return values can't
       promise.spread([value0, value1, value2]) { ... })
 ===============================================================================
 http://stackoverflow.com/questions/36312648/how-does-promise-resolution-decide-whether-to-treat-a-return-value-as-a-promise
-Q: how does promise resolution decide whether to treat a return value as a promise or as a plain value?
+  Q: how does promise resolution decide whether to treat a return value as a promise or as a plain value?
 
   Promise resolution "helpfully" does different things depending on whether the return value of resolve() or the return value of the function passed to then() is a promise or not.
 
@@ -265,3 +265,65 @@ Possible references for promise-for-a-promise:
   Should I be looking at this "fantasy land"?
     https://github.com/fantasyland/fantasy-promises
   Wow, the implementation is really small.
+
+
+  ==========================================
+Relevant links to the problem in question:
+http://stackoverflow.com/questions/36312648/how-does-promise-resolution-decide-whether-to-treat-a-return-value-as-a-promise
+http://stackoverflow.com/questions/27746304/how-do-i-tell-if-an-object-is-a-promise/27746324#comment67620804_27746324
+http://stackoverflow.com/questions/29435262/regarding-promises-a-specification-what-is-the-difference-between-the-terms-t/29435437#comment67807705_29435437
+Wed Oct 26 19:26:15 PDT 2016
+  I filed this bug against the spec:
+  https://github.com/promises-aplus/promises-spec/issues/240
+  ==========================================
+    Title: change "if x is a promise" to something non-circular and clear
+
+    The promises/A+ spec currently has a clause saying "If x is a promise, adopt its state [3.4]:"
+    where footnote [3.4] is: "Generally, it will only be known that x is a true promise if it comes from the current implementation.
+    This clause allows the use of implementation-specific means to adopt the state of known-conformant promises."
+
+    Notice that, according to the earlier definition of "promise",
+    "If x is a promise" means "If x is an object or function with a 'then' method whose behavior conforms to this specification",
+    where "this specification" includes the clause in question.
+
+    In other words, the definition of "promise" is circular.
+
+    If [3.4] is an attempt to clarify, it fails.
+
+    The clause in question should be changed to something non-circular and clear:
+      - Do not use the words "if x is a promise" or any other self-referential phrase here.
+      - If the clause is to say "if SOMETHING(x), adopt its state", then clearly say what is meant by SOMETHING(x).
+        In other words, if it's intended that the implementation has latitude here, then clearly say how much latitude,
+        so that it will be meaningful to ask, and possible to tell, whether any particular straightforward implementation
+        is conformant or not from looking at the source code.
+
+    In particular, it should be possible to discern whether each of the following possible
+    implementations of the boolean function SOMETHING(x) is conformant:
+      - function(x) { return typeof(x.then) == 'function'; }
+      - function(x) { return typeof(x.then) === 'function'; }
+      - function(x) { return x instanceof SomePromisesImplementation.Promise
+                          || x instanceof SomeOtherPromisesImplementation.WhateverItCallsAPromise; }
+      - function(x) { return false; }
+      - function(x) { return true; }
+      - function(x) { return Math.random() >= 0.5; }
+  ==========================================
+
+Wed Oct 26 19:42:51 PDT 2016
+  Added the following comment:
+  ==========================================
+    I think one reasonable possible resolution would be to change "If x is a promise, adopt its state [3.4]:"
+    to "**(Optional)** If x is **known to be** a promise, adopt its state [3.4]:".
+
+    Even though this is still self-referential, I believe this will make it clear and meaningful.
+
+    In particular, the questions of whether the 6 SOMETHING(x) functions shown at the end of my original post are conformant can then be answered:
+    NO, NO, YES (assuming we trust the two implementations are conformant to the entire spec), YES, NO, NO.
+  ==========================================
+Wed Oct 26 21:37:29 PDT 2016
+  adding another comment to http://stackoverflow.com/questions/27746304/how-do-i-tell-if-an-object-is-a-promise/27746324
+
+  @BenjaminGruenbaum , are you aware that the Promises/A+ spec to which you're referring also has an earlier section `2.3.2. If x is a promise, adopt its state [3.4]:`?
+  This is a clearly different section from 2.3.3.3, with different intent and necessarily different criteria.
+  So the definitive-sounding first section of your answer ("How a promise library decides: If it has a `.then` function - that's the *only* standard promise libraries use") appears to be quite incorrect.
+  [and subsequent not-entirely-pleasant discussion]
+  [I should write my own answer to this one]
