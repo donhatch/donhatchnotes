@@ -170,6 +170,7 @@ Completion screwups (some local to google, some not):
     - alias pppp ~/<tab>  doesn't work.  (not that it really makes sense, but I might do that when composing the line and then backfix it afterwards)
         (this is another automatic one, see workaround above)
     - blaze run myprogram <tab>  doesn't complete to files
+    - g4 changes -lt -u donhatch >| ~/tmp/changes.donhatc<tab>
 
 
 Posted: http://stackoverflow.com/questions/38843719/emergency-override-of-broken-command-completions-in-bash
