@@ -329,19 +329,3 @@ Wed Oct 26 21:37:29 PDT 2016
   [and subsequent not-entirely-pleasant discussion]
   [I should write my own answer to this one]
 
-Fri Oct 28 08:17:16 PDT 2016
-  My main overall question is:
-  What's a good set of libraries (framework? don't know what to call it)
-  with which to do javascript work?
-  My impressions so far are:
-    - dojo has nicest looking ui toolkit
-    - stay away from Promises/A+ as much as possible, they are a bloody mess.
-      But what to use instead?
-      - fantasyland/promises?
-      - creed/promises? how does it relate to fantasyland/promises and flutures?
-    - cujojs?  what is it and do I want it?
-  Things to read when I have time:
-    http://blog.briancavalier.com/async-programming-part-1-it-s-messy/
-    http://blog.briancavalier.com/async-programming-part-2-promises/
-    http://blog.briancavalier.com/async-programming-part-3-finally/
-

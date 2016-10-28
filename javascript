@@ -49,3 +49,25 @@ More Gotchas:
 GIANT WTF:
 // http://stackoverflow.com/questions/1063007/how-to-sort-an-array-of-integers-correctly
 someone gives a function that only returns bools, when it should return ints... but it seems to work regardless!? wtf!?
+
+
+Q: My main overall question is:
+  What's a good set of libraries (framework? don't know what to call it)
+  with which to do javascript work?
+  My impressions so far are:
+    - dojo has nicest looking ui toolkit dijit
+    - stay away from Promises/A+ as much as possible, they are a bloody mess.
+      But what to use instead?
+      - fantasyland/promises?
+      - flutures?
+      - creed/promises? how does it relate to fantasyland/promises and flutures?
+    - cujojs?  what is it and do I want it? he calls it something other
+      than "framework", says it's framework-agnostic and in fact facilitates 
+      being framework-agnostig
+    - https://sanctuary.js.org/
+
+  Things to read when I have time:
+    http://blog.briancavalier.com/async-programming-part-1-it-s-messy/
+    http://blog.briancavalier.com/async-programming-part-2-promises/
+    http://blog.briancavalier.com/async-programming-part-3-finally/
+
