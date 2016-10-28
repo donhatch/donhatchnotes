@@ -272,6 +272,7 @@ Relevant links to the problem in question:
 http://stackoverflow.com/questions/36312648/how-does-promise-resolution-decide-whether-to-treat-a-return-value-as-a-promise
 http://stackoverflow.com/questions/27746304/how-do-i-tell-if-an-object-is-a-promise/27746324#comment67620804_27746324
 http://stackoverflow.com/questions/29435262/regarding-promises-a-specification-what-is-the-difference-between-the-terms-t/29435437#comment67807705_29435437
+
 Wed Oct 26 19:26:15 PDT 2016
   I filed this bug against the spec:
   https://github.com/promises-aplus/promises-spec/issues/240
@@ -327,3 +328,20 @@ Wed Oct 26 21:37:29 PDT 2016
   So the definitive-sounding first section of your answer ("How a promise library decides: If it has a `.then` function - that's the *only* standard promise libraries use") appears to be quite incorrect.
   [and subsequent not-entirely-pleasant discussion]
   [I should write my own answer to this one]
+
+Fri Oct 28 08:17:16 PDT 2016
+  My main overall question is:
+  What's a good set of libraries (framework? don't know what to call it)
+  with which to do javascript work?
+  My impressions so far are:
+    - dojo has nicest looking ui toolkit
+    - stay away from Promises/A+ as much as possible, they are a bloody mess.
+      But what to use instead?
+      - fantasyland/promises?
+      - creed/promises? how does it relate to fantasyland/promises and flutures?
+    - cujojs?  what is it and do I want it?
+  Things to read when I have time:
+    http://blog.briancavalier.com/async-programming-part-1-it-s-messy/
+    http://blog.briancavalier.com/async-programming-part-2-promises/
+    http://blog.briancavalier.com/async-programming-part-3-finally/
+
