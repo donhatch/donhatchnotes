@@ -272,6 +272,9 @@ Relevant links to the problem in question:
 http://stackoverflow.com/questions/36312648/how-does-promise-resolution-decide-whether-to-treat-a-return-value-as-a-promise
 http://stackoverflow.com/questions/27746304/how-do-i-tell-if-an-object-is-a-promise/27746324#comment67620804_27746324
 http://stackoverflow.com/questions/29435262/regarding-promises-a-specification-what-is-the-difference-between-the-terms-t/29435437#comment67807705_29435437
+http://stackoverflow.com/questions/23803743/what-is-the-explicit-promise-construction-antipattern-and-how-do-i-avoid-it
+http://stackoverflow.com/questions/32168194/fulfill-dont-resolve-promise-with-another-promise?noredirect=1&lq=1
+http://stackoverflow.com/questions/37959086/how-to-stop-automatic-resolution-of-promise-objects
 
 Wed Oct 26 19:26:15 PDT 2016
   I filed this bug against the spec:
@@ -329,3 +332,85 @@ Wed Oct 26 21:37:29 PDT 2016
   [and subsequent not-entirely-pleasant discussion]
   [I should write my own answer to this one]
 
+  Maybe wait til my pull is accepted, see:
+      https://github.com/promises-aplus/promises-spec/issues/240
+      https://github.com/promises-aplus/promises-spec/pull/241
+
+  My answer:
+
+  It's difficult to tell what the context is here,
+  and the OP hasn't responded to requests for clarification.
+  Other people have answered based on assumed guesses of the intended context,
+  but those guesses don't seem to be the most likely interpretations to me,
+  so I'm adding my own answer based on my own guesses of what I think the question
+  most likely means.
+  I won't consider interpretations that make the question silly or invalid,
+  since I think those interpretations are ungenerous and not helpful to anyone.
+
+  In that spirit, I can think of two reasonable interpretations of the question:
+
+  1. Where the Promises/A+ spec currently says: "If `x` is a promise, adopt its state",
+     how does/should/must the implementation test "If `x` is a promise"?
+
+  First of all, note that, in this spec, "promise" has a precise meaning; it's defined as:
+  "an object or function with a then method whose behavior conforms to this specification".
+
+  Therefore "If x is a promise" is obviously not a condition that can be decided,
+  so it was a poor choice of words to use in these decision-making instructions.
+  The wording was recently fixed [https://github.com/promises-aplus/promises-spec/issues/240],
+  so the spec actually no longer contains this problematic phrase.
+
+  The new wording is:
+    "(Recommended) If `x` is known to be a promise, adopt its state [3.4]",
+  where footnote 3.4 now says:
+    "Generally, it will only be known that `x` is a true promise if it comes from the current implementation.  This clause allows the use of implementation-specific means to adopt the state of known-conformant promises, which may be identified by a test such as `x instanceof Promise`. This allows optimisations by not requiring the more general thenable-handling procedure with its repeated value inspection."
+
+  Hopefully that's now clear.
+
+  Note that there is also a section soon after that, for handling "thenables"
+  (defined as anything with a "then" method) that are *not* known to be promises.
+  That section is fairly clear, specific and detailed, so refer to it if you're interested in that.
+
+  2. How can I make sure the promise library will treat
+     the value I return from my "then" callback as a plain value,
+     rather than as a promise or something promise-like, which it's not?
+
+  According to the Promises/A+ spec, the two situations in which the promise resolution procedure
+  may do something other than "fulfill `promise` with `x`" are when:
+    - `x` is a known to be a promise (using some test such as `x instanceof Promise`)
+    - `x` has a `then` method.
+  Note, however, that the former (`x` is a promise) implies the latter (`x` has a `then` method),
+  so for this concern, it suffices to test the latter condition.
+
+  In other words, if your interest is in making sure some plain value
+  you're about to return from your `then` callback
+  isn't going to be (mis)treated as a thenable,
+  just check whether your value has a `then` method.
+  If it doesn't, great.  If it does, or if you can't predict
+  whether it will or won't when you're writing the code,
+  then you'll have to protect the value, e.g. by wrapping it in a non-thenable
+  and requiring the consumer to unwrap it.
+
+  Other questions and answers show some possible ways to do such wrapping; e.g.:
+    http://stackoverflow.com/questions/25028365/how-do-i-create-a-javascript-promise-which-resolves-to-a-thenable#answer-25029165
+    http://stackoverflow.com/questions/32168194/fulfill-dont-resolve-promise-with-another-promise?noredirect=1&lq=1#answer-32285123
+    http://stackoverflow.com/questions/37959086/how-to-stop-automatic-resolution-of-promise-objects#answer-37960913
+
+
+Q: promise "then" callback order question
+
+    Consider the following code:
+      let p = Promise.resolve(42);
+      p.then(() => console.log("a")).then(() => console.log("b"));
+      p.then(() => console.log("1")).then(() => console.log("2"));
+    What are the possible outputs?
+
+    I know "b" and "1" must come after "a", and "2" must come after "1".
+    Given that, there are three possible outputs:
+      a b 1 2
+      a 1 b 2
+      a 1 2 b
+    Which of these are actually possible, according to the ES6 spec?
+    Which are possible in a promises/A+ conformant implementation?
+A: All of them are possible.  See http://stackoverflow.com/questions/36870467/what-is-the-order-of-execution-in-javascript-promises
+   Holy moly, huge answer from jfriend00.  Not sure why it's all necessary.
