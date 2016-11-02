@@ -258,6 +258,10 @@ Q: in https://github.com/promises-aplus/promises-spec/issues/94#issuecomment-162
    it says "This also feeds into discussions of flattening promise chains; it has previously been discussed over and over that a promise-for-a-thenable is a problematic pattern in JavaScript and should not be supported. (A promise for another monad, of course, is fine.)".
    Can someone provide pointers to where this has been discussed over and over?
    (I asked)
+PA: see the two links from here: https://github.com/promises-aplus/promises-spec/issues/101 :
+        https://gist.github.com/ForbesLindesay/5392612 "Arguments in favor of Promises for Promises"
+        https://gist.github.com/ForbesLindesay/5392701 "Arguments against Promises for Promises"
+   Hmm, not very readable :-(
 
 
 Possible references for promise-for-a-promise:
