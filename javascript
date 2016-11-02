@@ -61,6 +61,34 @@ Q: My main overall question is:
       - fantasyland/promises?
       - flutures?
       - creed/promises? how does it relate to fantasyland/promises and flutures?
+        Hey WAIT a minute!  I thought it claims to be fantasyland-compliant...
+        but aren't the following doing that crappy automagic that makes
+        it do something different based on whether something is a thenable or not??
+          http://blog.briancavalier.com/creed/#api-make-promises-future-resolve-resolve-e-a-promise-promise-e-a
+          http://blog.briancavalier.com/creed/#api-make-promises-resolve-athenable-e-a-promise-e-a
+        PA: well, resolve does... but don't use it!  Use fulfill instead; that doesn't do the automagic.
+            But, future() does the automagic I think... do I need future()?
+            I'd kinda like to program in a way that never does that automagic.
+        PA: Maybe that's to support Promises/A+ then?  Yeah I think so-- this promises implementation
+            actually supports both.
+        PA: but does this do the automagic too??
+            http://blog.briancavalier.com/creed/#api-control-time-delay-int-apromise-e-a-promise-e-a
+            In which case, how do I do a delay without automagic??
+            I can't figure out whether he likes the automagic or not.
+            Seems like if he doesn't, he has to stay away from anything
+            that has "|Promise" in its type signature:
+              runPromise
+              future
+              resolve
+              then
+              catch
+              delay
+            Note that eir wrapper for XMLHttpRequest uses runPromise which does the automagic (I think).
+            So, how would I wrap it in a way that doesn't use runPromise?
+        PA: starting to think maybe I want fluture instead?  Maybe ask on creed's chat room?
+            Actually fluture's doc is *way* more accessible. maybe just use it.
+
+
     - cujojs?  what is it and do I want it? he calls it something other
       than "framework", says it's framework-agnostic and in fact facilitates 
       being framework-agnostig
@@ -70,4 +98,8 @@ Q: My main overall question is:
     http://blog.briancavalier.com/async-programming-part-1-it-s-messy/
     http://blog.briancavalier.com/async-programming-part-2-promises/
     http://blog.briancavalier.com/async-programming-part-3-finally/
+  oh wait, I think this is better:
+    http://know.cujojs.com/tutorials/async/async-programming-is-messy.html.md
+    http://know.cujojs.com/tutorials/async/simplifying-async-with-promises
+    http://know.cujojs.com/tutorials/async/mastering-async-error-handling-with-promises
 
