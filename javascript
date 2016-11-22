@@ -59,8 +59,27 @@ Q: My main overall question is:
     - stay away from Promises/A+ as much as possible, they are a bloody mess.
       But what to use instead?
       - fantasyland/promises?
+         pro: thenables are not treated specially
+         pro: very small implementation
+         pro: author seemms to care about clean semantics
+         con: lack of SetTimeout stuff makes me think it's prone
+              to stack overflow?
+         con (dealbreaker): doc is too minimal and cryptic to be useful
+              (but illuminated at least somewhat by reading https://sanctuary.js.org/, maybe)
+              (hmm, is this an introduction to fantasyland? https://james-forbes.com/?/posts/the-perfect-api)
       - flutures?
+          https://github.com/Avaq/Fluture
+          https://github.com/Avaq/Fluture/wiki/Comparison-to-Promises
+          https://github.com/Avaq/Fluture/wiki/Comparison-of-Future-Implementations
+         I think this just a concrete example of fantasyland?
+         pro: just like promises but without the thenable crap? sounds perfect!
+         pro: good doc!
+         con (maybe): stateless, doesn't remember result?
+                I'm confused and not sure how this could possibly work.
+                But, they say Future.cache() can deal with that?
       - creed/promises? how does it relate to fantasyland/promises and flutures?
+        pro: seems to support both Promises/A+ (a "then" method) and fantasyland (other methods)?
+        con: documentation isn't readable enough to figure out whether it meets my needs
         Hey WAIT a minute!  I thought it claims to be fantasyland-compliant...
         but aren't the following doing that crappy automagic that makes
         it do something different based on whether something is a thenable or not??
@@ -86,13 +105,30 @@ Q: My main overall question is:
             Note that eir wrapper for XMLHttpRequest uses runPromise which does the automagic (I think).
             So, how would I wrap it in a way that doesn't use runPromise?
         PA: starting to think maybe I want fluture instead?  Maybe ask on creed's chat room?
-            Actually fluture's doc is *way* more accessible. maybe just use it.
+            Actually fluture's doc is *way* more accessible language. maybe just use it.
+      - promises+generators?
+         pro: very clean expression of coroutines
+         con: farther and farther from comprehensibility by a newbie
+         con: still "then"-diseased... I think?
+      - asynquences?
+         Seems to be promises+generators and something more?
+         pro: seems like a lot of thought was put into making this as clean and usable as possible.
+         pro: very accessible doc
+         con: some of the important supporting articles are on blog.getify.com (Kyle Simpson's website)
+              which no longer exists, or lead to broken links
+         Q: is it still "then"-diseased, or not?? there's something called "then" but I'm not sure it's
+            the diseased Promises/A+ "then".
+         A: No!  read https://github.com/getify/asynquence#promisesa-compliance: 
+            "Trying to do so will likely cause unexpected behavior, because Promises/A+ insists on problematic (read: "dangerous") duck-typing for objects that have a then() method, as asynquence instances do."
+            So ey's on board!  And there are utilities for interoperating.
+            This is looking really good so far!
+          
 
 
     - cujojs?  what is it and do I want it? he calls it something other
       than "framework", says it's framework-agnostic and in fact facilitates 
-      being framework-agnostig
-    - https://sanctuary.js.org/
+      being framework-agnostic
+    - https://sanctuary.js.org/ : "refuge from unsafe javascript" ?
 
   Things to read when I have time:
     http://blog.briancavalier.com/async-programming-part-1-it-s-messy/
