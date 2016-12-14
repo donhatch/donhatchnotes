@@ -29,61 +29,61 @@ I'm having a really hard time absorbing it.
 http://stackoverflow.com/questions/36178889/after-adding-a-listener-to-a-promise-should-i-use-the-original-promise-or-the-n
 Q: after adding a listener to a Promise, should I use the original promise or the new one?
 
-I have some javasript code that takes an existing promise
-(say, the promise returned by fetch()) and adds value
-(say, then/catch listeners for debugging, or maybe more):
+  I have some javasript code that takes an existing promise
+  (say, the promise returned by fetch()) and adds value
+  (say, then/catch listeners for debugging, or maybe more):
 
-<code>let myFetch = function(url) {
-  return fetch(url).then(function(value) {
-    console.log("fetch succeeded: value=",value);
-    return value;
-  }.catch(function(reason) {
-    console.log("fetch failed: reason=",reason);
-    throw reason;
-  });
-};
-</code>
-
-I found myself modifying the above code so that the listeners are only added if some condition is true:
-
-<code>let myFetch = function(url) {
-  let promise = fetch(url);
-  if (some condition) {
-    promise = promise.then(function(value) {
+  <code>let myFetch = function(url) {
+    return fetch(url).then(function(value) {
       console.log("fetch succeeded: value=",value);
       return value;
     }.catch(function(reason) {
       console.log("fetch failed: reason=",reason);
       throw reason;
     });
-  }
-  return promise;
-};
-</code>
+  };
+  </code>
 
-Now I'm wondering, does it really make sense for myFetch to return the new promise returned by "then"
-(actually catch which is shorthand for another "then") as above,
-or would it make more sense for it to return the original promise (with the added listeners)?
-In other words, I'm thinking of leaving out the second "promise =",
-so that the code will look like this instead:
+  I found myself modifying the above code so that the listeners are only added if some condition is true:
 
-<code>let myFetch = function(url) {
-  let promise = fetch(url);
-  if (some condition) {
-    promise.then(function(value) {
-      console.log("fetch succeeded: value=",value);
-      return value;
-    }.catch(function(reason) {
-      console.log("fetch failed: reason=",reason);
-      throw reason;
-    });
-  }
-  return promise;
-};
-</code>
+  <code>let myFetch = function(url) {
+    let promise = fetch(url);
+    if (some condition) {
+      promise = promise.then(function(value) {
+        console.log("fetch succeeded: value=",value);
+        return value;
+      }.catch(function(reason) {
+        console.log("fetch failed: reason=",reason);
+        throw reason;
+      });
+    }
+    return promise;
+  };
+  </code>
 
-Is that effectively different from the previous version?
-Is either version preferable, and if so, why?
+  Now I'm wondering, does it really make sense for myFetch to return the new promise returned by "then"
+  (actually catch which is shorthand for another "then") as above,
+  or would it make more sense for it to return the original promise (with the added listeners)?
+  In other words, I'm thinking of leaving out the second "promise =",
+  so that the code will look like this instead:
+
+  <code>let myFetch = function(url) {
+    let promise = fetch(url);
+    if (some condition) {
+      promise.then(function(value) {
+        console.log("fetch succeeded: value=",value);
+        return value;
+      }.catch(function(reason) {
+        console.log("fetch failed: reason=",reason);
+        throw reason;
+      });
+    }
+    return promise;
+  };
+  </code>
+
+  Is that effectively different from the previous version?
+  Is either version preferable, and if so, why?
 
 ==================
 ==================
@@ -91,75 +91,75 @@ I posted this:
 http://stackoverflow.com/questions/35375730/is-javascript-promise-api-more-convoluted-than-it-needs-to-be
 Q: Is javascript Promise API more convoluted than it needs to be?
 
-I think I have finally managed to bend my mind around javascript/ES6 Promises, for the most part.  It wasn't easy!  But there's something that's baffling me about the design.
+  I think I have finally managed to bend my mind around javascript/ES6 Promises, for the most part.  It wasn't easy!  But there's something that's baffling me about the design.
 
-Why does the Promise constructor take a callback?  Given that the callback is called immediately, couldn't the caller just execute that code instead, thereby avoiding one unnecessary level of mind-bending "don't call me, I'll call you"?
+  Why does the Promise constructor take a callback?  Given that the callback is called immediately, couldn't the caller just execute that code instead, thereby avoiding one unnecessary level of mind-bending "don't call me, I'll call you"?
 
-Here's what I think of as the prototypical example of Promise usage, copied from Jake Archibald's Javascript Promises tutorial http://www.html5rocks.com/en/tutorials/es6/promises/#toc-promisifying-xmlhttprequest , with comments stripped.  It's a Promise-based wrapper for an XMLHttpRequest GET request:
+  Here's what I think of as the prototypical example of Promise usage, copied from Jake Archibald's Javascript Promises tutorial http://www.html5rocks.com/en/tutorials/es6/promises/#toc-promisifying-xmlhttprequest , with comments stripped.  It's a Promise-based wrapper for an XMLHttpRequest GET request:
 
-<code>function get(url) {
-  return new Promise(function(resolve, reject) {
+  <code>function get(url) {
+    return new Promise(function(resolve, reject) {
+      var req = new XMLHttpRequest();
+      req.open('GET', url);
+      req.onload = function() {
+        if (req.status == 200) {
+          resolve(req.response);
+        }
+        else {
+          reject(Error(req.statusText));
+        }
+      };
+      req.onerror = function() {
+        reject(Error("Network Error"));
+      };
+      req.send();
+    });
+  }
+  </code>
+
+  For me, the above code would be much easier to understand if it were rewritten as follows, using a very slightly different kind of promise that I'm imagining, having a no-arg constructor and resolve/reject methods:
+
+  <code>function get(url) {
+    var promise = new MyEasierToUnderstandPromise();
+
     var req = new XMLHttpRequest();
     req.open('GET', url);
     req.onload = function() {
       if (req.status == 200) {
-	resolve(req.response);
+        promise.resolve(req.response);
       }
       else {
-	reject(Error(req.statusText));
+        promise.reject(Error(req.statusText));
       }
     };
     req.onerror = function() {
-      reject(Error("Network Error"));
+      promise.reject(Error("Network Error"));
     };
     req.send();
-  });
-}
-</code>
 
-For me, the above code would be much easier to understand if it were rewritten as follows, using a very slightly different kind of promise that I'm imagining, having a no-arg constructor and resolve/reject methods:
+    return promise;
+  }
+  </code>
 
-<code>function get(url) {
-  var promise = new MyEasierToUnderstandPromise();
+  MyEasierToUnderstandPromise is not too hard to implement in terms of Promise.  At first I tried making it an actual subclass of Promise, but for some reason I couldn't get that to work; so instead I implemented it as a simple factory function, which returns a plain old Promise object with a couple of extra functions
+  attached that behave like member functions:
 
-  var req = new XMLHttpRequest();
-  req.open('GET', url);
-  req.onload = function() {
-    if (req.status == 200) {
-      promise.resolve(req.response);
-    }
-    else {
-      promise.reject(Error(req.statusText));
-    }
+  <code>function NewMyEasierToUnderstandPromise() {
+    var resolveVar;
+    var rejectVar;
+    var promise = new Promise(function(resolveParam, rejectParam) {
+      resolveVar = resolveParam;
+      rejectVar = rejectParam;
+    });
+    promise.resolve = resolveVar;
+    promise.reject = rejectVar;
+    return promise;
   };
-  req.onerror = function() {
-    promise.reject(Error("Network Error"));
-  };
-  req.send();
+  </code>
 
-  return promise;
-}
-</code>
+  So, why isn't Promise designed like this?  I think if it was, it would have helped me to understand Promises a lot quicker-- I bet it would have cut my learning time in half.
 
-MyEasierToUnderstandPromise is not too hard to implement in terms of Promise.  At first I tried making it an actual subclass of Promise, but for some reason I couldn't get that to work; so instead I implemented it as a simple factory function, which returns a plain old Promise object with a couple of extra functions
-attached that behave like member functions:
-
-<code>function NewMyEasierToUnderstandPromise() {
-  var resolveVar;
-  var rejectVar;
-  var promise = new Promise(function(resolveParam, rejectParam) {
-    resolveVar = resolveParam;
-    rejectVar = rejectParam;
-  });
-  promise.resolve = resolveVar;
-  promise.reject = rejectVar;
-  return promise;
-};
-</code>
-
-So, why isn't Promise designed like this?  I think if it was, it would have helped me to understand Promises a lot quicker-- I bet it would have cut my learning time in half.
-
-I know a lot of smart people had a hand in making the Promise API, and everyone seems to be generally happy and proud of it, so I'm wondering what they were thinking.
+  I know a lot of smart people had a hand in making the Promise API, and everyone seems to be generally happy and proud of it, so I'm wondering what they were thinking.
 
 
 
@@ -418,3 +418,103 @@ Q: promise "then" callback order question
     Which are possible in a promises/A+ conformant implementation?
 A: All of them are possible.  See http://stackoverflow.com/questions/36870467/what-is-the-order-of-execution-in-javascript-promises
    Holy moly, huge answer from jfriend00.  Not sure why it's all necessary.
+
+Tue Nov  1 17:58:31 PDT 2016
+  bleah, domenic doesn't like my https://github.com/promises-aplus/promises-spec/pull/241
+
+
+  Hey @domenic, thanks for taking a look.
+
+  I'm certainly disappointed that you and I see such different things when we look
+  at that section of the spec, especially after I thought we were on the verge of making
+  what I perceive to be a quite good and important fix.
+
+  If you haven't found anything that's been said so far to be compelling,
+  I doubt anything I could say would convince you that there's a problem,
+  so I won't try to argue it further.
+
+  For the record, my feeling on the relative importances of the pieces of this proposed change is:
+
+  1. Adding "(Recommended)" and "known to be" to the main text is essential--
+     without those, the stated requirement is impossible to satisfy, and doesn't express your intent.
+  2. Including the example criterion `x instanceof Promise` in the footnote is secondary--
+     it definitely adds value, but I wouldn't say the spec is broken without it.
+  3. I'm not attached to anything else about the content or rephrasing of the footnote,
+     though I do like what we've arrived at in the proposed patch at this moment-- it's very clear to me now.
+
+  @bergus's latest suggestion of only adding "(Recommended)" would address so little of the problem,
+  as I see it, that I would not want to have my name on that commit.
+
+  So, I'll retract this pull request, and I'll close https://github.com/promises-aplus/promises-spec/issues/240 citing your https://github.com/promises-aplus/promises-spec/pull/241#issuecomment-257607015 , unless you want to do that.
+  Let me know; I'll close it in a day or two if I don't hear otherwise from you.
+
+
+Q: why that crap about waiting for platform code before executing then callbacks??
+A: really good stuff here, should be in the spec:
+   http://stackoverflow.com/questions/38059284/why-does-javascript-promise-then-handler-run-after-other-code?rq=1#answer-38062501
+
+Thu Nov 10 23:35:28 PST 2016
+
+  Added this to #241:
+  -------------------------------------
+    After thinking more about this, I'm going to give it one more pitch.
+
+    Since the proposed patch contents seem to be stable,
+    and the discussion is back to the higher-level question of whether to do this at all,
+    I'm going to take it out of this trench and back up to the issue thread
+    #240.  See you there.
+
+  Added this to #241:
+  -------------------------------------
+    I made the pull request (#241) and revised it a few times based on review discussion.  I'm now very happy with it; I think it completely resolves the problem.
+
+    For reference, the proposed new wording is:
+
+      (Recommended) If `x` is known to be a promise, adopt its state [3.4]:
+      ...
+      [3.4] Generally, it will only be known that `x` is a true promise if it comes from the current implementation.  This clause allows the use of implementation-specific means to adopt the state of known-conformant promises, which may be identified by a test such as `x instanceof Promise`. This allows optimisations by not requiring the more general thenable-handling procedure with its repeated value inspection.
+
+    It looks to me like @ForbesLindesay, @bergus, and @briancavalier are on board with the above proposed new wording.
+    But @domenic isn't; in his Nov 1 comment:
+
+    > In general I am -1 on this change. I don't think the current spec is ambiguous and people haven't had any issues implementing it [many times].
+
+    So we're back to the question of whether to do anything about this issue at all.
+    I'll try to make one more appeal for it here.  Here goes.
+
+    ---------------------------------------------------------------
+
+    @domenic, I get that you think this part of the spec is good enough and not worth putting much more thought into.
+
+    The others (@ForbesLindesay, @bergus, @briancavalier) have put thought into it, and they've arrived at this tighter version of this section that I think is really good and completely resolves the issue.
+
+    Unless you actually think this change makes it *worse* overall, would you be willing to let the change through?
+
+    Here's why I think it's important.
+
+    The world is learning how promises work, in large part through discussions that refer to the promises/A+ spec, since it's the primary and best reference.  In fact, it's the *only* reference that has the level of precision and completeness that's appropriate and useful for most of these discussions.
+    (In contrast, the ES6 promises spec, for example, in addition to being implementation-specific, uses language that is too complicated and convoluted for it to be useful in resolving most of the questions I've seen.)
+
+    In particular, the wording of this section becomes significant when I discuss your spec with people, e.g. when asking or answering questions on stackoverflow, or if I write an implementation, or when I review someone else's implementation.
+    Without the proposed tightening, I find myself saying things of the form:
+
+      According to the promises/A+ spec: `[old wording]`,
+      which obviously can't be taken literally since that wouldn't make sense,
+      but I've talked to the spec authors about it
+      and I can tell you with confidence that they did have something
+      coherent in mind here, and what they really meant was: `[new wording]`.
+
+    which is kind of wordy and embarrassing.
+
+    Sure, people have managed to implement it [many times] in spite of this hurdle, and maybe all of them even inferred your intent correctly-- I haven't checked.
+
+    In any case, after this change, I'll be able to say the following instead, which I very much prefer:
+
+      According to the promises/A+ spec: `[new wording]`.
+
+    That's a significant reduction in noise and distraction which will increase the quality of the global discussion, and it will also reflect better on you and on the great work you've put into this project.
+
+    What do you think?  Will you let it through?
+  -------------------------------------
+
+
