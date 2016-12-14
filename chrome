@@ -275,6 +275,7 @@ Ideas for extensions:
 Q: where do extensions live?
 A: 
     linux: ~/.config/google-chrome-beta/Default/Extensions
+        or: ~/.config/google-chrome-beta/Profile 1/Extensions/eogalmedmljabbaahganginmeabadfbp
     mac: ~/Library/Application\ Support/Google/Chrome/Default/Extensions
   Q: what about settings?
 
