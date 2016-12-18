@@ -518,3 +518,66 @@ Thu Nov 10 23:35:28 PST 2016
   -------------------------------------
 
 
+Tue Dec  6 21:31:39 PST 2016
+  Going to file yet another bug report, on the compliance suite.
+  See Bergi's answers to: http://stackoverflow.com/questions/35391179/promises-a-compliant
+  http://stackoverflow.com/questions/27746304/how-do-i-tell-if-an-object-is-a-promise 
+
+  Maybe file a bug.  What would be a good title?
+
+    Issue: sloppy language in description of compliance test suite
+    Issue: misleading language in description of compliance test suite
+    Issue: misleading language in description of what compliance test suite does
+    Issue: hyperbole in description of what compliance test suite does
+    Issue: misleading description of what compliance test suite does
+    Issue: false and misleading description of what compliance test suite does
+
+    Both the Compliance Test Suite doc and the Conformant Implementations list
+    make statements implying that passing the test suite is equivalent to complying with the spec:
+
+    In https://promisesaplus.com/implementations :
+      There are many conformant implementations of Promises/A+.
+      Here are the ones we know about.
+      Note that an implementation’s conformance is determined by it passing the test suite.
+
+    In https://github.com/promises-aplus/promises-tests :
+      This suite tests compliance of a promise implementation with the Promises/A+ specification.
+      Passing the tests in this repo means that you have a Promises/A+ compliant implementation of the then() method, [...]
+
+    Of course the equivalence doesn't hold-- no test suite could possibly accomplish that;
+    this is something that should be clear after a moment's
+    reflection by anyone who has passed an introductory computer science course.
+
+    The most that can be said truthfully is something like:
+      - the test suite will catch many common errors in implementations
+      - if the test suite fails, the implementation is not conformant
+      - if the test suite passes, the implementation *might* be conformant, but no test can ever tell you for sure.
+    (This glosses over the possibility of bugs in the suite and timeouts, which is fine.)
+
+    One might be tempted to dismiss this issue as simply loose/sloppy language
+    that, anyone can see, should not be taken literally since that would be absurd.
+
+    The problem with that is the hyperbole is viral-- it leaks out into discussions
+    on the web, which become at best confusing and at worst seriously misleading.
+    In particular, it seems that the test suite is now routinely given as a supposedly definitive answer to
+    "is such-and-such promise implementation promises/A+ compliant"; such answers are wrong and misleading,
+    and are apparently contributing to what looks like a mass delusion.
+
+    Examples:
+
+    - Bergi's comment in http://stackoverflow.com/questions/35391179/promises-a-compliant#comment-58501762 :
+
+        [...] just run the test suite on the implementation in question to get a definitive answer.
+
+    - End of Benjamin Gruenbaum's answer http://stackoverflow.com/questions/27746304/how-do-i-tell-if-an-object-is-a-promise#answer-27746324:
+      *really* need to be sure?  You can always run it through the test suite :D
+
+      I actually don't know whether the smiley is because Benjamin is acknowledging the test suite can't really tell
+      in general, or whether he actually believes it *can* tell and the smiley is just because of the non-practicality issue.
+      JLRishe seems to interpret it as the latter (see below), so the misinformation snowballs...
+
+    - JLRishe's comment in http://stackoverflow.com/questions/27746304/how-do-i-tell-if-an-object-is-a-promise#comment-44650451:
+      The only alternative as far as I can see is to take Benjamin Gruenbaum's suggestion and run it through the promise test suite.  But that's not practical for actual production code.
+
+    It would be helpful if more accurate language could be chosen which does not lead so easily
+    to misconceptions and misinformation.
