@@ -1106,6 +1106,11 @@ Don
         ../rcs-fast-export/rcs-fast-export.rb . | git fast-import
         git reset
 
+    Q: how to check out by date?
+    A: per http://stackoverflow.com/questions/6990484/git-checkout-by-date#answer-6990682
+       (and lots of other references):
+        git checkout `git rev-list -n 1 --before="2009-07-27 13:37" master`
+
 POSSIBLE BUG: weird behavior on "git fetch --dry-run"
     - don't use git pull for this, it gets confusing.
     - and especially don't use -n, it does *not* mean --dry-run in general
