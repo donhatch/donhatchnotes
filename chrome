@@ -83,6 +83,10 @@ Q: argh! if I've inserted stuff so that line number is > original file size, the
 Q: how to restart chrome, recreating all tabs and windows?
 A: chrome://restart
 
+Q: can I change my "drag" cursor? the default one really sucks,
+   it doesn't give me a feeling for where the pointer point is,
+   and actually obscures it.
+
 
 
 
@@ -210,6 +214,28 @@ Q: how do I get chrome to forget links I've visited?
        History -> Clear browsing data... -> obliterate everything
 A: oh hmm, actually I think it's completing
    based on bookmarks.  I'd have to remove the bookmarks too.
+
+Q: what tab managers do I like?
+A:
+  - Tab Outliner seems to be the most useful/intelligent, from what I've seen.
+    Tips:
+     - from https://www.youtube.com/watch?v=VvlK1ttZ3dI "How to easily clean-up you browsing tree in Tabs Outliner":
+       - use clone view to have 2 views, allows dragging between distant locations
+       - instead of deleting, move things to a garbage pile; that's easier to retrieve something if put there accidenally.
+    Bugs:
+     - the fact that it says '?' gives help
+       but then when you type ? it says "that's only available in paid mode"
+       feels like a bit of an insult, like bait-and-switch.
+     - it jumps when I shift focus to a different chrome window,
+       even if whole tree fits on screen.  should never jump if whole tree
+       fits on screen!  and I need it to avoid jumping wherever
+       possible in general.
+    Questions:
+     Q: can I make it pop a window to the front?
+  - Hey wait a minute-- is there something called "Tree Tabs"? https://www.youtube.com/watch?v=Q9AKiqhtMRQ
+    Is it called "Sidewise Tree Style Tabs"?
+    Hmm, installed that, it seems to be a bit flaky,
+    but maybe just because it's fighting with Tab Outliner.  Disabled it.
 
 
 

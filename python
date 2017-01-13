@@ -178,6 +178,13 @@ GOTCHAS:
 
     - string functions that test for "is all something"
       return false on empty string-- lame!
+        isalnum
+        isalpha
+        isdigit
+        islower ("all cased characters... and there is at least one cased character" !)
+        isspace
+        istitle
+        isupper ("all cased characters... and there is at least one cased character" !)
       Is there a good workaround other than writing my own replacement?
       (see http://p-nand-q.com/python/stupid_lambda_tricks.html
       for an approach to a similar issue for list functions
