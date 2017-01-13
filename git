@@ -530,13 +530,24 @@ TODO: think about the possibility of a branch-specific README as suggested in ht
 TODO: check out qgit
 
 
+CRLF ISSUES:
+    http://stackoverflow.com/questions/170961/whats-the-best-crlf-carriage-return-line-feed-handling-strategy-with-git#answer-10855862
+    which refers to this:
+      https://help.github.com/articles/dealing-with-line-endings/
+    and says this is required reading:
+      http://adaptivepatchwork.com/2012/03/01/mind-the-end-of-your-line/
+
+    The one with the cartoon:
+      http://stackoverflow.com/questions/20168639/git-commit-get-fatal-error-fatal-crlf-would-be-replaced-by-lf-in/20168775#20168775
+
+
 
 
 QUESTIONS:
 
-    Q: make a new branch with current changes?
+    Q: make a new branch from current uncommitted/unstaged changes?
     A: git checkout -b <new-branch>
-       And then, as in BEST PRACTICES section:
+       And then, as in BEST PRACTICES section, commit staged (which is nothing):
           git commit --allow-empty -m "Create branch 'B' from 'A'"
 
     Q: p4 filelog?
@@ -676,7 +687,7 @@ Don
 
     Q: make a tmp branch to hold changes I don't mean to check in anywhere?
     A: git branch tmp
-    Q: okay how to I make a branch from a particular commit?
+    Q: okay how do I make a branch from a particular commit?
     A: git branch tmp <commit>
 
     Q: dry run push/pull/fetch/merge?
