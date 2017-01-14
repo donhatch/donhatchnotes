@@ -186,7 +186,7 @@ BEST PRACTICES:
           git merge --no-ff B
           git branch -d B
       that will make the default comment "Merge branch 'simplify_listeners'"
-      which is good. (Maybe add optional "back into 'A'")
+      which is good. (And during edit, add "back into 'A'" to make it even better.)
 
     - TODO: sometimes I'll have a bunch of commits that I later decide
       should have been done in a topic/feature branch
