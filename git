@@ -174,8 +174,8 @@ BEST PRACTICES:
           git commit --allow-empty -m "Initial empty commit"
 
     - when creating a new branch, I like to always make an empty commit:
-          git branch B A
-          git checkout B  # or just: git checkout -b B
+          git checkout A
+          git checkout -b B # short for: git branch B A; git checkout B
           git commit --allow-empty -m "Create branch 'B' from 'A'"
       this makes 'git log --graph' much easier to read!
       Also, I'm thinking, always use precisely that format;
