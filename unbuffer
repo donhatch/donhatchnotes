@@ -5,3 +5,15 @@ but in fact it's useless.  From its man page:
 "NOTE: If COMMAND adjusts the buffering of its standard  streams  ('tee'
 does  for  e.g.) then that will override corresponding settings changed
 by 'stdbuf'.
+
+(Actually I'm not quite clear on that at this moment.)
+
+References:
+http://stackoverflow.com/questions/3465619/how-to-make-output-of-any-shell-command-unbuffered
+http://unix.stackexchange.com/questions/25372/turn-off-buffering-in-pipe
+http://www.pixelbeat.org/programming/stdio_buffering/
+
+Good answer using 'script' command here,
+there are versions for both freebsd/mac and linux
+(DO NOT MIX or you might overwrite files!)
+  http://stackoverflow.com/questions/3465619/how-to-make-output-of-any-shell-command-unbuffered#answer-16422308
