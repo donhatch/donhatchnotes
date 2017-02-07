@@ -244,6 +244,14 @@ EXTENSIONS:
 Q: how do I make a user script?
 A: make a chrome extension
 
+Q: What are the differences among user scripts, content scripts, background scripts, injected scripts?
+PA: see this answer, which covers extension code (background page, content scripts, injected scripts):
+  http://stackoverflow.com/questions/9915311/chrome-extension-code-vs-content-scripts-vs-injected-scripts#answer-9916089
+  However, it doesn't cover user scripts.
+
+
+
+
 Q: on redirect, the url in the url bar gets rewritten
    and there's no way to get back to the original robust url.
    Any way to make life easier?

@@ -139,3 +139,12 @@ Q: My main overall question is:
     http://know.cujojs.com/tutorials/async/simplifying-async-with-promises
     http://know.cujojs.com/tutorials/async/mastering-async-error-handling-with-promises
 
+Q: how to remove an event listener?
+PA: removeEventListener, but it says it has to be a "named external" function.
+    However, the following seem like fine solutions that *don't* require
+    it to be external:
+      http://stackoverflow.com/questions/4878805/force-javascript-eventlistener-to-execute-once#comment-65537773
+      http://hastebin.com/ikixonajuk.coffee
+      https://www.broken-links.com/2013/05/22/removing-event-listeners-with-anonymous-functions/
+      http://stackoverflow.com/questions/4616525/javascript-removing-an-anonymous-event-listener#answer-4616564
+      http://stackoverflow.com/questions/4616525/javascript-removing-an-anonymous-event-listener#comment-5076539
