@@ -1,0 +1,50 @@
+x-mouse aka focus-follows-mouse aka sloppy focus.
+
+Good summary here (the stuff about dead buffaloes and durians):
+  http://steve-yegge.blogspot.com/2008/04/settling-osx-focus-follows-mouse-debate.html
+
+Other interesting things on OS X (mac):
+  http://stackoverflow.com/questions/98310/focus-follows-mouse-plus-auto-raise-on-mac-os-x
+  http://superuser.com/questions/27306/focus-follows-mouse-or-sloppy-focus-on-mac-os-x
+  https://news.ycombinator.com/item?id=8768400
+
+Highlights of partial workarounds:
+  - iTerm2 (which is a nice Terminal replacement anyway) has it,
+    but only within the same app:
+      Preferences -> Pointer -> Focus follows mouse
+  - Oh! Terminal actually has same thing, with obscure enabling recipe per:
+      http://stackoverflow.com/questions/98310/focus-follows-mouse-plus-auto-raise-on-mac-os-x#answer-98331
+        defaults write com.apple.Terminal FocusFollowsMouse -bool true
+  - hmm, actually, they work great together, *as long as iTerm2 is on top*.
+  - per http://stackoverflow.com/questions/98310/focus-follows-mouse-plus-auto-raise-on-mac-os-x#answer-35820182 :
+      ⌃⌥-click (control-option-click) - switches focus without raising window
+      ⌘-click (command-click) - clicks in window without switching focus,
+         can do many operations (unfortunately not too helpful when I want
+         to copy text, since that requires keys too)
+    control-option-click seems to work well for Terminal and chrome, but not
+    for iTerm2 (iTerm2 brings up the right-click menu? wonder if there's
+    a way to disable that?  or file bug against iTerm2)
+  - "scroll-follows-mouse" is on by default (or maybe always)
+
+  - in the ycombinator thread, someone suggested using some applescript
+    (with accessibility enabled so can control windows and mouse)
+  - in http://superuser.com/questions/27306/focus-follows-mouse-or-sloppy-focus-on-mac-os-x#answer-334078 ey suggests writing an "input manager" that can
+    redirect the keystrokes/clicks using mach_inject or similar.
+    Details are flawed, but that might be a good technology to use
+    in other ways.
+    Oh, ouch!  mach_inject looks scary! It's remote process code injection!
+    Forget that.  It would be great to be able to intercept key/mouse events
+    and direct them, though.
+  - http://www.itgo.me/a/x6995563997546953496/intercepting-keyboard-and-mouse-events-from-focused-applications-on-os-x
+
+  - Event tap?
+      https://encyclopediaofdaniel.com/blog/os-x-event-tap/
+      https://developer.apple.com/reference/coregraphics/quartz_event_services
+    Hmm, looks like it's either Swift or Objective-C?  Not applescript.
+  - Possibly relevant stuff about event architecture, with diagram:
+    https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/EventOverview/EventArchitecture/EventArchitecture.html
+  - Seems like this goes into the too hard pile :-(
+
+    
+
+    
