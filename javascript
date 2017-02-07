@@ -106,7 +106,9 @@ Q: My main overall question is:
             So, how would I wrap it in a way that doesn't use runPromise?
         PA: starting to think maybe I want fluture instead?  Maybe ask on creed's chat room?
             Actually fluture's doc is *way* more accessible language. maybe just use it.
-      - promises+generators?
+      - promises+generators? "control flow utopia" as forbeslindesay calles it.
+                https://www.promisejs.org/generators/
+                http://colintoh.com/blog/staying-sane-with-asynchronous-programming-promises-and-generators
          pro: very clean expression of coroutines
          con: farther and farther from comprehensibility by a newbie
          con: still "then"-diseased... I think?
@@ -122,6 +124,19 @@ Q: My main overall question is:
             "Trying to do so will likely cause unexpected behavior, because Promises/A+ insists on problematic (read: "dangerous") duck-typing for objects that have a then() method, as asynquence instances do."
             So ey's on board!  And there are utilities for interoperating.
             This is looking really good so far!
+       - ES7 async?  Hmm it's here already?!
+         This talks about it:
+             https://davidwalsh.name/async-generators
+         and says "in the meantime, libraries like asynquence give us these runner utilities to make
+         it pretty darn easy to get the most out of our asynchronous generators".
+         Hmm here are some articles that seem to say it's not so great:
+           https://spion.github.io/posts/es7-async-await-step-in-the-wrong-direction.html
+           http://calculist.org/blog/2011/12/14/why-coroutines-wont-work-on-the-web/  conclusion: "generators yes, coroutines no". that was 2011.
+         So, would they think asynquence has the same problems, whatever those problems are.
+         Oh, OUCH!  I think it's due to the possibility of a thing I thought was transactional no longer being,
+         due to something I call unexpectedly awaiting.  See example in second article.
+         Hmm, but... don't async functions have to declare that they are async?  So it's not true that "you never know when someone might call yield";
+         only functions declared "async" can, right?  Not sure whether that helps.
           
 
 
