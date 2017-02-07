@@ -196,8 +196,10 @@ A: Well, "resolve" and "then" have to return a value, but return values can't
    That lets the above be written as:
       promise.spread(function(value0, value1, value2) { ... })
    However, this is really unnecessary in most cases, as pointed out in the
-   Bluebird doc; it can be rewritten using ES6 destructuring syntax as:
-      promise.spread([value0, value1, value2]) { ... })
+   linked Bluebird doc; it can be rewritten using ES6 destructuring syntax as:
+      promise.then(function([value0, value1, value2]) { ...})
+   unfortunately the following doesn't compile :-(
+      promise.then([value0, value1, value2] => { ... })
 ===============================================================================
 http://stackoverflow.com/questions/36312648/how-does-promise-resolution-decide-whether-to-treat-a-return-value-as-a-promise
   Q: how does promise resolution decide whether to treat a return value as a promise or as a plain value?
@@ -262,9 +264,13 @@ PA: see the two links from here: https://github.com/promises-aplus/promises-spec
         https://gist.github.com/ForbesLindesay/5392612 "Arguments in favor of Promises for Promises"
         https://gist.github.com/ForbesLindesay/5392701 "Arguments against Promises for Promises"
    Hmm, not very readable :-(
+   But they link to great discussions!
+      https://mail.mozilla.org/pipermail/es-discuss/2013-April/030192.html
+      https://mail.mozilla.org/pipermail/es-discuss/2013-April/030198.html (puzzle for anti-flatteners)
+   And here's a puzzle for pro-flatteners:
+     http://stackoverflow.com/questions/37426037/promises-for-promises-that-are-yet-to-be-created-without-using-the-deferred-ant
 
-
-Possible references for promise-for-a-promise:
+More possible references for promise-for-a-promise:
   https://github.com/promises-aplus/promises-spec/issues/97#issuecomment-16319350
   Should I be looking at this "fantasy land"?
     https://github.com/fantasyland/fantasy-promises
@@ -363,6 +369,7 @@ Wed Oct 26 21:37:29 PDT 2016
   so it was a poor choice of words to use in these decision-making instructions.
   The wording was recently fixed [https://github.com/promises-aplus/promises-spec/issues/240],
   so the spec actually no longer contains this problematic phrase.
+  [XXX NOT!  reword this in some tactful way]
 
   The new wording is:
     "(Recommended) If `x` is known to be a promise, adopt its state [3.4]",
