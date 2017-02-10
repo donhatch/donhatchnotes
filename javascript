@@ -124,7 +124,7 @@ Q: My main overall question is:
             "Trying to do so will likely cause unexpected behavior, because Promises/A+ insists on problematic (read: "dangerous") duck-typing for objects that have a then() method, as asynquence instances do."
             So ey's on board!  And there are utilities for interoperating.
             This is looking really good so far!
-       - ES7 async?  Hmm it's here already?!
+       - ES7 async?  Hmm it's here already?!  (the "co" library is supposed to be a stepping stone to it, so I probably don't need co.)
          This talks about it:
              https://davidwalsh.name/async-generators
          and says "in the meantime, libraries like asynquence give us these runner utilities to make
