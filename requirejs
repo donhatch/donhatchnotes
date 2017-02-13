@@ -1,0 +1,109 @@
+NOTES:
+  - At top level, `require` is the same as `requirejs`
+  - `define(['a'], function(){})` doesn't mean "define a";
+    it means "Here's my module definition for this file,
+    which depends on 'a'".
+
+QUESTIONS:
+
+Q: How does requirejs know to load a required file before I even mention the file name?
+   http://stackoverflow.com/questions/42172792/how-does-requirejs-know-to-load-a-required-js-file-before-i-ever-mention-the-fil
+A: Sneaky magic, it's called the "Simplified CommonJS wrapper";
+   it actually parses the callback code and makes assumptions about it.
+   See the answer to my question, and also these:
+    http://stackoverflow.com/questions/28341390/when-is-requirejs-require-call-asynchronous-when-is-it-synchronous
+    http://stackoverflow.com/questions/34661039/how-does-the-simplied-commonjs-wrapper-work-in-require-js-under-the-hood
+   Note that it works in `define`, but *not* in `require`!
+
+Q: I've heard it said that `define` is lazy; that is, the callback
+   isn't executed until it's needed.  What's an example of this?
+   This guy claims to show an example of it, but I can't seem to reproduce it;
+   see my question attached to the answer:
+   http://stackoverflow.com/questions/18534912/requirejs-difference-between-require-and-define#answer-18535142#comment-71533847
+
+Q: On the face of it, "define" seems to the same as "require" except that
+   its callback returns a value which the calling "define" or "require"
+   can access via a function argument.
+   So, are "define" and "require" otherwise interchangeable?
+   I.e. (1) can "define" always be used in place of "require"? (2) can "require" always be used in place of "define" when the return value isn't used? (3) if the answer to (1) is "yes", then is there any reason for "require" to exist at all?
+   Note that there are several questions that appear to be related to this on stackoverflow;
+   however, I think most of the answers are framed in a way that isn't
+   helpful to me; they talk about intent while leaving open the possibility
+   that the functions are essentially the same other than accessibility of
+   return value.
+     http://stackoverflow.com/questions/9507606/when-should-i-use-require-and-when-to-use-define
+     http://stackoverflow.com/questions/17366073/requirejs-define-vs-require
+     http://stackoverflow.com/questions/18534912/requirejs-difference-between-require-and-define
+     http://stackoverflow.com/questions/21209359/requirejs-can-i-use-require-instead-of-define
+
+   Maybe I could ask and answer another:
+     "Is requirejs's `require` the same as `define` aside from lack of return value from the callback?"
+
+A:
+  (1) No!
+      - `require` can be used at any point in javascript code at runtime,
+        many times per file / function if desired;
+        It means "schedule this callback to be run asynchronously, after ansychronously loading
+        these dependencies (and the dependencies' dependencies, recursively)".
+      - `define` means "here's the callback that produces the value
+        to be returned to calling `define`s and `require`s when they ask for this file.
+      - only the first `define` called during loading of the file by requirejs is honored (apparently).
+        (Seems to me it would be better if this were an error?)
+      - if `define` is called outside of being loaded as a dependency or `data-main` attr
+        of require.js's script tag, it gives an error.
+      - `define` is only honored during initial file load;
+        e.g. if I put one inside a callback of a setTimeout(f, 1000), it never gets run.
+        (Seems to me it would be better if this were an error?)
+        (And if I put one inside a callback of a setTimeout(f, 0), it give an error...
+        not sure exactly why this is an error and the setTimeout(f, 1000) isn't).
+      - Supposedly `define` is only called if/when something requires or depends on it,
+        which is maybe useful for lazy purposes, postponing/avoiding overhead?
+        However, I can't reproduce this at all; see my other question about it.
+  (2) No!
+      - The crucial non-obvious thing here is timing: if I use `require` where I should
+        have used `define`, things can get executed in an unfortunate order that results
+        in errors.  While simple examples may appear to work, here's an example
+        where it doesn't.
+
+        In this example, PRINT.js and getStackTrace.js put respective functions
+        PRINT and getStackTrace into the global namespace, and PRINT calls getStackTrace.
+
+        TODO: put the important parts of the file contents here
+
+        If PRINT.js has a `define` declaring dependency on getStacktrace.js,
+        I get the expected sequence of execution:
+	  main.js loaded
+	  PRINT.js loaded
+	  getStackTrace.js loaded
+          getStackTrace.js's define callback called (if any-- it's optional, don't know why)
+	  PRINT.js's define callback called
+	  main.js's require or define callback executed, which calls PRINT(), which calls getStackTrace(); all good
+
+        Whereas if I replace PRINT.js's `define` with `require`:
+	  main.js loaded
+	  PRINT.js loaded (requirejs is looking for define, which doesn't happen)
+	  main.js's require callback executed, which calls PRINT, which gives error to console:
+	    PRINT.js:102 Uncaught ReferenceError: getStackTrace is not defined
+	  getStackTrace.js loaded
+          getStackTrace.js's define callback called (if any)
+	  PRINT.js's require callback called
+
+        So the crucial difference is the relative order of main.js's
+        and PRINT.js's callbacks: PRINT.js's define callback gets executed
+        before main.js's require or define callback
+        (which implies all PRINT.js's dependencies got loaded even before that).
+        Whereas PRINT.js's require callback gets executed after main.js's callback
+        (or at least *can* get executed after it), because supposedly nothing
+        depends on its result; that means functions in PRINT, although defined,
+        may not be *usable* by the time main.js require callback is called,
+        resulting in error.
+
+      - Given that `require` is *not* a valid substitute for `define` even though
+        it appears to be so, and using `require` instead of `define` is easy to get wrong,
+        and that there seems to be no legitimate use case for failing to have `define`
+        in a file that gets depended on, it seems to me it would be better if
+        requirejs would err on failure for a depended-on file to execute `define`
+        during file load, instead of silentl proceeding.
+
+  (3) N/A since the answer to (1) is "no".
+
