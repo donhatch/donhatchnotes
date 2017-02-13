@@ -99,6 +99,15 @@ A:
         may not be *usable* by the time main.js require callback is called,
         resulting in error.
 
+        One way of thinking about this is that `define` is a synchronization point:
+        the define's dependencies get loaded *before* the define's callback,
+        and the caller's callback (require or define) gets called *after*
+        the define's callback.  Therefore, the define's dependencies get
+        loaded before main.js's callback, which prevents errors when main.js
+        invokes the intermediate module's functions which call the dependent
+        modules functions.
+
+
       - Given that `require` is *not* a valid substitute for `define` even though
         it appears to be so, and using `require` instead of `define` is easy to get wrong,
         and that there seems to be no legitimate use case for failing to have `define`
