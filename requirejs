@@ -9,7 +9,8 @@ QUESTIONS:
 Q: How does requirejs know to load a required file before I even mention the file name?
    http://stackoverflow.com/questions/42172792/how-does-requirejs-know-to-load-a-required-js-file-before-i-ever-mention-the-fil
 A: Sneaky magic, it's called the "Simplified CommonJS wrapper";
-   it actually parses the callback code and makes assumptions about it.
+   it actually parses the callback code, necessarily somewhat naively,
+   and makes assumptions about it.
    See the answer to my question, and also these:
     http://stackoverflow.com/questions/28341390/when-is-requirejs-require-call-asynchronous-when-is-it-synchronous
     http://stackoverflow.com/questions/34661039/how-does-the-simplied-commonjs-wrapper-work-in-require-js-under-the-hood
