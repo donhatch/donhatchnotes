@@ -1,0 +1,111 @@
+iterm2 is a replacement for Terminal on macos.
+I'm using iTerm2 because it seems to be more applescript-able than Terminal:
+  https://www.iterm2.com/documentation-scripting.html
+
+
+Non-obvious things:
+ - Like Terminal, command-click does many terminal actions without raising
+   or focusing the window.
+   (But unlike Terminal, ctrl-alt-click doesn't focus-without-raising :-( ;
+   see BUG below)
+ - command-/ locates cursor-- cool!
+
+My settings:
+  - Prefs
+    - General
+      - Closing
+        - uncheck "confirm closing multiple sessions"
+        - check "Quit when all windows closed"
+    - Appearance
+      - Dimming
+        - check "Dim inactive split panes"
+        - check "Dim background windows"
+      - Window
+        - check "Show border around window"
+    - Profiles
+      - Default
+        - Colors
+          - Cursor Colors
+            - check "Cursor Guide"
+        - Notifications
+          - Filter Alerts
+            - uncheck 'Send "Bell" alert'
+    - Pointer
+      - check "Focus follows mouse"
+
+Q: can I set tab colors in applescript?
+
+BUG: ctrl-alt-click doesn't focus-without-raise like Terminal does;
+     instead, it's just like ctrl-click or right-click,
+     i.e. it selects a word, raises the
+     window, and brings up the right-click menu.
+     And can't customize! :-(
+     That is, left button (even modified) isn't one of the gestures
+     I can customize in Prefs / Pointer / +;
+     it says "You can't customize that button".
+
+------------------------------------------------
+Here's an Automator / "Run AppleScript" script I use to open 8 different tabs
+with different text colors and different commands:
+
+on run {input, parameters}
+    
+    -- Used clues from:
+    --     https://www.iterm2.com/documentation-scripting.html
+    --     https://gist.github.com/lrdiv/4dfb6b19ed82cbdf5002
+    tell application "iTerm"
+        create window with default profile
+        tell current window
+            tell current session
+                set foreground color to {65535, 49152, 49152, 0}
+                write text "ssh darn.mtv.corp.google.com"
+                write text "scrn A"
+            end tell
+            create tab with default profile
+            tell current session
+                set foreground color to {65535, 57344, 49152, 0}
+                write text "ssh darn.mtv.corp.google.com"
+                write text "scrn B"
+            end tell
+            create tab with default profile
+            tell current session
+                set foreground color to {65535, 65535, 49152, 0}
+                write text "ssh darn.mtv.corp.google.com"
+                write text "scrn C"
+            end tell
+            create tab with default profile
+            tell current session
+                set foreground color to {49152, 65535, 49152, 0}
+                write text "ssh darn.mtv.corp.google.com"
+                write text "scrn D"
+            end tell
+            create tab with default profile
+            tell current session
+                set foreground color to {49152, 65535, 65535, 0}
+                write text "ssh darn.mtv.corp.google.com"
+                write text "scrn E"
+            end tell
+            create tab with default profile
+            tell current session
+                set foreground color to {49152, 49152, 65535, 0}
+                write text "ssh darn.mtv.corp.google.com"
+                write text "scrn F"
+            end tell
+            create tab with default profile
+            tell current session
+                set foreground color to {57344, 49152, 65535, 0}
+                write text "ssh darn.mtv.corp.google.com"
+                write text "scrn G"
+            end tell
+            create tab with default profile
+            tell current session
+                set foreground color to {65535, 49152, 65535, 0}
+                write text "ssh darn.mtv.corp.google.com"
+                write text "scrn H"
+            end tell
+            select first tab
+        end tell
+    end tell
+    return input
+end run
+
