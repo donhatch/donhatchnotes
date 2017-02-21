@@ -24,6 +24,7 @@ Javascript frameworks:
   because it has a really excellent-looking ui toolkit called Dijit, with a nice demo page:
     http://archive.dojotoolkit.org/nightly/dojotoolkit/dijit/themes/themeTester.html
   Haven't explored it much though.
+  See dojo notes in separate file.
 
 
 QUESTIONS:
