@@ -1,8 +1,16 @@
+REQUIRED READING:
+  http://stackoverflow.com/questions/18512503/can-someone-explain-the-syntax-involved-in-this-require-js-example#answer-18513994
+  which refers to this excellent article:
+    http://aaronhardy.com/javascript/javascript-architecture-requirejs-dependency-management/
 NOTES:
   - At top level, `require` is the same as `requirejs`
   - `define(['a'], function(){})` doesn't mean "define a";
     it means "Here's my module definition for this file,
     which depends on 'a'".
+  - I think if I want to use some modules using dojo,
+    maybe I can't call "require"?  Not sure.
+    I seemed to run into some trouble until I rewrote it using only
+    `define` and no using `require` inside the define.
 
 QUESTIONS:
 
@@ -117,3 +125,144 @@ A:
 
   (3) N/A since the answer to (1) is "no".
 
+Q: I'm now loading all modules that are in current directory as
+   './someModule.js'.   It *sometimes* seems to work if the './' is omitted
+   and/or if the '.js' is omitted, but I think I've had bad luck with both
+   in a dojo setting (e.g. if I omit the .js, it would try to load the thing
+   from the dojo subdirectory, and if I omit the .js, something else
+   bad would happen... although maybe that was just if I had .js an some places
+   and omitted otherwise).  Get straight on exactly what the problems were
+   and exactly what the recommendations are, and what conventions
+   are required in order to get both requirejs and dojo's AMD functionality
+   to work?
+
+Q: Can I use requirejs and dojo's AMD functionality interchangeably?
+   If not, what's the greatest common subset of functionality?
+
+Q: Is there some clever way I can require PRINT.js
+   in a way that makes PRINT.js load the caller before continuing?
+
+   Let's see if I can frame this in a way that's suitable...
+   Hmm, maybe make it more self-contained first?
+   (i.e. not dependent on getStackTrace.js)
+
+
+
+   Q: how to define a module that reads the caller's source code?
+
+   I have a couple of use cases where I'm writing a function
+   that needs to read its caller's source code.
+   These are utility functions for developer productivity.
+
+   Use case #1: PRINT
+     PRINT(<expression>) should print to the console:
+       <expression> = <value>
+     For example:
+       PRINT(1+2);                  // "1+2 = 3"
+       PRINT([1,2,3].length);       // "[1,2,3].length = 3"
+       let a = 3; PRINT(a);         // "a = 3"
+       let b = {x:8,y:9}; PRINT(b); // "b = {x:8,y:9}"
+
+   Use case #2: CHECK
+     CHECK(<boolean expression>) should throw a new Error("CHECK failed: <boolean expression> at <caller function> (<caller file>:<caller line>)")
+     if <boolean expression> evaluates to false.
+     For example, when called from fun() in foo.js:
+       CHECK(true);     // (does nothing)
+       CHECK(1+1===2);  // (does nothing)
+       CHECK(false);    // throw new Error("CHECK failed: false at fun (foo.js:3)");
+       CHECK(1+1===3);  // throw new Error("CHECK failed: 1+1===3 at fun (foo.js:4)");
+
+   How can I implement PRINT and CHECK?
+       
+   IMPLEMENTATION #1: Synchronously load the caller's source file
+     getStackTrace.js:
+       // Assumes require.js has been loaded
+       define([], function() {
+         return function getStackTrace() {
+         };
+       });
+     PRINT.js:
+       // Assumes require.js has been loaded
+       define(['./getStackTrace.js'], function(getStackTrace) {
+         return function PRINT() {
+           ...
+         };
+       });
+     CHECK.js:
+       // Assumes require.js has been loaded
+       define(['./getStackTrace.js'], function(getStackTrace) {
+         return function CHECK() {
+           ...
+         };
+       });
+      main.js:
+       // Assumes require.js has been loaded
+       require(['PRINT', 'CHECK'], function fun(PRINT, CHECK) {
+         PRINT(1 + 2);                // "1 + 2 = 3"
+         PRINT([1,2,3].length);       // "[1,2,3].length = 3"
+         let a = 3; PRINT(a);         // "a = 3"
+         let b = {x:8,y:9}; PRINT(b); // "b = {x:8,y:9}"
+         CHECK(true);     // (does nothing)
+         CHECK(1+1===2);  // (does nothing)
+         CHECK(1+1===3);  // throw new Error("CHECK failed: 1+1===3 at fun (foo.js:8)");
+       });
+       
+   That works, but it has a problem: it loads the source files synchronously,
+   which provokes the following warning in chrome:
+     [...]
+   and I suspect future versions will disallow synchronous loading entirely.
+   So I need to write this all the right way-- that is, asynchronously.
+
+   IMPLEMENTATION #2: Asynchronously load caller's source file (only works from main):
+     getStackTrace.js:
+       (same as in IMPLEMENTATION #1)
+     PRINT.js:
+       // Assumes require.js has been loaded
+       define(['./getStackTrace.js'], function(getStackTrace) {
+         return {
+           withPRINT: function(callback) {
+             let callerURL = ...;
+             fetch(callerURL).then(function() {
+               callback(function PRINT(expr) {
+               });
+             };
+           },
+         };
+       });
+     CHECK.js:
+       // Assumes require.js has been loaded
+       define(['./getStackTrace.js'], function(getStackTrace) {
+         return {
+           withCHECK: function(callback) {
+             let callerURL = ...;
+             fetch(callerURL).then(function() {
+               callback(function CHECK(expr) {
+               });
+             };
+           },
+         };
+       });
+     main.js:
+       // Assumes require.js has been loaded
+       require(['PRINT', 'CHECK'], function fun(PRINTmodule, CHECKmodule) {
+         PRINTmodule.withPRINT(function(PRINT) {
+           CHECKmodule.withCHECK(function(CHECK) {
+             PRINT(1 + 2);                // "1 + 2 = 3"
+             PRINT([1,2,3].length);       // "[1,2,3].length = 3"
+             let a = 3; PRINT(a);         // "a = 3"
+             let b = {x:8,y:9}; PRINT(b); // "b = {x:8,y:9}"
+             CHECK(true);     // (does nothing)
+             CHECK(1+1===2);  // (does nothing)
+             CHECK(1+1===3);  // throw new Error("CHECK failed: 1+1===3 at fun (foo.js:10)");
+           });
+         };
+       };
+
+   Implementation #2 works as desired, and isn't too awful.
+
+   But it is not a complete solution: it only works for calling PRINT and CHECK
+   from the main program (i.e. from the callback of a `require`).
+   I also need to be able to call PRINT and CHECK from within other modules
+   (i.e. to call them from a function returned by the callback of a `define`).
+
+   What is the cleanest way to implement this?
