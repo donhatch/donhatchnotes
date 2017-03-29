@@ -588,3 +588,42 @@ Tue Dec  6 21:31:39 PST 2016
 
     It would be helpful if more accurate language could be chosen which does not lead so easily
     to misconceptions and misinformation.
+
+
+Tue Feb 14 17:28:55 PST 2017
+ wanting to ask something about why the "then" delays.
+ it's asked here:
+   http://stackoverflow.com/questions/31225687/why-promise-resolve-then-is-delayed
+
+ What should I reply to Benjamin Bruenbaum's?
+
+   Maybe this:
+     I haven't yet heard an explanation for why this particular race is considered so terrible.
+     In general principle, if I don't know when a promise is going to be resolved, then I don't
+     know when its `then` callback will be called relative to any other code it's not chained to...
+     so why was it so important for the spec to nail down this one special case,
+     in spite of both increased implementation complexity and performance cost?
+     E.g. consider `myPromise.then(function(){console.log("a");}); myOtherPromise.then(function(){console.log("b");})`.
+     That's another case when you get sometimes `a b` and sometimes `b a`.  Is that terrible too?
+
+   Or this:
+     I'm not really following what's so terrible about this particular race.
+     In general, I can't assume anything about the order in which my `then` callback
+     will be called relative to any other code it's not chained to... so why was it so
+     important for the spec to nail down this one special case,
+     in spite of both implementation complexity and performance cost?
+     E.g. consider `myPromise.then(function(){console.log("a");}); myOtherPromise.then(function(){console.log("b");})`.
+     That's another case when you get sometimes `a b` and sometimes `b a`.  Is that terrible too?
+
+  OH WAIT-- I need to read the link he talked about:
+    http://blog.izs.me/post/59142742143/designing-apis-for-asynchrony
+  which defers to a second link:
+    https://blog.ometer.com/2011/07/24/callbacks-synchronous-and-asynchronous/
+
+  A lot of it is about JVM and locking, which is irrelevant in the javascript same-thread context,
+  I think.  Is there any analogous thing about resource acquiring?  I.e. what gets easier
+  if the callback is guaranteed to be done after the stack is unwound?
+  Ok one valid point is testability: if it can ever be delayed, then make sure it's *always* delayed
+  so the test suite is more likely to cover it.
+
+
