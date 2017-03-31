@@ -1,0 +1,471 @@
+Posted as: http://stackoverflow.com/questions/43140346/function-in-an-amd-module-needs-to-read-its-callers-source-code
+Tags: javascript, google-chrome, requirejs, amd
+Q: function in an AMD module needs to read its caller's source code
+
+I have a couple of use cases where I'm writing a function
+that needs to read its caller's source code.
+These are utility functions for developer productivity.
+The environment in which I'm most interested is the Google Chrome browser with requirejs.
+
+Use case #1: PRINT
+------------------
+`PRINT(<expression>)` should print to the console: `<expression> = <value>`.
+
+For example:
+
+    PRINT(1+2);                  // "1+2 = 3"
+    PRINT([1,2,3].length);       // "[1,2,3].length = 3"
+    let a = 3; PRINT(a);         // "a = 3"
+    let b = {x:8,y:9}; PRINT(b); // "b = {x:8,y:9}"
+
+Use case #2: CHECK
+------------------
+`CHECK(<boolean expression>)` should throw a `new Error("CHECK failed: <boolean expression> at <caller function> (<caller file>:<caller line>)")` if `<boolean expression>` evaluates to false.
+
+For example, when called from `fun()` in `foo.js`:
+
+    CHECK(true);     // (does nothing)
+    CHECK(1+1===2);  // (does nothing)
+    CHECK(false);    // throw new Error("CHECK failed: false at fun (foo.js:3)");
+    CHECK(1+1===3);  // throw new Error("CHECK failed: 1+1===3 at fun (foo.js:4)");
+
+Note that both `PRINT` and `CHECK` need to read their caller's source code.
+How can I implement this?
+
+Here's an implementation that works in Google Chrome, along with a small example program
+and module that use `PRINT` and `CHECK`:
+
+---
+
+IMPLEMENTATION #1: Synchronously load the caller's source file
+--------------------------------------------------------------
+PRINT.js:
+
+    // Assumes require.js has been loaded
+    'use strict';
+    define([], function() {
+        return function PRINT(value) {
+            let stackTraceLines = new Error().stack.split('\n');
+            let callerStackTraceLine = stackTraceLines[2].trim();
+            let reResult = /^.*\((.+):(\d+):(\d+)\)$/.exec(callerStackTraceLine); // oversimplistic regex
+            if (reResult === null) {
+                console.error("[PRINT(value="+JSON.stringify(value)+") failed: couldn't parse caller stack trace line "+JSON.stringify(callerStackTraceLine)+"]");
+                return;
+            }
+            let [, callerFileName, linenum, colnum] = reResult;
+            linenum = parseInt(linenum);
+            colnum = parseInt(colnum);
+
+            let callerSourceCodeLines = undefined;
+            {
+                let req = new XMLHttpRequest();
+                req.open('GET', callerFileName, /*async=*/false);
+                req.addEventListener("load", function(event) {
+                    callerSourceCodeLines = this.responseText.split('\n');
+                });
+                req.send();
+            }
+
+            if (callerSourceCodeLines === undefined) {
+                console.error("[PRINT(value="+JSON.stringify(value)+") failed: couldn't get file contents for "+JSON.stringify(callerFileName)+" for some reason]");
+                return;
+            }
+            if (linenum < 1 || linenum > callerSourceCodeLines.length) {
+                console.error("[PRINT(value="+JSON.stringify(value)+") failed: caller stack trace line "+JSON.stringify(callerStackTraceLine)+" says linenum="+JSON.stringify(linenum)+" but number of caller source code lines from "+JSON.stringify(callerFileName)+" is "+callerSourceCodeLines.length);
+                return;
+            }
+            let callerLine = callerSourceCodeLines[linenum-1];
+            let callerPartOfLine = callerLine.slice(colnum-1);
+            {
+                let reResult = /^PRINT\((.*)\);\s*(\/\/.*)?$/.exec(callerPartOfLine); // oversimplistic regex
+                if (reResult === null) {
+                    console.error("[PRINT(value="+JSON.stringify(value)+") failed: couldn't parse caller part of line "+JSON.stringify(callerPartOfLine)+"]");
+                    return;
+                }
+                let [, expr] = reResult;
+                console.log(expr+" = "+JSON.stringify(value));
+            }
+        }; // PRINT
+    });
+CHECK.js:
+
+    // Assumes require.js has been loaded
+    'use strict';
+    define([], function() {
+        return function CHECK(cond) {
+            if (cond === true) {
+                return;
+            }
+            if (!(cond === false)) {
+                 throw new Error("Bad CHECK: cond="+JSON.stringify(cond)+" of type "+typeof(cond)+" is neither true nor false");
+            }
+            // cond is false. Get caller source code in order to compose an informative message.
+            let stackTraceLines = new Error().stack.split('\n');
+            let callerStackTraceLine = stackTraceLines[2].trim();
+            let reResult = /^.*\((.+):(\d+):(\d+)\)$/.exec(callerStackTraceLine); // oversimplistic regex
+            if (reResult === null) {
+                throw new Error("Internal error during CHECK(cond="+JSON.stringify(cond)+") failure: couldn't parse stack trace line "+JSON.stringify(callerStackTraceLine));
+            }
+            let [, callerFileName, linenum, colnum] = reResult;
+            linenum = parseInt(linenum);
+            colnum = parseInt(colnum);
+
+            let callerSourceCodeLines = undefined;
+            {
+                let req = new XMLHttpRequest();
+                req.open('GET', callerFileName, /*async=*/false);
+                req.addEventListener("load", function(event) {
+                    callerSourceCodeLines = this.responseText.split('\n');
+                });
+                req.send();
+            }
+
+            if (callerSourceCodeLines === undefined) {
+                throw new Error("Internal error during CHECK(cond="+JSON.stringify(cond)+") failure: couldn't get file contents for "+JSON.stringify(callerFileName));
+            }
+            if (linenum < 1 || linenum > callerSourceCodeLines.length) {
+                throw new Error("Internal error during CHECK(cond="+JSON.stringify(cond)+") failure: caller stack trace line "+JSON.stringify(callerStackTraceLine)+" says linenum="+JSON.stringify(linenum)+" but number of caller source code lines from "+JSON.stringify(callerFileName)+" is "+callerSourceCodeLines.length);
+            }
+            let callerLine = callerSourceCodeLines[linenum-1];
+            let callerPartOfLine = callerLine.slice(colnum-1);
+            {
+                let reResult = /^CHECK\(([^;]*)\);\s*(\/\/.*)?$/.exec(callerPartOfLine); // oversimplistic regex
+                if (reResult === null) {
+                    throw new Error("Internal error during CHECK(cond="+JSON.stringify(cond)+") failure: couldn't parse caller part of line "+JSON.stringify(callerPartOfLine)+"]");
+                }
+                let [, expr] = reResult;
+                throw new Error("CHECK failed: "+expr+" "+callerStackTraceLine);
+            }
+        }; // CHECK
+    });
+A.js:
+
+    // Assumes require.js has been loaded
+    'use strict';
+    define(['PRINT', 'CHECK'], function(PRINT, CHECK) {
+        return function A() {
+            PRINT(1+2);                  // "1+2 = 3"
+            PRINT([1,2,3].length);       // "[1,2,3].length = 3"
+            let a = 3; PRINT(a);         // "a = 3"
+            let b = {x:8,y:9}; PRINT(b); // "b = {x:8,y:9}"
+            CHECK(true);     // (does nothing)
+            CHECK(1+1===2);  // (does nothing)
+            CHECK(1+1===3);  // throw new Error("CHECK failed: 1+1===3 at A (A.js:11)");
+        };  // A
+    });
+main.js:
+
+    // Assumes require.js has been loaded
+    'use strict';
+    require(['A', 'PRINT'], function main(A, PRINT) {
+        PRINT(Math.sqrt(2)); // "Math.sqrt(2) = 1.4142135623730951"
+        A();
+    });
+main.html:
+
+    <script src="require.js"></script>
+    <script src="main.js"></script>
+The output is as desired:
+
+    Math.sqrt(2) = 1.4142135623730951
+    1+2 = 3
+    [1,2,3].length = 3
+    a = 3
+    b = {"x":8,"y":9}
+    [X] Uncaught Error: CHECK failed: 1+1===3 at A (http://localhost:8000/implementation1/A.js:11:9)
+
+---
+    
+The above implementation #1 works, but it has a problem (in addition to inefficiency):
+it loads the source files synchronously, which provokes the following console warning in addition to the output, in Google Chrome:
+
+    [!] Synchronous XMLHttpRequest on the main thread is deprecated
+    because of its detrimental effects to the end user's experience.
+    For more help, check https://xhr.spec.whatwg.org/.
+and future versions of Chrome will disallow synchronous loading entirely.
+
+So I need to write this the right way-- that is, asynchronously.
+
+I imagine it should look something like the following, using a requirejs plugin called
+`callersSourceCodeLines!` (which I don't know how to write, or even whether it's possible).
+
+---
+
+IMPLEMENTATION #2: Asynchronous, using a requirejs plugin that I don't know how to write
+--------------------------------------------------------------------------------------
+
+callersSourceCodeLines.js:
+
+    ???
+PRINT.js:
+
+    // Assumes require.js has been loaded
+    'use strict';
+    define(['callersSourceCodeLines!'], function(callersSourceCodeLines) {
+        return function PRINT(value) {
+            let stackTraceLines = new Error().stack.split('\n');
+            let callerStackTraceLine = stackTraceLines[2].trim();
+            let reResult = /^.*\((.+):(\d+):(\d+)\)$/.exec(callerStackTraceLine); // oversimplistic regex
+            if (reResult === null) {
+                console.error("[PRINT(value="+JSON.stringify(value)+") failed: couldn't parse caller stack trace line "+JSON.stringify(callerStackTraceLine)+"]");
+                return;
+            }
+            let [, callerURL, linenum, colnum] = reResult;
+            linenum = parseInt(linenum);
+            colnum = parseInt(colnum);
+
+            let callerSourceCodeLines = callersSourceCodeLines[callerURL];
+
+            if (callerSourceCodeLines === undefined) {
+                console.error("[PRINT(value="+JSON.stringify(value)+") failed: couldn't get file contents for "+JSON.stringify(callerURL)+" for some reason]");
+                return;
+            }
+            if (linenum < 1 || linenum > callerSourceCodeLines.length) {
+                console.error("[PRINT(value="+JSON.stringify(value)+") failed: caller stack trace line "+JSON.stringify(callerStackTraceLine)+" says linenum="+JSON.stringify(linenum)+" but number of caller source code lines from "+JSON.stringify(callerURL)+" is "+callerSourceCodeLines.length);
+                return;
+            }
+            let callerLine = callerSourceCodeLines[linenum-1];
+            let callerPartOfLine = callerLine.slice(colnum-1);
+            {
+                let reResult = /^PRINT\((.*)\);\s*(\/\/.*)?$/.exec(callerPartOfLine); // oversimplistic regex
+                if (reResult === null) {
+                    console.error("[PRINT(value="+JSON.stringify(value)+") failed: couldn't parse caller part of line "+JSON.stringify(callerPartOfLine)+"]");
+                    return;
+                }
+                let [, expr] = reResult;
+                console.log(expr+" = "+JSON.stringify(value));
+            }
+        }; // PRINT
+    });
+CHECK.js:
+
+    // Assumes require.js has been loaded
+    'use strict';
+    define(['callersSourceCodeLines!'], function(callersSourceCodeLines) {
+        return function CHECK(cond) {
+            if (cond === true) {
+                return;
+            }
+            if (!(cond === false)) {
+                 throw new Error("Bad CHECK: cond="+JSON.stringify(cond)+" of type "+typeof(cond)+" is neither true nor false");
+            }
+            // cond is false. Get caller source code in order to compose an informative message.
+            let stackTraceLines = new Error().stack.split('\n');
+            let callerStackTraceLine = stackTraceLines[2].trim();
+            let reResult = /^.*\((.+):(\d+):(\d+)\)$/.exec(callerStackTraceLine); // oversimplistic regex
+            if (reResult === null) {
+                throw new Error("Internal error during CHECK(cond="+JSON.stringify(cond)+") failure: couldn't parse stack trace line "+JSON.stringify(callerStackTraceLine));
+            }
+            let [, callerURL, linenum, colnum] = reResult;
+            linenum = parseInt(linenum);
+            colnum = parseInt(colnum);
+
+            let callerSourceCodeLines = callersSourceCodeLines[callerURL];
+
+            if (callerSourceCodeLines === undefined) {
+                throw new Error("Internal error during CHECK(cond="+JSON.stringify(cond)+") failure: couldn't get file contents for "+JSON.stringify(callerURL));
+            }
+            if (linenum < 1 || linenum > callerSourceCodeLines.length) {
+                throw new Error("Internal error during CHECK(cond="+JSON.stringify(cond)+") failure: caller stack trace line "+JSON.stringify(callerStackTraceLine)+" says linenum="+JSON.stringify(linenum)+" but number of caller source code lines from "+JSON.stringify(callerURL)+" is "+callerSourceCodeLines.length);
+            }
+            let callerLine = callerSourceCodeLines[linenum-1];
+            let callerPartOfLine = callerLine.slice(colnum-1);
+            {
+                let reResult = /^CHECK\(([^;]*)\);\s*(\/\/.*)?$/.exec(callerPartOfLine); // oversimplistic regex
+                if (reResult === null) {
+                    throw new Error("Internal error during CHECK(cond="+JSON.stringify(cond)+") failure: couldn't parse caller part of line "+JSON.stringify(callerPartOfLine)+"]");
+                }
+                let [, expr] = reResult;
+                throw new Error("CHECK failed: "+expr+" "+callerStackTraceLine);
+            }
+        }; // CHECK
+    });
+A.js:
+
+    (same as in IMPLEMENTATION #1)
+main.js:
+
+    (same as in IMPLEMENTATION #1)
+main.html:
+
+    (same as in IMPLEMENTATION #1)
+
+---
+
+Here is what I'm actually using currently, which is more complicated than I'd like:
+IMPLEMENTATION #3: Asynchronous, using `text!` plugin, wrapping `define` and `require`
+------------------------------------------------------------
+
+sourceCodeLines.js:
+
+    'use strict';
+    // Assumes require.js has been loaded
+    define([], function () {
+        // Module value is just an initially blank object.
+        // Callers of PRINT and CHECK register their source code lines by saying:
+        //    sourceCodeLines[myURL] = mySourceCodeLines;
+        // and then PRINT and CHECK can look up their caller's source code lines as:
+        //    let myCallersSourceCodeLines = sourceCodeLines[myCallersURL];
+        return {};
+    });
+registerSourceCodeLinesAndRequire.js:
+
+    'use strict';
+
+    // Wrapper for require(), which also fetches and registers the caller's source
+    // code so the caller's source code will be available to PRINT and CHECK.
+    // Requires of PRINT and/or CHECK should use this instead of require().
+    let registerSourceCodeLinesAndRequire = function(deps0, callback0) {
+        let stackTraceLines = new Error().stack.split('\n');
+        let callerStackTraceLine = stackTraceLines[2].trim();
+        let reResult = /^at (.+):\d+:\d+$/.exec(callerStackTraceLine); // oversimplistic regex
+        if (reResult === null) {
+            throw new Error("registerSourceCodeLinesAndRequire failed: couldn't parse caller stack trace line "+JSON.stringify(callerStackTraceLine));
+        }
+        let [, thisCallersURL] = reResult;
+        // Assumes requirejs has been loaded
+        require(['sourceCodeLines', 'text!'+thisCallersURL, ...deps0], function(sourceCodeLines, thisCallersFileContents, ...args0) {
+            sourceCodeLines[thisCallersURL] = thisCallersFileContents.split('\n');
+            callback0(...args0);
+        });
+    }; // registerSourceCodeLinesAndRequire
+
+    // Wrapper for define(), which also fetches and registers the caller's source
+    // code so the caller's source code will be available to PRINT and CHECK.
+    // Modules that depend on PRINT and/or CHECK should define themselves using
+    // this instead of define().
+    let registerSourceCodeLinesAndDefine = function(deps0, callback0) {
+        let stackTraceLines = new Error().stack.split('\n');
+        let callerStackTraceLine = stackTraceLines[2].trim();
+        let reResult = /^at (.+):\d+:\d+$/.exec(callerStackTraceLine); // oversimplistic regex
+        if (reResult === null) {
+            throw new Error("registerSourceCodeLinesAndDefine failed: couldn't parse caller stack trace line "+JSON.stringify(callerStackTraceLine));
+        }
+        let [, thisCallersURL] = reResult;
+        // Assumes requirejs has been loaded
+        define(['sourceCodeLines', 'text!'+thisCallersURL, ...deps0], function(sourceCodeLines, thisCallersFileContents, ...args0) {
+            sourceCodeLines[thisCallersURL] = thisCallersFileContents.split('\n');
+            return callback0(...args0);
+        });
+    }; // registerSourceCodeLinesAndDefine
+PRINT.js:
+
+    // Assumes require.js has been loaded
+    'use strict';
+    define(['sourceCodeLines'], function(sourceCodeLines) {
+        return function PRINT(value) {
+            let stackTraceLines = new Error().stack.split('\n');
+            let callerStackTraceLine = stackTraceLines[2].trim();
+            let reResult = /^.*\((.+):(\d+):(\d+)\)$/.exec(callerStackTraceLine); // oversimplistic regex
+            if (reResult === null) {
+                console.error("[PRINT(value="+JSON.stringify(value)+") failed: couldn't parse caller stack trace line "+JSON.stringify(callerStackTraceLine)+"]");
+                return;
+            }
+            let [, callerURL, linenum, colnum] = reResult;
+            linenum = parseInt(linenum);
+            colnum = parseInt(colnum);
+
+            let callerSourceCodeLines = sourceCodeLines[callerURL];
+
+            if (callerSourceCodeLines === undefined) {
+                console.error("[PRINT(value="+JSON.stringify(value)+") failed: couldn't get file contents for "+JSON.stringify(callerURL)+" for some reason]");
+                return;
+            }
+            if (linenum < 1 || linenum > callerSourceCodeLines.length) {
+                console.error("[PRINT(value="+JSON.stringify(value)+") failed: caller stack trace line "+JSON.stringify(callerStackTraceLine)+" says linenum="+JSON.stringify(linenum)+" but number of caller source code lines from "+JSON.stringify(callerURL)+" is "+callerSourceCodeLines.length);
+                return;
+            }
+            let callerLine = callerSourceCodeLines[linenum-1];
+            let callerPartOfLine = callerLine.slice(colnum-1);
+            {
+                let reResult = /^PRINT\((.*)\);\s*(\/\/.*)?$/.exec(callerPartOfLine); // oversimplistic regex
+                if (reResult === null) {
+                    console.error("[PRINT(value="+JSON.stringify(value)+") failed: couldn't parse caller part of line "+JSON.stringify(callerPartOfLine)+"]");
+                    return;
+                }
+                let [, expr] = reResult;
+                console.log(expr+" = "+JSON.stringify(value));
+            }
+        }; // PRINT
+    });
+CHECK.js:
+
+    // Assumes require.js has been loaded
+    'use strict';
+    define(['sourceCodeLines'], function(sourceCodeLines) {
+        return function CHECK(cond) {
+            if (cond === true) {
+                return;
+            }
+            if (!(cond === false)) {
+                 throw new Error("Bad CHECK: cond="+JSON.stringify(cond)+" of type "+typeof(cond)+" is neither true nor false");
+            }
+            // cond is false. Get caller source code in order to compose an informative message.
+            let stackTraceLines = new Error().stack.split('\n');
+            let callerStackTraceLine = stackTraceLines[2].trim();
+            let reResult = /^.*\((.+):(\d+):(\d+)\)$/.exec(callerStackTraceLine); // oversimplistic regex
+            if (reResult === null) {
+                throw new Error("Internal error during CHECK(cond="+JSON.stringify(cond)+") failure: couldn't parse stack trace line "+JSON.stringify(callerStackTraceLine));
+            }
+            let [, callerURL, linenum, colnum] = reResult;
+            linenum = parseInt(linenum);
+            colnum = parseInt(colnum);
+
+            let callerSourceCodeLines = sourceCodeLines[callerURL];
+
+            if (callerSourceCodeLines === undefined) {
+                throw new Error("Internal error during CHECK(cond="+JSON.stringify(cond)+") failure: couldn't get file contents for "+JSON.stringify(callerURL));
+            }
+            if (linenum < 1 || linenum > callerSourceCodeLines.length) {
+                throw new Error("Internal error during CHECK(cond="+JSON.stringify(cond)+") failure: caller stack trace line "+JSON.stringify(callerStackTraceLine)+" says linenum="+JSON.stringify(linenum)+" but number of caller source code lines from "+JSON.stringify(callerURL)+" is "+callerSourceCodeLines.length);
+            }
+            let callerLine = callerSourceCodeLines[linenum-1];
+            let callerPartOfLine = callerLine.slice(colnum-1);
+            {
+                let reResult = /^CHECK\(([^;]*)\);\s*(\/\/.*)?$/.exec(callerPartOfLine); // oversimplistic regex
+                if (reResult === null) {
+                    throw new Error("Internal error during CHECK(cond="+JSON.stringify(cond)+") failure: couldn't parse caller part of line "+JSON.stringify(callerPartOfLine)+"]");
+                }
+                let [, expr] = reResult;
+                throw new Error("CHECK failed: "+expr+" "+callerStackTraceLine);
+            }
+        }; // CHECK
+    });
+A.js:
+
+    // Assumes require.js and registerSourceCodeLinesAndRequire.js have been loaded
+    'use strict';
+    registerSourceCodeLinesAndDefine(['PRINT', 'CHECK'], function(PRINT, CHECK) {
+        return function A() {
+            PRINT(1+2);                  // "1+2 = 3"
+            PRINT([1,2,3].length);       // "[1,2,3].length = 3"
+            let a = 3; PRINT(a);         // "a = 3"
+            let b = {x:8,y:9}; PRINT(b); // "b = {x:8,y:9}"
+            CHECK(true);     // (does nothing)
+            CHECK(1+1===2);  // (does nothing)
+            CHECK(1+1===3);  // throw new Error("CHECK failed: 1+1===3 at A (A.js:11)");
+        };
+    }); // A
+main.js:
+
+    // Assumes require.js and registerSourceCodeLinesAndRequire.js have been loaded
+    'use strict';
+    registerSourceCodeLinesAndRequire(['A', 'PRINT'], function main(A, PRINT) {
+        PRINT(Math.sqrt(2)); // "Math.sqrt(2) = 1.4142135623730951"
+        A();
+    });
+main.html:
+
+    <script src="require.js"></script>
+    <script src="registerSourceCodeLinesAndRequire.js"></script>
+    <script src="main.js"></script>
+
+---
+
+Implementation #3 works well (in Google Chrome), but it seems rather convoluted, and the details of the implementation have unfortunately leaked into `A.js`, `main.js`, and `main.html`.
+
+Can it be made cleaner?  In particular, is my imagined implementation #2 possible?
+Or is there a better way of doing this?
+
+
+
