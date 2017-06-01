@@ -114,17 +114,19 @@ A:
    for x in a b c; do echo $x; done
    for x in `echo a b c`; do echo $x; done
    for x in `seq 1 10`; do echo $x; done
+   (and see the following too)
+
+Q: repeat 10 date?
+A:
+   for i in {1..10}; do echo "i = $i"; done
+   for i in {0..10..2}; do echo "i = $i"; done
+   for (( c=0; c<5; c++ )); do echo "c = $c"; done
 
 Q: if true?
 A: if true; then echo foo; fi
 
 Q: while true?
 A: while true; do echo $x; done
-
-Q: repeat 10 date?
-A: for i in {1..10}; do echo "i = $i"; done
-   for i in {0..10..2}; do echo "i = $i"; done
-   for (( c=0; c<5; c++ )); do echo "c = $c"; done
 
 Q: list completions?
 A: complete
