@@ -1,0 +1,97 @@
+http://reactivex.io/rxjs/
+http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html
+
+"The introduction to Reactive Programming you've been missing"
+https://gist.github.com/staltz/868e7e9bc2a7b8c1f754
+(but double-click examples have gone stale)
+
+http://stackoverflow.com/questions/33324227/rxjs-how-would-i-manually-update-an-observable
+
+NOTES:
+  - Seems like all the examples on recognizing a double click
+    have gone stale and no longer work.
+    See http://stackoverflow.com/questions/37310640/rxjs-buffer-how-to-group-multi-click-events-as-stream
+
+QUESTIONS:
+
+Q: How do I implement a simple Observable value
+   that supports addListener() (to listen to value changes) and set()?
+PA:
+   Here's one that emits even on non-changes:
+    let subject = new Rx.Subject();
+    subject.subscribe(x=>console.log("first listener: ",x));
+    subject.subscribe(x=>console.log("second listener: ",x));
+    subject.next(1);
+    subject.next(10);
+    subject.next(100);
+    subject.next(100);
+  To emit only on changes:
+    let subject = new Rx.Subject();
+    let subjectChanges = subject.distinctUntilChanged((a,b)=>a===b);
+    subjectChanges.subscribe(x=>console.log("first listener: ",x));
+    subjectChanges.subscribe(x=>console.log("second listener: ",x));
+    console.log("subject = ",subject);
+    subject.next(1); subject.next(1); subject.next(1);
+    subject.next(2); subject.next(2); subject.next(2);
+    subject.next(undefined); subject.next(undefined); subject.next(undefined);
+    subject.next(null); subject.next(null); subject.next(null);
+  Or use BehaviorSubject, which, unlike Subject, has a getValue()
+  and emits immediately... but still need to tack on a
+  distinctUntilChanged().  Not the most intuitive.
+  How about I implement what *I* wanted?
+    let MySubject = function(initialValue, equals) {
+      let behaviorSubject = new Rx.BehaviorSubject(initialValue);
+      let behaviorSubjectChanges = behaviorSubject.distinctUntilChanged(equals);
+      return {
+        next: (value)=>behaviorSubject.next(value), // XXX use bind or something?
+        getValue: ()=>behaviorSubject.getValue(), // XXX use bind or something?
+        subscribe: (subscriber)=>behaviorSubjectChanges.subscribe(subscriber), // XXX use bind or something?
+      };
+    };
+    let subject = new MySubject('Eric');
+    subject.subscribe(x=>console.log("first listener: ",x));
+    subject.subscribe(x=>console.log("second listener: ",x));
+    subject.next(1); subject.next(1); subject.next(1);
+    subject.next(2); subject.next(2); subject.next(2);
+    subject.next(undefined); subject.next(undefined); subject.next(undefined);
+    subject.next(null); subject.next(null); subject.next(null);
+  But then is it even necessary to piggyback on the existing ones?  How about I write something from scratch?
+    let MySubject = function(initialValue, equals) {
+      let value = initialValue;
+      let underlying = new Rx.Subject();
+      return {
+        next:  (newValue)=>{if (!equals(newValue, value)) {newValue = value; underlying.next(newValue); },
+        subscribe: (subscriber)=>underlying.subscribe(subscriber), // XXX use bind or something?
+      }
+    }:
+  Alternative: make a BehaviorSubject, and maybe tack on a class that remembers its most recently emitted value?
+  Or... wait a minute, maybe a Subject -> distinctUntilChanged -> BehaviorSubject?
+  What a wreck :-(
+
+Q: Can I use reactive programming to construct
+   a computation flow graph with the usual stuff?
+     - dirtyness flows downstream
+     - getting a value pulls upstream
+     - clean intermediate values get cached
+
+Q: Might I want xstream instead?
+   https://staltz.com/why-we-built-xstream.html
+   https://staltz.com/xstream/
+   https://github.com/staltz/xstream
+   Superficially, I think I pretty much always want hot/multicast,
+   and the small set of operators might be good too.
+PA: Interesting, I'd set a value using shamefullySend.
+   So, how would I implement a simple model? (like a BehaviorSubject)
+
+
+Q: might I want to use bacon.js instead?
+
+
+
+
+
+
+Q: where is Observable's subscribe method documented??? can't find it on http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html
+
+Q: what does `scan<number>` in http://stackoverflow.com/questions/37310640/rxjs-buffer-how-to-group-multi-click-events-as-stream#answer-40037149 ?  That gives an error in chrome 59.
+A: It's TypeScript.  Fuck that, it'll require VS, IE.  Even if not, it'll bite me somehow.
