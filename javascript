@@ -40,6 +40,7 @@ Q: given that both object and JSON define objects as non-ordered,
    but with different semantics (namely, objects are ordered).
 
 Q: still don't have a good mnemonic for what I have to remember :-(
+   (XXX what was I talking about?)
 
 Q: how to test whether something is a string?
 A: typeof x == "string"
