@@ -53,11 +53,27 @@ Q: Can I implement my canonical first example? That is:
      second listener: null
      thing.get() = null
 
+ Q: Is 'property' what I want?
+ Q: Oh wait, the bacon (which is the same thing I think) doc says "There is no getLatestValue method available and will not be either.  You get the value by subscribing to the stream/property (using onValue) and handling the values in your callback.".  So does that mean I can say getValue(), it's just ridiculously verbose?
+
 Q: Can I implement push-dirty / pull-clean by subscribe / unsubscribe kind of stuff?
 PA: Basically, get() would mean subscribe to 1 event and then unsubscribe (I think)? Hmm, maybe that won't work
     since events will get skipped when no one's listening.
    But if something is *monitoring* a node in the compute graph, that means subscribe,
    and so dirties will automatically get propagated?  Not sure.
 PA: read this: http://conal.net/papers/push-pull-frp/
+    Bleah, can't follow it, it's too abstract.
 
-Q: is there something like a conditional or switch operator?
+Q: Is there something like a conditional or switch operator?
+   I.e. the thing's value should be a?b:c.
+   And, I think, only fire when a the output *changes*?
+   (Might need to just make that an additional operator? not sure)
+
+       A: ---true-|-------------false-------------true--false---true----------------->
+       B: ---100--|---200---300-------400---500---------------5------6--------------->
+       C: ----1---|-2-----3---------------4-----5------------------------------------>
+                  |
+          ---100--|---200---300---3-------4-----5-500-----5----------6--------------->
+
+
+
