@@ -1,0 +1,267 @@
+I'm not really attracted to frameworks in general, except Dojo is appealing
+because it has a really excellent-looking ui toolkit called Dijit, with a nice demo page:
+  http://archive.dojotoolkit.org/nightly/dojotoolkit/dijit/themes/themeTester.html
+Haven't explored it much though.
+
+About easings on the web:
+  http://easings.net
+  http://gizma.com/easing/
+(I have some problems with it, e.g. shouldn't the cubic one be a single cubic??)
+
+Existing toggler:
+  https://github.com/dojo/dojo
+  https://github.com/dojo/dojo/tree/master/fx
+  https://github.com/dojo/dojo/blob/master/fx/Toggler.js
+  
+
+BUG: key event handling is flaky as hell.
+     Attached keydown, keypress, keyup handlers.
+     Lean on 'j' for a while, then release it and then, within 1 second, press Space and release quickly.
+     It gets *only* a keyup??
+
+Q: wtf is up with all the different ways to attach listeners/handlers?
+
+Q: if I set up an `after` callback using dojo/aspect,
+   I think it only honors my return value if it's not undefined.
+   But what if I specifically *want* to return undefined??
+
+Q: how do I build docs?
+A:
+    Get the docs repo from here: https://github.com/dojo/docs
+    Follow the directions to build it here:
+      https://dojotoolkit.org/reference-guide/1.9/developer/metadoc.html#exporting-the-doc
+    So I did this:
+      cd ~/gitrepos
+      git clone https://github.com/phiggins42/rstwiki.git
+      # (after being guided by error messages...)
+      setenv PYTHONPATH ~/local/lib/python2.7/site-packages
+      easy_install --prefix=$HOME/local cheetah cherrypy docutils pygments gitdb==0.5.2 gitpython
+      cd rstwiki
+      git submodule init && git submodule update
+      cp local.sample.conf wiki.conf
+      vi wiki.conf
+        tools.staticdir.dir = "/Users/donhatch/gitrepos/rstwiki/_static"
+        root = "/Users/donhatch/gitrepos/dojo/docs"
+      export LC_CTYPE="" # bash
+      setenv LC_CTYPE "" # tcsh
+      mkdir /tmp/rstwiki_sessions
+      ./wiki.py
+        cheetah: command not found
+      setenv PATH "${PATH}:${HOME}/local/bin"
+      ./wiki.py
+        cool, it started a server on http://localhost:4200
+
+Q: how do I checkout a particular date while messing with docs?
+   E.g. I can simultaneously checkout dojo&dijit like this:
+    git checkout `git rev-list -n 1 --before="2011-03-25 23:51 +0000" master`   # just before the screwup
+    git checkout `git rev-list -n 1 --before="2011-03-25 23:52 +0000" master`   # just after the screwup
+PA: oh, what rstwiki uses are git modules inside the rstwiki directory.
+    so, I've got 4 git repos to mess with:
+      ~/gitrepos/dojo/docs
+      ~/gitrepos/rstwiki
+      ~/gitrepos/rstwiki/_static/dojo
+      ~/gitrepos/rstwiki/_static/dijit
+
+    cd ~/gitrepos/dojo/docs
+      # for some reason I can't sync it like dijit and dojo
+      git checkout `git rev-list -n 1 --before="2011-03-25 23:51 +0000" master` # doesn't work!
+      git checkout `git rev-list -n 1 --before="2011-11-20 16:29 +0000" master` # oldest one that works using that syntax
+      git checkout 75b6911c57e8e1450b5826b8a32d3895c97547e6 # from 3-24, the one that was current at time of screwup
+      # ARGH! rstwiki doesn't work on it back then: I get errors like:
+      #     System Message: ERROR/3 (/, line 82)
+      #     Unknown directive type "cv-compound".
+    cd ~/gitrepos/rstwiki
+    (cd _static/dojo && git checkout `git rev-list -n 1 --before="2011-03-25 23:51 +0000" master`) && (cd _static/dijit && git checkout `git rev-list -n 1 --before="2011-03-25 23:51 +0000" master`) # just before the screwup
+    (cd _static/dojo && git checkout `git rev-list -n 1 --before="2011-03-25 23:52 +0000" master`) && (cd _static/dijit && git checkout `git rev-list -n 1 --before="2011-03-25 23:52 +0000" master`)  # just after the screwup
+
+  ARGH!
+
+  Gag, triplicate binary search is painful.
+  Just keep rstwiki updated to current master, I think; otherwise it doesn't have a Run button.
+  Oldest consistent date known to work for other three:
+    git checkout `git rev-list -n 1 --before="2012-03-25 23:51 +0000" master`
+    (cd _static/dojo && git checkout `git rev-list -n 1 --before="2012-03-25 23:52 +0000" master`) && (cd _static/dijit && git checkout `git rev-list -n 1 --before="2012-03-25 23:52 +0000" master`)
+    alias checkoutdate '(cd ~/gitrepos/dojo/docs && git checkout `git rev-list -n 1 --before=\"\!*\" master`) && (cd ~/gitrepos/rstwiki/_static/dojo && git checkout `git rev-list -n 1 --before=\"\!*\" master`) && (cd ~/gitrepos/rstwiki/_static/dijit && git checkout `git rev-list -n 1 --before=\"\!*\" master`)'
+    checkoutdate "2012-03-25 23:52 +0000"
+      # works great!
+    checkoutdate "2011-11-20 16:29 +0000"
+      # this is the first checkout date that works for doc.
+      # nasty errors: 404s and "Unknown directive type "codeviewer"."
+    checkoutdate "2011-11-21 00:00 +0000"
+      # Unknown directive type "cv-compound".
+      # And corrupts the docs repo!?
+    checkoutdate "2011-11-22 00:00 +0000"
+      # works great but corrupts the docs repo
+    checkoutdate "2011-11-21 19:06:09 +0000"
+      # first date for which the Run button works
+      # gah, I'm getting sick of tiptoing around sewage!
+    checkoutdate "2012-01-01 00:00:00 +0000"
+      # and grabbed examples
+    checkoutdate "2017-01-01 00:00:00 +0000"
+      # and grabbed examples... same as now
+      # (needed to clear browser cache)
+  Docs directory gets corrupt occasionally :-(
+  To clean:
+    (cd ~/gitrepos/dojo && /bin/rm -rf docs && git clone https://github.com/dojo/docs.git) && cd $cwd
+    (cd ~/gitrepos/dojo && /bin/rm -rf docs && cp -a docs.pristine docs) && cd $cwd
+
+
+BUG: Tree anim discontinuities if clicked while previous anim in progress
+BUG: Toggler using wipeIn/wipeOut anim discontinous if started while previous anim in progress
+
+  Bisected down to this (in dojo/dojo and dojo/dijit simulaneously)
+    git checkout `git rev-list -n 1 --before="2011-03-25 23:52 +0000" master`
+
+  Interesting, the toggler bug was introduced in this commit:
+    https://github.com/dojo/dojo/commit/944f8ad4c8dd3314b97f9ce8e015cad6db8ec96b
+
+      commit 944f8ad4c8dd3314b97f9ce8e015cad6db8ec96b
+      Author: Douglas Hays <doughays@dojotoolkit.org>
+      Date:   Fri Mar 25 23:51:19 2011 +0000
+
+          Fixes #12177.  Duplicate cleanup handler for both onStop and onEnd.  Added automated test.
+          
+          git-svn-id: http://svn.dojotoolkit.org/src/dojo/trunk@24124 560b804f-0ae3-0310-86f3-f6aa0a117693
+
+    which was a fix for this bug:
+      https://bugs.dojotoolkit.org/ticket/12177
+      http://mail.dojotoolkit.org/pipermail/dojo-checkins/2011-January/081943.html
+
+    Going to file a bug report, based on doc examples, probably these:
+      https://dojotoolkit.org/reference-guide/1.10/dijit/Tree.html#a-programmatic-tree
+      https://dojotoolkit.org/reference-guide/1.10/dojo/fx/Toggler.html#example-3-toggle-a-dom-node-with-custom-animation-functions
+
+    After I got docs set up these are in:
+      http://localhost:4200/dijit/Tree
+      http://localhost:4200/dojo/fx/Toggler
+      ~/gitrepos/dojo/docs/dijit/Tree.rst
+      ~/gitrepos/dojo/docs/dojo/fx/Toggler.rst
+
+    Specifically:
+      Current behavior:
+        Tree:
+          set durations to 2000
+          Tree starts collapsed, after 2 seconds, jumps to expanded (!?)   CAN'T REPRODUCE THESE
+            Click 1 second after it starts:
+              - jumps to expanded, starts to collapse
+            Double-click 1 second after it starts:
+              - jumps to expanded, jumps to expanded again, starts to collapse
+            Triple-click 1 second after it starts:
+              - jumps to expanded, jumps to expanded again, jumps to collapsed, starts to expand
+          Start collapsed:
+            Click, wait 1 sec, Click:
+               - starts to expand, 2nd click makes it jump to expanded then starts to collapse
+            Double-click (i.e. two clicks within .25 secs or so of each other): (actually easier to see with default duration)
+               - starts to expand, 2nd click makes it jump back to collapsed and then start to expand again
+            Triple-click:
+               - first click starts to expand, 2nd click jumps back to collapsed and starts to expand, 3rd click
+                 jumps to expanded and starts to collapse
+          Start expanded:
+            Click, wait 1 sec, Click:
+               - starts to collapse, 2nd click makes it jump to collapsed then starts to collapse
+            Double-click (i.e. two clicks within .25 secs or so of each other): (actually easier to see with default duration)
+               - starts to collapse, 2nd click makes it jump back to expanded and then start to collapse again
+            Triple-click:
+               - first click starts to collapse, 2nd click jumps back to expanded and starts to collapse, 3rd click
+                 jumps to collapsed and starts to expand
+        Toggle demo:
+          set durations to 2000
+          Show (even though already shown) then Hide about 1/2 sec after
+            - does a hide of just the background, then the text disappears all at once at the end
+          Start hidden, Hide then show about 1/2 sec after
+            - stays hidden
+          Show, show: good (no matter whether double-click or not)
+          Hide, hide: good (no matter whether double-click or not)
+
+Mon Feb 20 15:09:37 PST 2017
+  All right, starting with 1.6 demo and current source, putting it in ~/wrk/dojo/1.6.modified,
+  with their own dojo&dijit repos
+
+    git checkout `git rev-list -n 1 --before="2011-03-25 23:51 +0000" master`
+    git checkout `git rev-list -n 1 --before="2011-03-25 23:52 +0000" master`
+
+  Result:
+    - Tree demo started behaving badly at the evil commit
+    - Toggler demo doesn't work at all around that time, but works with latest dojo&dijit
+  Same with 1.6 demo as with 1.7 demo.
+
+  Dammit!  How do I get toggler demo to work back then??  It works on the web page out on the net!
+
+Mon Feb 20 18:45:31 PST 2017
+  All right I'm gonna start with 1.7.modified and try to debug what's happening back then.
+  This gives no errors, and works for *all* relevant versions of dojo+dijit,
+  but buttons are non-functional :-( :
+      git checkout `git rev-list -n 1 --before="2012-03-25 23:51 +0000" master`
+
+  Sigh, let's bisect to find out at what commit the buttons became non-functional.
+      alias checkoutmaster2 '(cd ../dojo && git checkout master) && (cd ../dijit && git checkout master)'
+      alias checkoutdate2 '(cd ../dojo && git checkout `git rev-list -n 1 --before=\"\!*\" master`) && (cd ../dijit && git checkout `git rev-list -n 1 --before=\"\!*\" master`)'
+      checkoutdate2 "2011-03-25 23:51 +0000"
+
+Mon Feb 20 19:21:17 PST 2017
+  Ah ok, I'm just going to hook it up the simpler way.
+
+    BUG REPORT: Tree and wipeIn/wipeOut-based Toggler anim erratic when started while previous anim in progress
+
+    Tree behaves erratically (that is, the animation jumps in various ways) when a node's +/- button is clicked
+    while a previous expand or collapse is in progress.
+    Toggler also behaves erratically (discontinuities, and attributes being animated out-of-sync with other attributes)
+    when showFunc/hideFunc are set to wipeIn/wipeOut.
+    I'll give recipes to reproduce some specific bad behaviors below.
+
+    My basic premise is that both of these widgets's animations should be continous in all cases, no matter in what crazy way the user clicks around on them, and so any discontinuities in their animations is a bug.
+
+    The discontinuities in both widgets apparently began with this commit, 6 years ago:
+      https://github.com/dojo/dojo/commit/944f8ad4c8dd3314b97f9ce8e015cad6db8ec96b
+        commit 944f8ad4c8dd3314b97f9ce8e015cad6db8ec96b
+        Author: Douglas Hays <doughays@dojotoolkit.org>
+        Date:   Fri Mar 25 23:51:19 2011 +0000
+            Fixes #12177.  Duplicate cleanup handler for both onStop and onEnd.  Added automated test.
+            git-svn-id: http://svn.dojotoolkit.org/src/dojo/trunk@24124 560b804f-0ae3-0310-86f3-f6aa0a117693
+
+    My recipe to reproduce these problems is based on the first Tree example and third (last) Toggler example from the docs.
+    I'm starting from the 1.7 docs, since that's the doc version whose code is most compatible
+    with dojo&dijit as they have changed over the past 6 years:
+      https://dojotoolkit.org/reference-guide/1.7/dijit/Tree.html#a-programmatic-tree
+      https://dojotoolkit.org/reference-guide/1.7/dojo/fx/Toggler.html#example-2-toggle-a-dom-node-with-custom-animation-functions
+    (note that the "example-2" is really example 3; that has since been fixed on the Toggler doc page).
+    I lengthened the animation durations to 2 seconds in both examples; I've attached the two modified examples.
+
+    To demonstrate various bad behavious, first save the two examples I attached, and put up-to-date dojo&dijit repos
+    in the appropriate places so they can be found by the example pages (i.e.  put them under ../_static/js and ../../_static/js).
+
+    Then try each of the following (I'm using chrome Version 56.0.2924.87 on a macbook pro, but I doubt it matters):
+
+      * TreeExample1.html (default duration set to 2000:
+        * Start with root expanded:
+          * Click, wait 1 sec, Click:
+             * Result: starts to collapse, 2nd click makes it jump to collapsed then starts to expand
+             * Expected: should be continuous
+          * Double-click (i.e. two clicks within .25 secs or so of each other): (actually easier to see with default duration)
+             * Result: starts to collapse, 2nd click makes it jump back to expanded and then start to collapse again
+             * Expected: should be continuous
+          * Triple-click:
+             * Result: first click starts to collapse, 2nd click jumps back to expanded and starts to collapse, 3rd click jumps to collapsed and starts to expand
+             * Expected: should be continuous
+        * Start with root collapsed:
+          * Same as with root expanded, but interchange "expand" with "collapse" throughout description
+
+      * ToggleExample3.html (both durations set to 2000):
+        * Show (even though already shown) then Hide about 1 sec later
+          * Result: does an animated hide of just the background, then the text disappears all at once at the end of the animation
+          * Expected: text should get wiped out continously with the background
+        * Start hidden, Hide (even though already hidden) then Show about 1 sec later
+          * Result: stays hidden
+          * Expected: should expand
+
+    All of the bad behaviors described above started at the previously mentioned commit 6 years ago.  In other words:
+      * GOOD: git checkout `git rev-list -n 1 --before="2011-03-25 23:51 +0000" master`
+      * BAD: git checkout `git rev-list -n 1 --before="2011-03-25 23:52 +0000" master`
+    (I run the same checkout command in both dojo&dijit directories, so that dojo&dijit stay compatible with each other.)
+
+Mon Feb 20 20:30:11 PST 2017
+  signing up on dojo member page
+  filed the bug report as this: https://bugs.dojotoolkit.org/ticket/18977
+
+
+

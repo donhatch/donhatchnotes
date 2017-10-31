@@ -24,12 +24,23 @@ Javascript frameworks:
   because it has a really excellent-looking ui toolkit called Dijit, with a nice demo page:
     http://archive.dojotoolkit.org/nightly/dojotoolkit/dijit/themes/themeTester.html
   Haven't explored it much though.
+  See dojo notes in separate file.
 
 
 QUESTIONS:
 ==========
 
+Q: given that both object and JSON define objects as non-ordered,
+   and there is this bug https://bugs.chromium.org/p/v8/issues/detail?id=164
+   that will probably never be fixed,
+   is there an alternative to object that keeps things ordered,
+   with an alternative to JSON.parse/JSON.stringify
+   for serializing/deserializing?
+   The grammar for the serialization would be identical to that of JSON
+   but with different semantics (namely, objects are ordered).
+
 Q: still don't have a good mnemonic for what I have to remember :-(
+   (XXX what was I talking about?)
 
 Q: how to test whether something is a string?
 A: typeof x == "string"
