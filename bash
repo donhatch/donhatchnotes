@@ -24,6 +24,9 @@ set -o pipefail # Fail if any command in pipeline fails
 ==============================================
 Questions about bash:
 
+Q: express newline embedded in a command arg?
+A: echo $'hello\nworld'
+
 Q: unshift?
 A: set -- foo "$@"
 
