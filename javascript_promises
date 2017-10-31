@@ -276,6 +276,8 @@ More possible references for promise-for-a-promise:
     https://github.com/fantasyland/fantasy-promises
   Wow, the implementation is really small.
 
+Hmm, this defines "future" as the strongly typed non-flattening version of promise: https://github.com/kriskowal/gtor/#user-content-singular-and-plural
+
 
   ==========================================
 Relevant links to the problem in question:
