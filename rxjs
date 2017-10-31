@@ -1,3 +1,12 @@
+Sorry, this is a train wreck. I have no idea how to select from the zillions of options:
+        Subject
+        BehaviorSubject
+        Variable
+    and even less idea how to chain them together the way I want.
+    Screw this.
+    I think Kefir is what I want.
+==========================================================================================
+
 http://reactivex.io/rxjs/
 http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html
 
@@ -14,14 +23,6 @@ NOTES:
   - Seems like all the examples on recognizing a double click
     have gone stale and no longer work.
     See http://stackoverflow.com/questions/37310640/rxjs-buffer-how-to-group-multi-click-events-as-stream
-
-  - Sorry, it's a train wreck.  I have no idea how to select from the zillions of options:
-        Subject
-        BehaviorSubject
-        Variable
-    and even less idea how to chain them together the way I want.
-    Screw this.
-    I think Kefir is what I want!
 
 QUESTIONS:
 
@@ -116,16 +117,6 @@ Q: might I want to use kefir.js instead?
    The kefir getting-started example here is pretty attractive:
     https://rpominov.github.io/kefir/
    Hmm! I think maybe it's what I want?  They call a simple model a `property`.
-
-   Bacon/Kefir questions:
-   Q: Is 'property' what I want?
-   Q: Oh wait, the bacon (which is the same thing I think) doc says "There is no getLatestValue method available and will not be either.  You get the value by subscribing to the stream/property (using onValue) and handling the values in your callback.".  So does that mean I can say getValue(), it's just ridiculously verbose?
-
-  
-
-
-
-
 
 
 Q: where is Observable's subscribe method documented??? can't find it on http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html
