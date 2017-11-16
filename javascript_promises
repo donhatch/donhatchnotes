@@ -276,6 +276,8 @@ More possible references for promise-for-a-promise:
     https://github.com/fantasyland/fantasy-promises
   Wow, the implementation is really small.
 
+Hmm, this defines "future" as the strongly typed non-flattening version of promise: https://github.com/kriskowal/gtor/#user-content-singular-and-plural
+
 
   ==========================================
 Relevant links to the problem in question:
@@ -540,12 +542,15 @@ Tue Dec  6 21:31:39 PST 2016
     Issue: false and misleading description of what compliance test suite does
 
     Both the Compliance Test Suite doc and the Conformant Implementations list
-    make statements implying that passing the test suite is equivalent to complying with the spec:
+    make statements saying or implying that passing the test suite is equivalent to complying with the spec:
 
     In https://promisesaplus.com/implementations :
       There are many conformant implementations of Promises/A+.
       Here are the ones we know about.
       Note that an implementation’s conformance is determined by it passing the test suite.
+
+    Um, no. An implementation's conformance to a spec is determined by whether it does what the spec says it must do, every time, for every possible input.
+    That's a stricter criterion than passing a test suite, no matter how thorough the test suite may be.
 
     In https://github.com/promises-aplus/promises-tests :
       This suite tests compliance of a promise implementation with the Promises/A+ specification.
@@ -553,21 +558,21 @@ Tue Dec  6 21:31:39 PST 2016
 
     Of course the equivalence doesn't hold-- no test suite could possibly accomplish that;
     this is something that should be clear after a moment's
-    reflection by anyone who has passed an introductory computer science course.
+    thought by anyone who has taken an introductory computer science course.
 
     The most that can be said truthfully is something like:
       - the test suite will catch many common errors in implementations
       - if the test suite fails, the implementation is not conformant
-      - if the test suite passes, the implementation *might* be conformant, but no test can ever tell you for sure.
+      - if the test suite passes, the implementation *might* be conformant, but no test suite can ever tell you for sure.
     (This glosses over the possibility of bugs in the suite and timeouts, which is fine.)
 
-    One might be tempted to dismiss this issue as simply loose/sloppy language
+    One might be tempted to dismiss this issue as simply informal/loose/sloppy language
     that, anyone can see, should not be taken literally since that would be absurd.
 
-    The problem with that is the hyperbole is viral-- it leaks out into discussions
+    The problem with that is that the hyperbole is viral-- it leaks out into discussions
     on the web, which become at best confusing and at worst seriously misleading.
     In particular, it seems that the test suite is now routinely given as a supposedly definitive answer to
-    "is such-and-such promise implementation promises/A+ compliant"; such answers are wrong and misleading,
+    "is [such-and-such promise implementation] promises/A+ compliant?"; such answers are wrong and misleading,
     and are apparently contributing to what looks like a mass delusion.
 
     Examples:
@@ -586,8 +591,7 @@ Tue Dec  6 21:31:39 PST 2016
     - JLRishe's comment in http://stackoverflow.com/questions/27746304/how-do-i-tell-if-an-object-is-a-promise#comment-44650451:
       The only alternative as far as I can see is to take Benjamin Gruenbaum's suggestion and run it through the promise test suite.  But that's not practical for actual production code.
 
-    It would be helpful if more accurate language could be chosen which does not lead so easily
-    to misconceptions and misinformation.
+    It would be helpful if more accurate language could be chosen which does not lead so easily to misconceptions and misinformation.
 
 
 Tue Feb 14 17:28:55 PST 2017
@@ -625,5 +629,74 @@ Tue Feb 14 17:28:55 PST 2017
   if the callback is guaranteed to be done after the stack is unwound?
   Ok one valid point is testability: if it can ever be delayed, then make sure it's *always* delayed
   so the test suite is more likely to cover it.
+
+
+Sat May 20 00:23:48 PDT 2017
+ I want to ask yet another question...
+ Here, asked this:
+    Q: can Promises/A+ promises be leveraged to implement synchronous-when-already-resolved semantics?
+
+    I'm implementing a data structure in memory
+    that shadows part of a large data structure stored somewhere out on the web.
+    Let's say the data structures in question are binary trees.
+    I want the in-memory tree to initially consist of just the root node,
+    and it should grow lazily by fetching nodes from the web on demand, as the user (or algorithm) explores.
+
+    One natural way to do this is for the tree node data type to provide methods `getLeftChild()`, `getRightChild()`,
+    each of which immediately returns a *promise* for the respective child node.
+    When `getLeftChild()` is called on a tree node whose left child is already in memory,
+    it returns a promise that is already-resolved with the cached child;
+    otherwise it initiates a fetch of the child and returns a promise for it,
+    and when the fetched child eventually comes back from the web, the fetched child will be saved in memory for the future and used to resolve the promise.
+
+    So, to print the node 5 levels down the left branch, I'd say:
+
+        root.getLeftChild().then(child0 =>
+          child0.getLeftChild().then(child00 =>
+          child00.getLeftChild().then(child000 =>
+          child000.getLeftChild().then(child0000 =>
+          child0000.getLeftChild().then(child00000 => {
+            console.log("child00000 = ",child00000);
+          })))));
+     Or, the same thing using `async/await`:
+
+        (async()=>{
+          let child0 = await root.getLeftChild();
+          let child00 = await child0.getLeftChild();
+          let child000 = await child00.getLeftChild();
+          let child0000 = await child000.getLeftChild();
+          let child00000 = await child0000.getLeftChild();
+          console.log("child00000 = ",child00000);
+        })();
+    This all works fine, and the calling code doesn't look too horrible in either case.
+
+    My only misgiving is that, when exploring within parts of the binary tree (or any similar linked data structure)
+    that are already in memory, I don't want to suffer the overhead of initiating a new microtask
+    every time I want to go from one node to a neighbor in the in-memory data structure.
+    Think of an algorithm whose core computation does millions of such link-following operations.
+
+    [Promises/A+](https://promisesaplus.com/) does indeed require a new microtask (at least) for each `then` callback execution:
+
+    > 2.2.4 onFulfilled or onRejected must not be called until the execution context stack contains only platform code. [3.1].
+    I believe `async/await` has a similar requirement.
+
+    What I'd like to know is: what's the easiest/cleanest way to make
+    a Promise-like object that behaves exactly like a Promises/A+ promise, *except* for clause 2.2.4?
+    I.e. I want it to have a `then` (or `then`-like) method that is "synchronous-when-available", so that the first code snippet above
+    will execute in one shot without yielding the execution context.
+
+    To avoid naming issues/confusion, I'm happy to refrain from calling my synchronous-when-available accessor `then`
+    (which is effectively a reserved word nowadays thanks to Promises/A+); instead, I'll call it `thenOrNow`.
+    And I'll call my hypothetical type/implementation `PromiseOrNow`.
+
+    Would I have to write `PromiseOrNow` from scratch, or is there a neat and reliable way to leverage an existing Promises/A+ implementation such as native `Promise`?
+
+    Notice that, since I'm not planning to mess with anything named "`then`",
+    `PromiseOrNow` could incidentally be Promises/A+ compliant, if that turns out to be a good way of doing it.
+    Perhaps it would be a prototype interited from the native `Promise.prototype`.
+    These properties would be nice in some ways, but they are not requirements.
+
+Mon May 22 22:37:13 PDT 2017
+
 
 

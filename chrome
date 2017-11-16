@@ -355,3 +355,19 @@ A:
         - different keyboard shortcuts for different entries
     [Yow! Way too ambitious.]
 
+Q: pixels as little squares?
+A: Use extension Stylish:
+     make rule "Pixelated images and canvases",
+       applies to: Everything
+	  img, canvas {
+	    image-rendering: pixelated;
+	  }
+   (Unfortunately doesn't seem to apply to file:// images,
+   but can add it to the img's Styles in the dev console, temporarily.)
+   (To really view an image file, make an html page with an img tag
+   that refers to it)
+
+   And use that CSS fragment in all web pages I care about.
+
+        
+

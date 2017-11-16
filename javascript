@@ -174,3 +174,45 @@ PA: removeEventListener, but it says it has to be a "named external" function.
       https://www.broken-links.com/2013/05/22/removing-event-listeners-with-anonymous-functions/
       http://stackoverflow.com/questions/4616525/javascript-removing-an-anonymous-event-listener#answer-4616564
       http://stackoverflow.com/questions/4616525/javascript-removing-an-anonymous-event-listener#comment-5076539
+
+Q: reading https://github.com/getify/You-Dont-Know-JS/blob/master/this%20%26%20object%20prototypes/ch2.md#user-content-everything-in-order ,
+   it says: 
+
+     Why is new being able to override hard binding useful?
+
+     The primary reason for this behavior is to create a function (that can be used with new for constructing objects) that essentially ignores the this hard binding but which presets some or all of the function's arguments.
+
+   And the example it gives is:
+
+      // using `null` here because we don't care about
+      // the `this` hard-binding in this scenario, and
+      // it will be overridden by the `new` call anyway!
+      var bar = foo.bind( null, "p1" );
+
+      var baz = new bar( "p2" );
+
+   Wouldn't that work perfectly well if hard binding took precendence
+   over new?
+PA: I guess that would require a special case for null, maybe that's
+    a reason to not do it.
+    However, null is already treated as a special case by explicit binding:
+    it means fall through directly to the default binding.
+    Skipping implicit binding? Yeah, I think so. Weird.
+      function foo() {
+        console.log(this.a);
+      }
+      var a = 'the global a';
+      foo.call(null); // 'the global a'
+
+      var baz = foo.bind(null);
+      var obj = {a:'the a from obj', baz:baz};
+      obj.baz(); // 'the global a' because the implicit binding is ignored
+      foo.bind(obj)(); // 'the a from obj'
+      
+      // note that 2nd bind is ignored:
+      foo.bind(null)(); // 'the global a'
+      foo.bind(obj)(); // 'the a from obj'
+      foo.bind(null).bind(obj)(); // 'the global a'
+      foo.bind(obj).bind(null)(); // 'the a from obj'
+   
+

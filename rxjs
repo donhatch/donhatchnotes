@@ -1,3 +1,12 @@
+Sorry, this is a train wreck. I have no idea how to select from the zillions of options:
+        Subject
+        BehaviorSubject
+        Variable
+    and even less idea how to chain them together the way I want.
+    Screw this.
+    I think Kefir is what I want.
+==========================================================================================
+
 http://reactivex.io/rxjs/
 http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html
 
@@ -8,11 +17,20 @@ https://gist.github.com/staltz/868e7e9bc2a7b8c1f754
 http://stackoverflow.com/questions/33324227/rxjs-how-would-i-manually-update-an-observable
 
 NOTES:
+  - "The Observable object represents a push based collection."
+    Not sure it's going to be useful for push-dirty pull-clean stuff I want to do.
+
   - Seems like all the examples on recognizing a double click
     have gone stale and no longer work.
     See http://stackoverflow.com/questions/37310640/rxjs-buffer-how-to-group-multi-click-events-as-stream
 
 QUESTIONS:
+
+Q: How do I find doc and good example of each thing?
+   For example, BehaviorSubject. If I google it or click on the link to it in doc, I just get this:
+     http://reactivex.io/rxjs/class/es6/BehaviorSubject.js~BehaviorSubject.html
+
+Q: can I put a BehaviorSubject downstream from a distinctUntilChanged?
 
 Q: How do I implement a simple Observable value
    that supports addListener() (to listen to value changes) and set()?
@@ -66,10 +84,14 @@ PA:
     }:
   Alternative: make a BehaviorSubject, and maybe tack on a class that remembers its most recently emitted value?
   Or... wait a minute, maybe a Subject -> distinctUntilChanged -> BehaviorSubject?
+    (not sure how to hook up the latter)
   What a wreck :-(
+
+  Experimentation in ~/wrk/example0.js
 
 Q: Can I use reactive programming to construct
    a computation flow graph with the usual stuff?
+     - dependency graph
      - dirtyness flows downstream
      - getting a value pulls upstream
      - clean intermediate values get cached
@@ -85,10 +107,16 @@ PA: Interesting, I'd set a value using shamefullySend.
 
 
 Q: might I want to use bacon.js instead?
+   It was born out of frustration with rxjs, maybe the same frustration I'm having; see https://github.com/baconjs/bacon.js/issues/383#issuecomment-46904133
+   and the blog post/rant it links to: http://nullzzz.blogspot.fi/2011/02/failing-with-rx-js.html
+PA: No, it's heavyweight (kefir fixes that though).  Full comparisons here:
+    https://stackoverflow.com/questions/33193211/what-are-the-differentiating-features-between-highland-js-kefir-js-and-rx-js
+    https://github.com/Reactive-Extensions/RxJS/blob/master/doc/mapping/bacon.js/whyrx.md
 
-
-
-
+Q: might I want to use kefir.js instead?
+   The kefir getting-started example here is pretty attractive:
+    https://rpominov.github.io/kefir/
+   Hmm! I think maybe it's what I want?  They call a simple model a `property`.
 
 
 Q: where is Observable's subscribe method documented??? can't find it on http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html

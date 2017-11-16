@@ -440,3 +440,11 @@ set notimeout          " don't timeout on mappings
 set ttimeout           " do timeout on terminal key codes
 set timeoutlen=100     " timeout after 100 msec
 
+
+" disable arrow keys (to which scroll actions translate in gnome-terminal)
+" when in insert mode (but not when in command line mode), to avoid wreckage when mouse wheel is jiggled during paste using middle-click.
+" See :help map-modes
+inoremap <Up> <nop>
+inoremap <Down> <nop>
+inoremap <Left> <nop>
+inoremap <Right> <nop>
