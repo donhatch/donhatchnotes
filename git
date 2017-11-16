@@ -1,6 +1,7 @@
 Git resources:
 
     https://github.com/blog/2019-how-to-undo-almost-anything-with-git
+      (well-meaning article https://git-scm.com/book/en/v2/Git-Tools-Reset-Demystified, maybe good but this reference is a much better recipe book)
 
     man gittutorial
 
