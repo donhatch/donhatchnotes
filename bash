@@ -176,6 +176,7 @@ Completion screwups (some local to google, some not):
         (this is another automatic one, see workaround above)
     - blaze run myprogram <tab>  doesn't complete to files
     - g4 changes -lt -u donhatch >| ~/tmp/changes.donhatc<tab>
+    - npm link ../most-gestures-fixe<tab>
 
 
 Posted: http://stackoverflow.com/questions/38843719/emergency-override-of-broken-command-completions-in-bash
@@ -223,4 +224,4 @@ Posted: http://stackoverflow.com/questions/38843719/emergency-override-of-broken
     (b) a way to bind a key/keys to temporarily disable programmable command completion for the current command that I have partially typed
     (c) some other clever non-intrusive way to get at filename completion at the moment I discover it's being hidden by a broken programmable command completion.
     ==============================================================
-    A: Alt-/. (complete-filename)
+    A: Alt-/ (complete-filename)
