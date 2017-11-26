@@ -15,6 +15,37 @@ Clearest description of automatic semicolon insertion, maybe:
   http://inimino.org/~inimino/blog/javascript_semicolons
   http://blog.izs.me/post/2353458699/an-open-letter-to-javascript-leaders-regarding
 
+  More links to decent arguments:
+    http://benalman.com/news/2013/01/advice-javascript-semicolon-haters/
+    https://github.com/getify/You-Dont-Know-JS/blob/master/types%20%26%20grammar/ch5.md#user-content-automatic-semicolons
+    https://hackernoon.com/an-open-letter-to-javascript-leaders-regarding-no-semicolons-82cec422d67d (starts with an example)
+    https://www.youtube.com/watch?v=gsfbh17Ax9I (entertaining)
+    https://brendaneich.com/2012/04/the-infernal-semicolon/
+
+  Note "standardjs" says omit them but "Never start a line with (, [, or `. This is the only gotcha with omitting semicolons, and standard protects you from this potential issue."
+    https://standardjs.com/rules.html#semicolons
+  (But... wasn't there something about return statements too?)
+
+  The prototypical examples:
+    #1:  (chooses to *not* insert a semicolon-- why?)
+      console.log('it works')
+      [1,2,3].forEach(function(n) { console.log(n) })
+    #2:  (chooses to *not* insert a semicolon-- why?)
+      console.log('it works')
+      (function() { console.log('grr')}())
+    #3:  (chooses to insert a semicolon-- why?)
+      return
+          {bear : 1}
+    #4: (chooses to *not* insert a semicolon-- why? this is an example from the lucumr article)
+      a = b + c
+      (d + e).print()
+
+  I DON'T UNDERSTAND.  When both are legal, does it insert or not?  Seems inconsistent.
+  I thought the standard says ASI only takes effect when the code would be illegal without it?
+  Indeed, according to the brendan eich article, "Remember, if there wasn’t an error, ASI does not apply."
+  So then why is it inserted after the return??
+
+
 Good debugging tips: (TODO: read it thoroughly)
   http://alistapart.com/article/advanced-debugging-with-javascript
 
@@ -131,7 +162,7 @@ Q: My main overall question is:
               which no longer exists, or lead to broken links
          Q: is it still "then"-diseased, or not?? there's something called "then" but I'm not sure it's
             the diseased Promises/A+ "then".
-         A: No!  read https://github.com/getify/asynquence#promisesa-compliance: 
+         A: No!  read https://github.com/getify/asynquence#promisesa-compliance:
             "Trying to do so will likely cause unexpected behavior, because Promises/A+ insists on problematic (read: "dangerous") duck-typing for objects that have a then() method, as asynquence instances do."
             So ey's on board!  And there are utilities for interoperating.
             This is looking really good so far!
@@ -148,11 +179,11 @@ Q: My main overall question is:
          due to something I call unexpectedly awaiting.  See example in second article.
          Hmm, but... don't async functions have to declare that they are async?  So it's not true that "you never know when someone might call yield";
          only functions declared "async" can, right?  Not sure whether that helps.
-          
+
 
 
     - cujojs?  what is it and do I want it? he calls it something other
-      than "framework", says it's framework-agnostic and in fact facilitates 
+      than "framework", says it's framework-agnostic and in fact facilitates
       being framework-agnostic
     - https://sanctuary.js.org/ : "refuge from unsafe javascript" ?
 
@@ -176,7 +207,7 @@ PA: removeEventListener, but it says it has to be a "named external" function.
       http://stackoverflow.com/questions/4616525/javascript-removing-an-anonymous-event-listener#comment-5076539
 
 Q: reading https://github.com/getify/You-Dont-Know-JS/blob/master/this%20%26%20object%20prototypes/ch2.md#user-content-everything-in-order ,
-   it says: 
+   it says:
 
      Why is new being able to override hard binding useful?
 
@@ -208,11 +239,11 @@ PA: I guess that would require a special case for null, maybe that's
       var obj = {a:'the a from obj', baz:baz};
       obj.baz(); // 'the global a' because the implicit binding is ignored
       foo.bind(obj)(); // 'the a from obj'
-      
+
       // note that 2nd bind is ignored:
       foo.bind(null)(); // 'the global a'
       foo.bind(obj)(); // 'the a from obj'
       foo.bind(null).bind(obj)(); // 'the global a'
       foo.bind(obj).bind(null)(); // 'the a from obj'
-   
+
 
