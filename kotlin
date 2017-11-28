@@ -1,0 +1,69 @@
+https://steve-yegge.blogspot.com/2017/05/why-kotlin-is-better-than-whatever-dumb.html
+
+asked on stackoverflow, but then retracted because it was not well received (I think they thought I was asking "why doesn't my kotlin code compile?")
+Q: does Kotlin's null safety help prevent these common NPE bugs?
+
+According to [the documentation](https://kotlinlang.org/docs/reference/null-safety.html),
+
+    Kotlin's type system is aimed to eliminate NullPointerException's from our code.
+
+Ok, here are the first examples of Java NPE bugs that come to my mind.
+
+Example #1:
+===========
+Class implementation forgets to initialize a member, and then uses the member.
+'''
+class Example1 {
+  private static class Thing {
+    String _s = null;
+    String _sTwice = null;
+    String _sThrice = null;
+    public Thing(String s) {
+      _s = s;
+      _sTwice = s + s;
+      // BUG: forgot to initialize _sThrice
+    }
+    public void printLengths() {
+      System.out.println("_s.length() = " + _s.length());
+      System.out.println("_sTwice.length() = " + _sTwice.length());
+      System.out.println("_sThrice.length() = " + _sThrice.length());
+    }
+  }
+  public static void main(String args[]) {
+    Thing thing = new Thing("x");
+    thing.printLengths(); // crash: NPE trying to access thing._sThrice.length()
+  }
+}
+'''
+
+Example #2:
+Caller calls a method but forgot to call a required initialization method first.
+'''
+class Example2 {
+  private static class Thing {
+    String _s = null;
+    String _sTwice = null;
+    String _sThrice = null;
+    public void init(String s) {
+      _s = s;
+      _sTwice = s + s;
+      _sThrice = s + s + s;
+    }
+    // Contract: init(someNonNullString) must be called first
+    public void printLengths() {
+      System.out.println("_s.length() = " + _s.length());
+      System.out.println("_sTwice.length() = " + _sTwice.length());
+      System.out.println("_sThrice.length() = " + _sThrice.length());
+    }
+  }
+  public static void main(String args[]) {
+    Thing thing = new Thing();
+    // BUG: forgot to call thing.init(someNonNullString)
+    thing.printLengths(); // crash: NPE trying to access thing._s.length()
+  }
+}
+'''
+
+Can Kotlin's "null safety" features help prevent bugs such as these?
+
+How would these examples best be written in Kotlin?
