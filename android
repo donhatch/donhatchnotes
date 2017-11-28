@@ -132,3 +132,28 @@ PA: - well, googlesamples/android-DrawableTinting does it, but I think its file 
 Q: kotlin?
 A: see kotlin notes
 
+Q: how the heck do I set the icon?
+PA: various docs and stackoverflow answers say things like:
+      right-click on res -> New Image Asset, and replace android:icon="@drawable/ic_launcher" with android:icon="@drawable/myicon" in app/src/main/AndroidManifest.xml
+    I tried that, and it didn't work-- it didn't put anything in drawable.
+    But it put stuff in various mipmap-* directories,
+    so I said android:icon="@mipmap/ic_launcher" and it worked.
+    BTW, api level 26 introduced a much more complicated icon creation:
+    "adaptive and legacy", with foreground and background,
+    that makes it hard to make the background transparent.  So I chose
+    "legacy only" in asset studio, it makes it easier and creates fewer files.
+    Note, I had to regenerate the asset when level 26 came,
+    because the old one was missing xxxdpi files (I think).
+    (XXX argh, I think it's actually that level 26 *requires* the adaptive ones)
+    (XXX and it looks like when I ask for that, it creates drawable/typewriter_el_background.xml but nothing for foreground or without-_background-or-_foreground?? is that a bug?)
+Q: how do I make the icon partially transparent?
+   for "legacy" icon (used by targetSdkLevel<=25), I could do it by setting
+   shape type to None.  Don't know how any more.
+   (TODO: read the extensive doc about adaptive icons; it should explain)
+
+
+Q: what does it mean when the Run (play) button in Android Studio has a little
+   dot in its lower right?
+A: per https://stackoverflow.com/questions/40998073/android-studio-what-does-the-green-dot-mean-in-the-run-button#answer-40998217,
+   it means it's running.
+   Oh!  I think I neglected to set the Name (I set foreground and background layer name, that wasn't adequate)
