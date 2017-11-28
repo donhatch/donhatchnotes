@@ -1,0 +1,219 @@
+http://nodejs.org
+
+Node.js is a javascript runtime,
+designed to build scalable network applications.
+
+Get started by going to nvm.org and following the instructions that use git.
+
+To learn what npm does, go through the docs on https://docs.npmjs.com/ .
+
+Q: what is the scope of installs and stuff?
+A: https://docs.npmjs.com/getting-started/installing-npm-packages-locally
+   Local:
+     npm install <whatever>
+       contrary to doc, seems to require ./package.json (or in ancestor dir)
+         (to create it initially, run npm init; can just hit enter for all questions)
+       creates node_modules if necessary, and installs the thing under there.
+   Global:
+     npm install -g <whatever>
+       installs it under /Users/donhatch/.nvm/versions/node/v6.11.4/lib/node_modules
+         (or something like that, depending on where current npm is,
+         which depends on what nvm is set to)
+
+Q: what is the --save and --save-dev crap?
+A: https://docs.npmjs.com/getting-started/using-a-package.json
+   --save installs it (if not already installed) and adds it to the package.json's dependencies.
+   --save-dev installs it (if not already installed) and adds it to the package.json's devDependencies.
+
+
+Q: wtf does "npm link ../csg.js/ @jscad/csg" do?
+   (from instructions in OpenJSCAD.org/README.md)
+   npm help link doesn't mention any version that takes multiple args.
+PA: I think it's just the same as:
+        npm link ../csg.js/
+        npm link @jscad/csg
+   which is a weird thing to do since I think the first one is shorthand for:
+        (cd ../csg.js && npm link) && npm link @jscad/csg
+   (since @jscad/csg is the name of the package specified in ../csg.js/package.json),
+   which makes the second command redundant.
+
+for stackoverflow:
+
+
+
+That makes it so if I happen to have two different physical directories
+on a given machine, and they have the same module name,
+they will stomp on each other.
+
+That makes it impossible for me to do work in multiple separate
+It makes it so that if I try to do work in multiple directories that have the same module name
+That makes it impossible to work in multiple scratch copies of a module with a given name,
+without
+
+Wouldn't it be better to simply create a local link A pointing to ../A instead?
+
+That would allow the following:
+
+
+
+
+
+Q: Why does local "npm link" go through global??
+   That seems dysfunctional, since it prevents me from being able to have local things
+   point to one another:
+       (cd OpenJSCAD.org_scratch1 && npm link ../csg.js_scratch1)
+       (cd OpenJSCAD.org_scratch2 && npm link ../csg.js_scratch2)
+   If I do that, they both end up pointing to the latter:
+       OpenJSCAD.org_scratch2/node_modules/@jscad/csg -> ~/npm/lib/node_modules/@jscad/csg -> csg.js_scratch2
+   And can't I accomplish the same thing, simpler and better, by making symlinks directly?
+   That is:
+       /bin/rm -f OpenJSCAD.org_scratch1/node_modules/@jscad/csg
+       ln -s ../../../csg.js_scratch1 OpenJSCAD.org_scratch1/node_modules/@jscad/csg
+       /bin/rm -f OpenJSCAD.org_scratch2/node_modules/@jscad/csg
+       ln -s ../../../csg.js_scratch2 OpenJSCAD.org_scratch2/node_modules/@jscad/csg
+
+   Oh, WAIT a minute... https://github.com/npm/npm/issues/10343#issuecomment-311199534
+   seems to say that this does the desired thing??? Wtf?
+       (cd OpenJSCAD.org_scratch1 && npm install ../csg.js_scratch1)
+       (cd OpenJSCAD.org_scratch2 && npm install ../csg.js_scratch2)
+   (ey says this symlink behavior is new; npm@4 copied the files instead of symlinking)
+
+   Let's see if that actually works...
+       cd OpenJSCAD.org_scratch1
+       node src/cli/cli.js examples/logo.jscad -o /var/tmp/RMME.stl
+       argh, all messed up!
+
+   Let's try from scratch...
+   First, to make sure no straggling crap...
+       rm ~/.nvm/versions/node/v6.11.4/lib/node_modules
+       nvm install v6
+       nvm use v6
+   Then, the original way from README.md:
+         cd ~/gitrepos
+         git clone https://github.com/jscad/OpenJSCAD.org.git OpenJSCAD.org_scratch3
+         git clone https://github.com/jscad/csg.js.git csg.js_scratch3
+         (cd OpenJSCAD.org_scratch3 && npm install)  # yes, it's necessary, to get e.g. @jscad/scad-api
+         (cd OpenJSCAD.org_scratch3 && npm link ../csg.js_scratch3 @jscad/csg)
+	    npm ERR! Darwin 16.0.0
+	    npm ERR! argv "/Users/donhatch/.nvm/versions/node/v6.12.0/bin/node" "/Users/donhatch/.nvm/versions/node/v6.12.0/bin/npm" "link" "../csg.js_scratch3" "@jscad/csg"
+	    npm ERR! node v6.12.0
+	    npm ERR! npm  v3.10.10
+
+	    npm ERR! Cannot read property '0' of undefined
+	    npm ERR!
+	    npm ERR! If you need help, you may report this error at:
+	    npm ERR!     <https://github.com/npm/npm/issues>
+      Wtf? I have no idea what that error means.
+      But, if I leave off the final thing, it's better:
+	   (cd OpenJSCAD.org_scratch3 && npm link ../csg.js_scratch3)
+      And then the original works, but I don't understand the point of it:
+	   (cd OpenJSCAD.org_scratch3 && npm link ../csg.js_scratch3 @jscad/csg)
+      But, now the command works (I'll refrain from "npm link" to get openjscad, and just use `node src/cli/cli.js` directly)
+           vi csg.js_scratch3/src/CSG.js
+             inserted at beginning and end of intersect function:
+                 console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX in intersect in csg.js_scratch3");
+                 console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX out intersect in csg.js_scratch3");
+	   (cd OpenJSCAD.org_scratch3 && node src/cli/cli.js examples/logo.jscad -o /var/tmp/RMME.stl)
+             converting examples/logo.jscad -> /var/tmp/RMME.stl (STereoLithography, Binary)
+             XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX in intersect in csg.js_scratch3
+             XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX out intersect in csg.js_scratch3
+    Now let's try it using what I think is a better way:
+         (cd OpenJSCAD.org_scratch3 && npm install ../csg.js_scratch3)
+    The cli command still outputs the right stuff.  Hooray!
+    Now let's see if I can two of them to link to different stuff:
+      git clone https://github.com/jscad/OpenJSCAD.org.git OpenJSCAD.org_scratch1
+      git clone https://github.com/jscad/OpenJSCAD.org.git OpenJSCAD.org_scratch2
+      git clone https://github.com/jscad/csg.js.git csg.js_scratch1
+      git clone https://github.com/jscad/csg.js.git csg.js_scratch2
+      (cd OpenJSCAD.org_scratch1 && npm install)
+      (cd OpenJSCAD.org_scratch2 && npm install)
+      (cd OpenJSCAD.org_scratch1 && npm install ../csg.js_scratch1)
+      (cd OpenJSCAD.org_scratch2 && npm install ../csg.js_scratch2)
+      vi csg.js_scratch1/src/CSG.js
+         console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX in intersect in csg.js_scratch1");
+         console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX out intersect in csg.js_scratch1");
+      vi csg.js_scratch2/src/CSG.js
+         console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX in intersect in csg.js_scratch2");
+         console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX out intersect in csg.js_scratch2");
+      (cd OpenJSCAD.org_scratch1 && node src/cli/cli.js examples/logo.jscad -o /var/tmp/RMME.stl)
+      (cd OpenJSCAD.org_scratch2 && node src/cli/cli.js examples/logo.jscad -o /var/tmp/RMME.stl)
+    ARGH!  Doesn't work!   Seems to have a *copy* of ../csg.js_scratch1,2 instead.
+    If I run the npm install again, it picks up the change... but that's not what I want!!!
+    Why isn't it honoring the symlink?  I'm confused.
+
+    Oh, WAIT a minute... I did just update npm recently... maybe its behavior changed,
+    in the middle of me trying to figure this stuff out??
+    It was 5.11.something, now it's 5.12.
+
+    Ok what if I hack it at this moment:
+       (cd OpenJSCAD.org_scratch1 && npm uninstall @jscad/csg)
+       (cd OpenJSCAD.org_scratch2 && npm uninstall @jscad/csg)
+       ls OpenJSCAD.org_scratch2/node_modules/@jscad/csg
+          no such file or directory... good
+       ls OpenJSCAD.org_scratch2/node_modules/@jscad/csg
+          no such file or directory... good
+       ln -s ../../../csg.js_scratch1 OpenJSCAD.org_scratch1/node_modules/@jscad/csg
+       ln -s ../../../csg.js_scratch2 OpenJSCAD.org_scratch2/node_modules/@jscad/csg
+       (cd OpenJSCAD.org_scratch1 && node src/cli/cli.js examples/logo.jscad -o /var/tmp/RMME.stl)
+       (cd OpenJSCAD.org_scratch2 && node src/cli/cli.js examples/logo.jscad -o /var/tmp/RMME.stl)
+    Now it works!  Hooray!!!
+
+
+
+
+
+
+asked here: https://stackoverflow.com/questions/47218163/why-does-npm-link-a-pollute-the-global-modules-directory
+no response whatsoever :-(
+=========================================
+Q: why does `npm link ../A` pollute the global modules directory?
+
+According to `npm help link`, `npm link ../A` is a shortcut for the following two steps:
+
+    (cd ../A && npm link)  # creates global link A pointing to ../A
+    npm link A             # creates local link A pointing to global link A
+
+Why does it choose to pollute the global installation with an intermediate link like this,
+instead of simply creating a single link pointing directly to `../A`?
+
+That seems nuts.
+
+I mean, if I *wanted* to, I could create two links like that by running the two commands; that's simple enough.
+But I shouldn't be *forced* to pollute the global area like that, should I?
+
+For example, let's say I am working on two different features in a library module named `A`,
+for which I use two different scratch directories;
+and I want to test them in an app module named `B` that depends on `A`,
+also using two respective scratch directories.  Then I'd do the following.
+
+Create `A_scratch1, A_scratch2`, both copies of library module `A`:
+
+    mkdir A && (cd A && npm init --yes)
+    cp -a A A_scratch1
+    cp -a A A_scratch2
+Create `B_scratch1, B_scratch2`, both copies of app module `B`:
+
+    mkdir B && (cd B && npm init --yes)
+    cp -a B B_scratch1
+    cp -a B B_scratch2
+Make `B_scratch1` depend on `A_scratch1` by linking:
+
+    (cd B_scratch1 && npm link ../A_scratch1)
+      /tmp/npmtest/B_scratch1/node_modules/A -> /Users/donhatch/.nvm/versions/node/v6.12.0/lib/node_modules/A -> /tmp/npmtest/A_scratch1
+Make `B_scratch2` depend on `A_scratch2` by linking:
+
+    (cd B_scratch2 && npm link ../A_scratch2)
+      /tmp/npmtest/B_scratch2/node_modules/A -> /Users/donhatch/.nvm/versions/node/v6.12.0/lib/node_modules/A -> /tmp/npmtest/A_scratch2
+
+Oops!  That clobbered `B_scratch1`'s dependency on `A_scratch1`, effectively replacing it with a dependency on `A_scratch2` instead, which I never wanted.
+
+In this case, I can create the desired structure (that is, local links without polluting the global area) by simply
+creating the symlinks manually:
+
+    (cd B_scratch1/node_modules && /bin/rm -f A && ln -s ../../A_scratch1 A)
+    (cd B_scratch2/node_modules && /bin/rm -f A && ln -s ../../A_scratch2 A)
+That seems to work.
+
+What will go wrong, if anything, if I do that?
+Why doesn't `npm link ../A_scratch1` do that?
+
