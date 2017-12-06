@@ -104,6 +104,9 @@ A: exec otherprogram "$@"
 Q: boolean expressions?
 A: http://stackoverflow.com/questions/48774/boolean-expressions-in-shell-scripts
 
+Q: arithmetic?
+A: echo $((1+2))
+
 Q: canonical function syntax for readability? (I know there are several)
 A: I have no idea.  The options are:
        function myFunction { commands; }
