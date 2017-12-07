@@ -56,6 +56,9 @@ Javascript frameworks:
     http://archive.dojotoolkit.org/nightly/dojotoolkit/dijit/themes/themeTester.html
   Haven't explored it much though.
   See dojo notes in separate file.
+  (Update: Coming to the conclusion that it's crap-- there is not enough
+  understanding of how the tree model relates to the tree view to *ever*
+  be able to adequately write or maintain a program that use them)
 
 
 QUESTIONS:
