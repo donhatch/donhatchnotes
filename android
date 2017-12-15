@@ -185,3 +185,20 @@ Q: what does it mean when the Run (play) button in Android Studio has a little
 A: per https://stackoverflow.com/questions/40998073/android-studio-what-does-the-green-dot-mean-in-the-run-button#answer-40998217,
    it means it's running.
    Oh!  I think I neglected to set the Name (I set foreground and background layer name, that wasn't adequate)
+
+===========================================================================================================
+
+Q: can multiple instances of a given Activity class exist within a process?
+   can multiple instances of a given Service class exist within a process?
+PA: see https://developer.android.com/guide/components/activities/tasks-and-back-stack.html
+   that shows how there can be multiple activities existing, if they occur at multiple places in the back stack.
+   Not sure if that's relevant to my apps I've been writing so far?
+
+Q: what's the relationship between tasks and processes?
+PA: some links:
+   http://opensourceforgeeks.blogspot.com/2014/12/difference-between-running-task-and.html
+   https://stackoverflow.com/questions/8148420/difference-between-running-task-and-running-process-in-android/27571575
+   https://www.sitepoint.com/activities-tasks-and-intents-oh-my/
+
+
+
