@@ -1,5 +1,12 @@
 (previous notes currently in ~/wrk/android/NOTES -- need to transfer them)
 
+Detailed table of android version vs api level here (note "MR1" means "maintenance release 1"):
+  https://developer.android.com/guide/topics/manifest/uses-sdk-element.html#api-level-table
+Less detailed table, with user distribution stats:
+  https://developer.android.com/about/dashboards/index.html
+Very cool chart of distribution history here, but it's not completely up to date:
+  https://en.wikipedia.org/wiki/Android_version_history
+
 Q: what's the story on various versions of stuff?
 PA: At this moment:
       Android version:
@@ -58,6 +65,14 @@ PA:
       Okay, I experimented, and what I found:
         - both targetSdkVersion's are used, but the one in build.gradle seems to take precedence if present.
       Seems to me that means I should put it in the manifest, doesn't it?  Otherwise it won't be seen by installation filters.
+  A: Ah, per:
+      https://stackoverflow.com/questions/19997509/android-studio-why-are-minsdkversion-and-targetsdkversion-specified-both-in-and
+     gradle puts info missing from app/src/main/AndroidManifest.xml into the final AndroidManifest.xml
+     (apparently, when developing, it appears in app/build/intermediates/manifest/*/*/AndroidManifest.xml)
+
+
+
+
 
    Here's some explanation, but it's not exactly android studio? https://developer.xamarin.com/guides/android/application_fundamentals/understanding_android_api_levels/
    Here's some more explanation: https://developer.android.com/guide/topics/manifest/uses-sdk-element.html
