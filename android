@@ -186,19 +186,62 @@ A: per https://stackoverflow.com/questions/40998073/android-studio-what-does-the
    it means it's running.
    Oh!  I think I neglected to set the Name (I set foreground and background layer name, that wasn't adequate)
 
+Q: where the heck is adb?
+PA: on mac: ~/Library/Android/sdk/platform-tools/adb
+
+Q: how do I adb or telnet to an emulator?
+   `telnet localhost 5554` or whatever says connection refused
+A: For telnet:
+     Read the instructions it gives: find the auth token and say `auth <token>`.
+     Or, can change the value in that file (newline or not doesn't matter)
+     or clear the file so there's no authentication needed.
+   For adb:
+
+Q: how to test/exercise android's screen rotation behavior?
+   Asked as:
+     https://stackoverflow.com/questions/43319781/how-to-test-exercise-androids-screen-rotation-behavior
+A: First of all, not obvious, but the emulator ui lets you choose arbitrary roll/pitch/yaw:
+      menu -> Virtual Sensors -> Accelerometer -> Rotate.
+    Even for just selecting one of the four primary orientations, it has nicer control here
+    via 4 buttons than the simple "rotate 90 degrees CCW" and "rotate 90 degrees CW".
+    As for arbitrary orientations, there's
+    , perhaps some clues here:
+      https://stackoverflow.com/questions/3921467/how-can-i-simulate-accelerometer-in-android-emulator#answer-20361772
+    Ah yes!
+      telnet localhost 5554  # or whatever port it chose
+        sensor list
+        sensor get acceleration
+          acceleration = 0:9.81:0  # if it's in initial portrait orientation
+          acceleration = -9.81:0:0  # if it's rotated 90 degrees CW from initial orientation
+          acceleration = 0:-9.81:0  # if it's upside down
+          acceleration = 9.81:0:0  # if it's rotatated 90 degrees CCW
+        sensor set acceleration -1:1:0  # to set it to rotated 45 degrees CW from initial orientation
+    Is there something analogous using adb?  (Probably not, since adb doesn't really know
+    it's an emulation, and this certainly wouldn't work in a non-emulation since values
+    would be clobbered by the real accelerometer)
+
+    I added an answer to my question on stackoverflow:
+      https://stackoverflow.com/questions/43319781/how-to-test-exercise-androids-screen-rotation-behavior/47842549#answer-47842549
+
+
+
+
+
+
+
 ===========================================================================================================
 
 Q: can multiple instances of a given Activity class exist within a process?
-   can multiple instances of a given Service class exist within a process?
+can multiple instances of a given Service class exist within a process?
 PA: see https://developer.android.com/guide/components/activities/tasks-and-back-stack.html
-   that shows how there can be multiple activities existing, if they occur at multiple places in the back stack.
-   Not sure if that's relevant to my apps I've been writing so far?
+that shows how there can be multiple activities existing, if they occur at multiple places in the back stack.
+Not sure if that's relevant to my apps I've been writing so far?
 
 Q: what's the relationship between tasks and processes?
 PA: some links:
-   http://opensourceforgeeks.blogspot.com/2014/12/difference-between-running-task-and.html
-   https://stackoverflow.com/questions/8148420/difference-between-running-task-and-running-process-in-android/27571575
-   https://www.sitepoint.com/activities-tasks-and-intents-oh-my/
+http://opensourceforgeeks.blogspot.com/2014/12/difference-between-running-task-and.html
+https://stackoverflow.com/questions/8148420/difference-between-running-task-and-running-process-in-android/27571575
+https://www.sitepoint.com/activities-tasks-and-intents-oh-my/
 
 
 
