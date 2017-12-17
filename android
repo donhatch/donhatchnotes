@@ -224,6 +224,50 @@ A: First of all, not obvious, but the emulator ui lets you choose arbitrary roll
       https://stackoverflow.com/questions/43319781/how-to-test-exercise-androids-screen-rotation-behavior/47842549#answer-47842549
 
 
+Q: (follow-up question (aborted because it's working now??)) why doesn't android emulator screen rotate in response to accelerometer changes?
+
+    I'd like to script a sequence of physical device orientation changes in the android emulator,
+    to test the "auto-rotate screen" behavior.
+
+    I was hoping I could do it by making the emulated accelerator perceive gravity direction changes.
+    Here's what I tried (using emulator configured as "Pixel 2 XL API 27"):
+
+        telnet localhost 5554
+
+    - Make sure emulated device is in natural portrait orientation
+    - Make sure auto-rotate-screen is on (i.e. [Settings.System.ACCELEROMETER_ROTATION](https://developer.android.com/reference/android/provider/Settings.System.html#ACCELEROMETER_ROTATION) set to 1, i.e. screen orientation should follow accelerometer).
+    - Make sure home screen allows auto-rotate (long-press on home screen -> HOME SETTINGS -> Allow Home screen rotation when phone is rotated -> On)
+
+        telnet> sensor get acceleration
+            acceleration = 0:9.81:0
+
+    - Press emulator "Rotate counterclockwise" button; observe the screen changes to landscape mode, and the accelerometer reports the new "up" direction:
+
+        telnet> sensor get acceleration
+            acceleration = 9.81:0:0
+
+    - Press emulator "Rotate clockwise" button; observe the screen changes back to portrait mode, and "up" direction has reverted to its original value:
+
+        telnet> sensor get acceleration
+            acceleration = 0:9.81:0
+
+    - Now try to do the counterclockwise rotation by changing the "up" direction:
+
+        telnet> sensor set acceleration 9.81:0:0
+        telnet> sensor get acceleration
+            acceleration = 9.81:0:0
+
+    - Hey! The screen changes to landscape mode!  Wtf?  I swear it wasn't doing that correctly,
+      earlier today!
+
+
+
+
+
+
+
+
+
 
 
 
