@@ -24,6 +24,22 @@ APPLICATION THEORY:
      couldn't I accomplish the same thing more easily with an actual method call?
 
 BUILD THEORY/PRACTICE:
+  Q: how do I compile/install/run from command line (not in AS)?
+  PA: For the install/run part, look at the "4:Run" tab at the bottom of AS, to see this:
+
+       12/27 14:26:04: Launching app
+       $ adb push /Users/donhatch/AndroidStudioProjects/LinearLayoutWeightsQuestionActivity/app/build/outputs/apk/debug/app-debug.apk /data/local/tmp/com.example.donhatch.linearlayoutweightsquestionactivity
+       $ adb shell pm install -t -r "/data/local/tmp/com.example.donhatch.linearlayoutweightsquestionactivity"
+       Success
+       $ adb shell am start -n "com.example.donhatch.linearlayoutweightsquestionactivity/com.example.donhatch.linearlayoutweightsquestionactivity.MainActivity" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER
+
+     If already built:
+       12/27 14:24:12: Launching app
+       No apk changes detected since last installation, skipping installation of /Users/donhatch/AndroidStudioProjects/LinearLayoutWeightsQuestionActivity/app/build/outputs/apk/debug/app-debug.apk
+       $ adb shell am force-stop com.example.donhatch.linearlayoutweightsquestionactivity
+       $ adb shell am start -n "com.example.donhatch.linearlayoutweightsquestionactivity/com.example.donhatch.linearlayoutweightsquestionactivity.MainActivity" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER
+
+
   Q: what's the story on various versions of stuff?
   PA: At this moment:
         Android version:
@@ -152,6 +168,11 @@ HOW TO DO COMMON THINGS IN ANDROID STUDIO:
   A: Android Studio -> Check for Updates...
      it says 3.0.1 is available.  downloading it.
 
+  Q: how to keep working while updating to latest?
+    https://stackoverflow.com/questions/37351996/how-to-keep-android-studio-working-while-downloading-tools
+  A: press the Background button in the modal dialog!  yay!
+
+
   Q: how do I change deployment target?
   A: Do both of the following:
        - hit the Stop button if it's running
@@ -173,6 +194,19 @@ HOW TO DO COMMON THINGS IN ANDROID STUDIO:
 
   Q: what is kotlin?
   A: see kotlin notes
+
+  Q: how to get the kotlin reflection api?
+  PA:
+     This suggested answer doesn't work as advertised
+         compile 'org.jetbrains.kotlin:kotlin-reflect'
+    (you can tell that the error message says it's looking for bogus names like kotlin-reflect-.jar).
+     But this works (for me currently since this is my version):
+         compile 'org.jetbrains.kotlin:kotlin-reflect:1.2.10'
+     and this does (NOTE the double quotes! doesn't work with single)
+	 compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+     But then it fails later with a "com.android.dex.DexIndexOverflowException: method ID not in [0,0xffff]: 65536".
+     See question about that elsewhere in this file.
+
 
   Q: how the heck do I set the icon?
   PA: various docs and stackoverflow answers say things like:
@@ -285,7 +319,32 @@ DEVELOPMENT/DEBUGGING:
 TROUBLESHOOTING:
   Q: what do I do when app crashes on startup with "can't find MainActivity on classpath"
      or something?
+     (may have something to do with the attempted preBuild rule to try to add custom framework.jar,
+     may be a race condition)
   A: make a nontrivial change to MainActivity.java and recompile.
+     (maybe can do something to fix race condition, too?)
+
+  Q: build fails with "com.android.dex.DexIndexOverflowException: method ID not in [0,0xffff]: 65536"
+     (after I added a dependency on kotlin-reflect).
+  PA: Per https://developer.android.com/studio/build/multidex.html:
+     Shouldn't be a problem if minSdkVersion>=21 (multidex enabled by default).
+     But mine is currently 15, so have to do something special.
+     Oh wait... actually, problem went away after "clean project" and "rebuild project"... ?
+
+  Q: Install on emulator (API 17) failed with INSTALL_FAILED_UID_CHANGED.
+  A: adb shell
+        rm -r /data/data/com.example.donhatch.linearlayoutweights  # or whatever the app name is
+
+  Q: `adb -P 5554 shell` fails with:
+        error: protocol fault (status 41 6e 64 72?!)
+  A: 5554 isn't for adb, silly, it's for communicating with the emulator
+     (which wouldn't make sense for a real device).
+     Say something like this instead:
+       adb shell  # if only one device connected; disconnect the real one if necessary
+     Or:
+       adb -P 7000 shell
+        * daemon not running; starting now at tcp:7000
+
 
 VIEW/LAYOUT BUGS:
   Q: Can I get control over LinearLayout's distribution of slack/shrinkage?
