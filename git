@@ -1148,18 +1148,18 @@ POSSIBLE BUG: weird behavior on "git fetch --dry-run"
 
 Answered this: http://stackoverflow.com/questions/4750845/how-do-you-annotate-a-branch
 
-I like to make an empty commit whenever I create a new branch,
-with a commit message saying whatever needs to be said.
+  I like to make an empty commit whenever I create a new branch,
+  with a commit message saying whatever needs to be said.
 
-git branch B A
-git checkout B
-git commit --allow-empty -m "Created branch 'B' from 'A'"
+  git branch B A
+  git checkout B
+  git commit --allow-empty -m "Created branch 'B' from 'A'"
 
-This also has a wonderful side effect of making the history
-shown in "git log --graph" much clearer--
-namely it shows a clearly labelled fork in the tree
-at the time I created the branch,
-instead of what I'd normally get which is an unclear unlabelled fork at some later time
-when I happen to make my first commit while in B--
-that kind of thing keeps me in a constant fog.
+  This also has a wonderful side effect of making the history
+  shown in "git log --graph" much clearer--
+  namely it shows a clearly labelled fork in the tree
+  at the time I created the branch,
+  instead of what I'd normally get which is an unclear unlabelled fork at some later time
+  when I happen to make my first commit while in B--
+  that kind of thing keeps me in a constant fog.
 
