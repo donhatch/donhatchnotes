@@ -25,19 +25,47 @@ APPLICATION THEORY:
 
 BUILD THEORY/PRACTICE:
   Q: how do I compile/install/run from command line (not in AS)?
-  PA: For the install/run part, look at the "4:Run" tab at the bottom of AS, to see this:
+  PA: 
+      Compile: per https://developer.android.com/studio/build/building-cmdline.html
+        ./gradlew tasks
+      Note that in the gradle console in AS, it says:
+        Executing tasks: [:app:assembleDebug]
+      So from the command line, that's:
+        ./gradlew :app:assembleDebug
+      The following seems to work too (not sure what the difference is)
+        ./gradlew assembleDebug
+      Looks like there's a task for install, too:
+        ./gradlew installDebug
+      (but that takes about 5 seconds, whereas the explicit commands below take about 4 seconds).
+      (however, I think that's because it does the assembleDebug too, which takes 1 second to realize there's nothing to do..
+      so maybe it's a win when all together.)
+      Q: if there's an emulator running, it will choose that instead of the attached actual device.
+         how to direct it at a particular device?
 
-       12/27 14:26:04: Launching app
-       $ adb push /Users/donhatch/AndroidStudioProjects/LinearLayoutWeightsQuestionActivity/app/build/outputs/apk/debug/app-debug.apk /data/local/tmp/com.example.donhatch.linearlayoutweightsquestionactivity
-       $ adb shell pm install -t -r "/data/local/tmp/com.example.donhatch.linearlayoutweightsquestionactivity"
-       Success
-       $ adb shell am start -n "com.example.donhatch.linearlayoutweightsquestionactivity/com.example.donhatch.linearlayoutweightsquestionactivity.MainActivity" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER
+      Install/run: look at the "4:Run" tab at the bottom of AS, to see this:
 
-     If already built:
-       12/27 14:24:12: Launching app
-       No apk changes detected since last installation, skipping installation of /Users/donhatch/AndroidStudioProjects/LinearLayoutWeightsQuestionActivity/app/build/outputs/apk/debug/app-debug.apk
-       $ adb shell am force-stop com.example.donhatch.linearlayoutweightsquestionactivity
-       $ adb shell am start -n "com.example.donhatch.linearlayoutweightsquestionactivity/com.example.donhatch.linearlayoutweightsquestionactivity.MainActivity" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER
+         12/27 14:26:04: Launching app
+         $ adb push /Users/donhatch/AndroidStudioProjects/LinearLayoutWeightsQuestionActivity/app/build/outputs/apk/debug/app-debug.apk /data/local/tmp/com.example.donhatch.linearlayoutweightsquestionactivity
+         $ adb shell pm install -t -r "/data/local/tmp/com.example.donhatch.linearlayoutweightsquestionactivity"
+         Success
+         $ adb shell am start -n "com.example.donhatch.linearlayoutweightsquestionactivity/com.example.donhatch.linearlayoutweightsquestionactivity.MainActivity" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER
+
+       If already built:
+         12/27 14:24:12: Launching app
+         No apk changes detected since last installation, skipping installation of /Users/donhatch/AndroidStudioProjects/LinearLayoutWeightsQuestionActivity/app/build/outputs/apk/debug/app-debug.apk
+         $ adb shell am force-stop com.example.donhatch.linearlayoutweightsquestionactivity
+         $ adb shell am start -n "com.example.donhatch.linearlayoutweightsquestionactivity/com.example.donhatch.linearlayoutweightsquestionactivity.MainActivity" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER
+
+       Note, per https://developer.android.com/studio/build/building-cmdline.html#RunningOnDevice , can say this instead of the adb shell pm install:
+         adb install -r app/build/outputs/apk/debug/app-debug.apk
+       (the -r is needed to avoid error if it's already installed)
+       (may be a bit faster than the two shell am/pm commands, and definitely simpler...
+       and maybe it has to be the preferred way, since there's apparently no way to make `./gradlew installDebug`
+       point to a particular device)
+       (also ./gradlew installDebug has the disadvantage that it doesn't give a nice green OK when build is successful)
+
+       So current preferred method is:
+         ./gradlew assembleDebug && adb install -r app/build/outputs/apk/debug/app-debug.apk && adb shell am start -n "com.example.donhatch.linearlayoutweightsquestionactivity/com.example.donhatch.linearlayoutweightsquestionactivity.MainActivity" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER
 
 
   Q: what's the story on various versions of stuff?
@@ -246,6 +274,11 @@ DEVELOPMENT/DEBUGGING:
        or clear the file so there's no authentication needed.
      For adb:
 
+  Q: how do I get a root shell on the emulator?
+  A: not sure how "adb shell" decides to be root or not, but if it's not, you can make it so by:
+       adb root
+     that restarts the daemon so subsequent `adb shell` invocations give a root shell.
+
   Q: how to test/exercise android's screen rotation behavior?
      Asked as:
        https://stackoverflow.com/questions/43319781/how-to-test-exercise-androids-screen-rotation-behavior
@@ -332,8 +365,17 @@ TROUBLESHOOTING:
      Oh wait... actually, problem went away after "clean project" and "rebuild project"... ?
 
   Q: Install on emulator (API 17) failed with INSTALL_FAILED_UID_CHANGED.
-  A: adb shell
-        rm -r /data/data/com.example.donhatch.linearlayoutweights  # or whatever the app name is
+  A: the following works sometimes:
+      adb shell
+        rm -r /data/data/com.example.donhatch.linearlayoutweightsquestionactivity  # or whatever the app name is
+     but sometimes it doesn't :-(
+     E.g. if I have:
+       minSdkVersion 15
+       targetSdkVersion 18
+       compile 'com.android.support:multidex:1.0.1'
+     Actually had to toss out my API 17 and 18 emulator images because of this :-(
+     Argh! And still doesn't work!  Even on a brand new emulator.  First "Installation failed since the device possibly has stale dexed jars that don't match the current version (dexopt error). In order to proceed, you have to uninstall the existing application.  WARNING: Uninstalling will remove the application data!  Do you want to uninstall the existing application? [Cancel] [OK}",
+     then the INSTALL_FAILED_UID_CHANGED thing.
 
   Q: `adb -P 5554 shell` fails with:
         error: protocol fault (status 41 6e 64 72?!)
@@ -345,21 +387,41 @@ TROUBLESHOOTING:
        adb -P 7000 shell
         * daemon not running; starting now at tcp:7000
 
+  Q: how to adb when more than one emulator or device?
+  A:
+     adb devices
+       List of devices attached
+       emulator-5556   device
+       emulator-5554   device
+       710KPLC0178312  device
+     adb -s emulator-5556 shell  # or whatever
+     adb -d shell  # to connect to one that's attached via usb, if there's exactly one
+     adb -e shell  # to connect to one emulator, if there's exactly one
+
+  Q: Intermittent "E AndroidRuntime: java.lang.RuntimeException: Unable to instantiate activity ComponentInfo{com.example.donhatch.linearlayoutweightsquestionactivity/com.example.donhatch.linearlayoutweightsquestionactivity.MainActivity}: java.lang.ClassNotFoundException: Didn't find class "com.example.donhatch.linearlayoutweightsquestionactivity.MainActivity" on path: DexPathList[[zip file "/data/app/com.example.donhatch.linearlayoutweightsquestionactivity-4vPbPMVlnm5zvxIGERf49Q==/base.apk"],nativeLibraryDirectories=[/data/app/com.example.donhatch.linearlayoutweightsquestionactivity-4vPbPMVlnm5zvxIGERf49Q==/lib/arm64, /system/lib64]]"
+     Workaround: tweak the source and recompile, usually it works next time
+  A: I think it happens intermittently when too many methods (I ran into it when trying to use a custom framework.jar);
+     and I think the following fixes it. In app/build.gradle, in android.defaultConfig:
+       multiDexEnabled true
+
+  Q: If too much logcat output at once, ADM (android device monitor) will show:
+       Device disconnected: 1
+     and not be able to see any more logcat messages.
+  A: In a shell:
+       adb reconnect
+     That will make ADM say "Device disconnected" again, but then
+     click on the device in the Devices pane again, and it will be reconnected.
+
 
 VIEW/LAYOUT BUGS:
   Q: Can I get control over LinearLayout's distribution of slack/shrinkage?
      https://stackoverflow.com/questions/47894003/why-isnt-linearlayout-distributing-shrinkage-in-proportion-to-weights
+  A: see that post for my answer.
 
-
-
-
-
-
-
-
-
-
-
+USER LAND:
+  Q: how to switch launchers once I've installed nova launcher?
+  A: home screen swipe down from top -> Settings -> Apps&notifications -> Advanced -> Default apps -> Home app
+        can set it to Pixel Launcher or Nova Launcher.
 
 
 ===========================================================================================================
