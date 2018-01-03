@@ -1,5 +1,3 @@
-(previous notes currently in ~/wrk/android/NOTES -- need to transfer them)
-
 Detailed table of android version vs api level here (note "MR1" means "maintenance release 1"):
   https://developer.android.com/guide/topics/manifest/uses-sdk-element.html#api-level-table
 Less detailed table, with user distribution stats:
