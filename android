@@ -412,6 +412,12 @@ TROUBLESHOOTING:
      That will make ADM say "Device disconnected" again, but then
      click on the device in the Devices pane again, and it will be reconnected.
 
+  Q: emulator won't start after upgrade to macOS High Sierra (10.13).
+     Spinning beachball for a bit, then there is an icon in the bottom dock
+     but no app window.
+  A: https://developer.android.com/studio/known-issues.html#body-content
+     But that was a red herring-- it's just that one of my emulator images
+     went bad.  Deleted it and recreated it in AVD manager.
 
 VIEW/LAYOUT BUGS:
   Q: Can I get control over LinearLayout's distribution of slack/shrinkage?
