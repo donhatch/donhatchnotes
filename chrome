@@ -370,4 +370,7 @@ A: Use extension Stylish:
    And use that CSS fragment in all web pages I care about.
 
         
-
+Q: is there a good workflow for pinning tabs? e.g. mail, calendar...
+PA: https://www.howtogeek.com/howto/7264/make-google-chrome-open-with-pinned-tabs/
+    hmm, have to manually open and pin, in each new window... I think? not sure.
+    Hmm and there's supposedly Basics -> On tartup -> Open the following pages -> Open current pages
