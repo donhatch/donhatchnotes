@@ -20,10 +20,9 @@ Very good material:
   https://www.stephanboyer.com/post/107/fun-with-promises-in-javascript -- good critique of the "helpful" behavior and how it should have been done (Surprise #1)
 
 
-
-
-I'm having a really hard time absorbing it.
-
+Things I definitely don't like, and would do differently in my own implementation:
+  - automagic assimilation of thenables
+  - then always waits til the next tick, even if already resolved
 
 ==================
 http://stackoverflow.com/questions/36178889/after-adding-a-listener-to-a-promise-should-i-use-the-original-promise-or-the-n
@@ -540,6 +539,7 @@ Tue Dec  6 21:31:39 PST 2016
     Issue: hyperbole in description of what compliance test suite does
     Issue: misleading description of what compliance test suite does
     Issue: false and misleading description of what compliance test suite does
+    Issue: does conformance/compliance refer to the spec or to the test suite?
 
     Both the Compliance Test Suite doc and the Conformant Implementations list
     make statements saying or implying that passing the test suite is equivalent to complying with the spec:
@@ -564,7 +564,8 @@ Tue Dec  6 21:31:39 PST 2016
       - the test suite will catch many common errors in implementations
       - if the test suite fails, the implementation is not conformant
       - if the test suite passes, the implementation *might* be conformant, but no test suite can ever tell you for sure.
-    (This glosses over the possibility of bugs in the suite and timeouts, which is fine.)
+    (This glosses over the possibility of bugs in the suite and timeouts, which is fine; and it assumes spec bugs like https://github.com/promises-aplus/promises-spec/issues/240
+    have been fixed.)
 
     One might be tempted to dismiss this issue as simply informal/loose/sloppy language
     that, anyone can see, should not be taken literally since that would be absurd.
@@ -696,7 +697,7 @@ Sat May 20 00:23:48 PDT 2017
     Perhaps it would be a prototype interited from the native `Promise.prototype`.
     These properties would be nice in some ways, but they are not requirements.
 
-Mon May 22 22:37:13 PDT 2017
+Fri Jan 26 17:10:20 PST 2018
 
 
 
