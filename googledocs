@@ -73,6 +73,49 @@ Q: How do I do the following:
            more one stuff
            even more one stuff
         2. two stuff! yeah!
+PA:
+   I don't know how to do it in order.  But here's a way,
+   inserting the sub-list last:
+   - type "1. " to start first list (or click "Numbered list" icon from top menu bar).
+   - type "one one one stuff<shift-enter>"; goes to next line without new number.
+   - type "more one stuff<enter>"; goes to next line without new number
+   - type "even more one stuff<enter>"; goes to next line with "2."
+   - type "two stuff! yeah!"
+   - mouse click at end of first line, hit <enter> there. "2." appears.
+   - hit <tab>; "2." turns into right-shifted "a." (good) and the next two lines shift right (bad).
+   - type "aaaaaa stuff<enter>bbbbb stuff"
+   - click just before beginning of next line
+   - type backspace (joins with previous line)
+   - type enter; "c." appears.
+   - type backspace; "c." disappears and the two lines move over to the left,
+     as desired.
+   - done!
+
+  Another way, insert the stuff after the sub-list last:
+   - type "1. " to start first list (or click "Numbered list" icon from top menu bar).
+   - type "one one one stuff<enter>"; "2." appears.
+   - type tab; "2." turns into further-indented "a."
+   - type "aaaaaa stuff<enter>"; "b." appears.
+   - type "bbbbb stuff<enter>"; "c." appears.
+   - type shift-tab, "c." shifts left and turns into "2."
+   - type "two stuff! yeah!"
+   - click at end of the "b." line
+   - type <enter>, "c." appears.
+   - type <backspace>, "c." disappears and cursor moves over to left, as desired.
+   - type "more one stuff"
+   - type <enter> or <shift enter>, doesn't seem to matter which  (this is weird)
+   - type "even more one stuff"
+   - done!
+
+  Ok let's try it in order (this doesn't work, but...)
+   - type "1. " to start first list (or click "Numbered list" icon from top menu bar).
+   - type "one one one stuff<enter>"; "2." appears.
+   - type tab; "2." turns into further-indented "a."
+   - type "aaaaaa stuff<enter>"; "b." appears.
+   - type "bbbbb stuff<enter>"; "c." appears.
+   - type backspace; the c. disappears and cursor goes back to where I want
+   - type "more one stuff<shift-enter>"; goes to next line without new number
+   - type "even more one stuff<enter>"; WOOPS! I want a "2." on next line, but there is none?
 
 Q: I've got the following:
         1. 111111
@@ -84,7 +127,16 @@ Q: I've got the following:
    How do I change the first a.b. list to bullets,
    but not the second one?
 
-
-
+PA: Use what I learned from the previous failed exercise:
+   - type "1. 111111<enter>"
+   - type tab
+   - type "aaaaa<enter>bbbbb<enter>
+   - type <backspace>
+   - type "DUMMY<enter>"
+   - type "<backspace>1. "
+   - Format -> Bullets & Numbering -> List Options -> Restart Numbering ... Restart numbering at: "2"
+   - delete the "DUMMY"
+   - click to get cursor after the 2, then type the remainder: "22222<enter><tab>aaaaa<enter>bbbbb" then the two sub-lists won't be associated with each other.
+     not ideal since the 2. isn't really associated with the 1. any more.
 
 

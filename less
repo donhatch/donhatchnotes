@@ -1,2 +1,14 @@
 Q: how to make less do color?
 A: less -R
+
+Q: how to make it simply exit if just one screen?
+A: less -F
+
+Q: how to make less and man not clear screen before and after?
+A: less -X
+
+Q: how to make less and man do all of the above, in bash?
+A:
+    alias less="less -X -F -R"
+    export PAGER="less -X -F -R"
+
