@@ -276,8 +276,16 @@ DEVELOPMENT/DEBUGGING:
 
   Q: how do I get a root shell on the emulator?
   A: not sure how "adb shell" decides to be root or not, but if it's not, you can make it so by:
-       adb root
+       adb -e root
      that restarts the daemon so subsequent `adb shell` invocations give a root shell.
+
+  Q: how to make /system read-write on emulator?
+  A:
+     You have to run the emulator in a special way, otherwise remounts read-only revert after 10 seconds or so
+     (and corrupts the system, I think).
+        ~/Library/Android/sdk/tools/emulator @Pixel_2_XL_API_27 -writable-system
+        adb -e root
+        adb -e remount
 
   Q: how to test/exercise android's screen rotation behavior?
      Asked as:
@@ -348,13 +356,38 @@ DEVELOPMENT/DEBUGGING:
         https://kwagjj.wordpress.com/2017/08/10/using-framework-jar-in-android-studio/
       (see notes in DIARY.txt... followed all the instructions but it's still not working)
       (except, using the final dex one because it doesn't work with the INTERMEDIATE one... not sure whether that's the problem?)
+  PA: maybe a good development recipe here: http://blog.udinic.com/2014/07/24/aosp-part-3-developing-efficiently/
+      the key will be something like "make snod"
+
+  Q: how to build android sources? (aosp)
+  PA:  (from notes in diary)
+    To sync:
+      repo sync
+    To diff:
+      repo diff
+    To set up environment vars and aliases for builds and runs:
+      . build/envsetup.sh
+      lunch aosp_x86_64-eng  # or whatever
+    Then:
+      To build:
+        time make -j9    # 141m or so, after significant sync
+        time make -j9    # 1m15s when clean
+      Incremental build just framework:
+        time mmm frameworks/base showcommands -j9   # 9m43s
+        time mmm frameworks/base showcommands -j9   # 8s
+        time mmm frameworks/base showcommands -j9   # 4m22s after change
+      To run emulator:
+        emulator
+          (Note, emulator says "Phone has stopped" shortly after starting,
+          but that goes away after 5 minutes or so.)
+
 
 TROUBLESHOOTING:
   Q: what do I do when app crashes on startup with "can't find MainActivity on classpath"
      or something?
      (may have something to do with the attempted preBuild rule to try to add custom framework.jar,
      may be a race condition)
-  A: make a nontrivial change to MainActivity.java and recompile.
+  PA: make a nontrivial change to MainActivity.java and recompile.
      (maybe can do something to fix race condition, too?)
 
   Q: build fails with "com.android.dex.DexIndexOverflowException: method ID not in [0,0xffff]: 65536"
