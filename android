@@ -358,9 +358,24 @@ DEVELOPMENT/DEBUGGING:
       the key will be something like "make snod"
 
   Q: how to build android sources? (aosp)
-  PA:  (from notes in diary)
-    To sync:
-      repo sync
+  A:  Follow https://source.android.com/setup/ -> downloading and building
+    To get the repo command:
+      curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+      chmod a+x ~/bin/repo
+    To initialize mirror:
+      mkdir repomirror  # on a case-insensitive filesystem
+      cd repomirror
+      repo init -u https://android.googlesource.com/mirror/manifest --mirror
+      repo sync  # ends up with 185G, currently (2018/02/05)
+    To make local repo from local mirror:
+      mkdir repo  # on a case-insensitive filesystem
+      cd repo
+      repo init -u ../repomirror/platform/manifest.git
+      time repo sync  # ends took 1h41m, 59G
+    To update mirror and local repo:
+      (cd repomirror && time repo sync)
+      cd repo
+      time repo sync
     To diff:
       repo diff
     To set up environment vars and aliases for builds and runs:
@@ -368,16 +383,23 @@ DEVELOPMENT/DEBUGGING:
       lunch aosp_x86_64-eng  # or whatever
     Then:
       To build:
-        time make -j9    # 141m or so, after significant sync
-        time make -j9    # 1m15s when clean
+        time make -j9    # 211m initially, 141m after significant sync
+        time make -j9    # initial 1m15s 148G, eventually 158G
       Incremental build just framework:
         time mmm frameworks/base showcommands -j9   # 9m43s
-        time mmm frameworks/base showcommands -j9   # 8s
+        time mmm frameworks/base showcommands -j9   # 8s when already built
         time mmm frameworks/base showcommands -j9   # 4m22s after change
+      To make system.img for emulator, based on what's built:
+        time make snod -j9 # 52s
+        XXX doesn't work!  doesn't pull in most recent changes to framework.
+        I think I need to figure out how to get this built:
+          out/target/product/generic_x86_64/system-qemu.img
+        not just:
+          out/target/product/generic_x86_64/system.img
       To run emulator:
         emulator
-          (Note, emulator says "Phone has stopped" shortly after starting,
-          but that goes away after 5 minutes or so.)
+          (Note, emulator brings up notification dialog "Phone has stopped"
+          shortly after starting, but click on the background and it goes away.)
 
 
 TROUBLESHOOTING:
