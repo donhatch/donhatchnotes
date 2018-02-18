@@ -355,7 +355,7 @@ DEVELOPMENT/DEBUGGING:
       (see notes in DIARY.txt... followed all the instructions but it's still not working)
       (except, using the final dex one because it doesn't work with the INTERMEDIATE one... not sure whether that's the problem?)
   PA: maybe a good development recipe here: http://blog.udinic.com/2014/07/24/aosp-part-3-developing-efficiently/
-      the key will be something like "make snod"
+      the key will be something like "make snod" (got it, see recipe elsewhere in this file)
   PA: Here is a very interesting post that unwraps framework from the device,
       tweaks something, then recompiles and rewraps it:
         https://blog.jhot.me/how-to-change-the-default-orientation-of-your-android-device-76724cd759b5
@@ -396,24 +396,10 @@ DEVELOPMENT/DEBUGGING:
         time mmm frameworks/base showcommands -j9   # 8s when already built
         time mmm frameworks/base showcommands -j9   # 4m22s after change
       To make system.img for emulator, based on what's built:
-        time make snod showcommands -j9 # 52s
+        time make snod -j9 # 52s
         # apparently also needs the following, to make system-qemu.img from system.img
-        # (found this from make showcommands)
+        # (found this from make showcommands to expand the final "Create system.qemu.img" step
         time SGDISK=out/host/darwin-x86/bin/sgdisk device/generic/goldfish/tools/mk_qemu_image.sh out/target/product/generic_x86_64/system.img  # 5.5s
-
-        XXX doesn't work!  doesn't pull in most recent changes to framework.
-        I think I need to figure out how to get this built:
-          out/target/product/generic_x86_64/system-qemu.img
-        not just:
-          out/target/product/generic_x86_64/system.img
-        AHA! I think I got it:
-        the last line shown, without showcommands, is:
-          [ 96% 27/28] Install system fs image: out/target/product/generic_x86_64/system.img
-          [100% 28/28] Create system-qemu.img
-        with showcommands, it's:
-          ...
-          WARNING: out/target/product/generic_x86_64/system.img+ approaching size limit (2684354560 now; limit 2684354560)
-          [100% 18/18] /bin/bash -c "(export SGDISK=out/host/darwin-x86/bin/sgdisk; device/generic/goldfish/tools/mk_qemu_image.sh out/target/product/generic_x86_64/system.img)"
 
       To run emulator:
         emulator
