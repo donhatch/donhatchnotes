@@ -356,6 +356,11 @@ DEVELOPMENT/DEBUGGING:
       (except, using the final dex one because it doesn't work with the INTERMEDIATE one... not sure whether that's the problem?)
   PA: maybe a good development recipe here: http://blog.udinic.com/2014/07/24/aosp-part-3-developing-efficiently/
       the key will be something like "make snod"
+  PA: Here is a very interesting post that unwraps framework from the device,
+      tweaks something, then recompiles and rewraps it:
+        https://blog.jhot.me/how-to-change-the-default-orientation-of-your-android-device-76724cd759b5
+      It seems to be old since it talks about BOOTCLASSPATH and dex rather than art,
+      but maybe still of use?  I'd like to have a similar recipe for the modern world.
 
   Q: how to build android sources? (aosp)
   A:  Follow https://source.android.com/setup/ -> downloading and building
@@ -371,35 +376,51 @@ DEVELOPMENT/DEBUGGING:
       mkdir repo  # on a case-insensitive filesystem
       cd repo
       repo init -u ../repomirror/platform/manifest.git
-      time repo sync  # ends took 1h41m, 59G
+      time repo sync  # took 1h41m, 59G
     To update mirror and local repo:
       (cd repomirror && time repo sync)
       cd repo
-      time repo sync
+      time repo sync  # 4m after a month or so, 43s when already up to date
     To diff:
       repo diff
+      repo diff frameworks/base/core/java/android/
     To set up environment vars and aliases for builds and runs:
       . build/envsetup.sh
       lunch aosp_x86_64-eng  # or whatever
     Then:
-      To build:
-        time make -j9    # 211m initially, 141m after significant sync
-        time make -j9    # initial 1m15s 148G, eventually 158G
+      To build (the showcommands is optional):
+        time make showcommands -j9    # 211m initially, 141m after significant sync, 133m after another sync a month or so later (oh woops! but it failed because of a typo. another 14m after that)
+        time make showcommands -j9    # initial 1m15s 148G, eventually (previously) 158G
       Incremental build just framework:
         time mmm frameworks/base showcommands -j9   # 9m43s
         time mmm frameworks/base showcommands -j9   # 8s when already built
         time mmm frameworks/base showcommands -j9   # 4m22s after change
       To make system.img for emulator, based on what's built:
-        time make snod -j9 # 52s
+        time make snod showcommands -j9 # 52s
+        # apparently also needs the following, to make system-qemu.img from system.img
+        # (found this from make showcommands)
+        time SGDISK=out/host/darwin-x86/bin/sgdisk device/generic/goldfish/tools/mk_qemu_image.sh out/target/product/generic_x86_64/system.img  # 5.5s
+
         XXX doesn't work!  doesn't pull in most recent changes to framework.
         I think I need to figure out how to get this built:
           out/target/product/generic_x86_64/system-qemu.img
         not just:
           out/target/product/generic_x86_64/system.img
+        AHA! I think I got it:
+        the last line shown, without showcommands, is:
+          [ 96% 27/28] Install system fs image: out/target/product/generic_x86_64/system.img
+          [100% 28/28] Create system-qemu.img
+        with showcommands, it's:
+          ...
+          WARNING: out/target/product/generic_x86_64/system.img+ approaching size limit (2684354560 now; limit 2684354560)
+          [100% 18/18] /bin/bash -c "(export SGDISK=out/host/darwin-x86/bin/sgdisk; device/generic/goldfish/tools/mk_qemu_image.sh out/target/product/generic_x86_64/system.img)"
+
       To run emulator:
         emulator
-          (Note, emulator brings up notification dialog "Phone has stopped"
+          (Note, emulated session brings up notification dialog "Phone has stopped"
           shortly after starting, but click on the background and it goes away.)
+
+        TODO: see whether the 30-second incremental update works with emulator, described on http://blog.udinic.com/2014/07/24/aosp-part-3-developing-efficiently/
 
 
 TROUBLESHOOTING:
