@@ -277,6 +277,15 @@ DEVELOPMENT/DEBUGGING:
        adb -e root
      that restarts the daemon so subsequent `adb shell` invocations give a root shell.
 
+  Q: How do I "tail -f" a file on the device, through adb?
+     The following behaves badly (every other keystroke is ignored):
+       adb shell tail -1000000 -f /storage/emulated/0/Download/ViewDebugLog | less
+  A: Add `-n` to make it ignore input (wtf?)
+       adb shell -n tail -1000000 -f /storage/emulated/0/Download/ViewDebugLog | less
+
+  Q: how to get bash instead of ash (toybox) through adb?
+  PA: doesn't seem to be a way that anyone knows. here's stuff about toybox here: http://landley.net/toybox/roadmap.html
+
   Q: how to make /system read-write on emulator?
   A:
      You have to run the emulator in a special way, otherwise remounts read-only revert after 10 seconds or so
@@ -393,13 +402,15 @@ DEVELOPMENT/DEBUGGING:
         time make showcommands -j9    # initial 1m15s 148G, eventually (previously) 158G
       Incremental build just framework:
         time mmm frameworks/base showcommands -j9   # 9m43s
-        time mmm frameworks/base showcommands -j9   # 8s when already built
-        time mmm frameworks/base showcommands -j9   # 4m22s after change
+        time mmm frameworks/base showcommands -j9   # when already build: 8s
+        time mmm frameworks/base showcommands -j9   # after change: 4m22s or 2m11s
       To make system.img for emulator, based on what's built:
         time make snod -j9 # 52s
         # apparently also needs the following, to make system-qemu.img from system.img
-        # (found this from make showcommands to expand the final "Create system.qemu.img" step
+        # (found this from make showcommands to expand the final "Create system-qemu.img" step
         time SGDISK=out/host/darwin-x86/bin/sgdisk device/generic/goldfish/tools/mk_qemu_image.sh out/target/product/generic_x86_64/system.img  # 5.5s
+      So the whole command to make system-qemu.img after making a change in source is, for me:
+        time (time mmm frameworks/base showcommands -j9 && time make snod -j9 && time SGDISK=out/host/darwin-x86/bin/sgdisk device/generic/goldfish/tools/mk_qemu_image.sh out/target/product/generic_x86_64/system.img); echo $'\007' # 2m56s
 
       To run emulator:
         emulator
@@ -471,6 +482,10 @@ TROUBLESHOOTING:
        adb reconnect
      That will make ADM say "Device disconnected" again, but then
      click on the device in the Devices pane again, and it will be reconnected.
+
+  Q: logging too much results in losing some of it at random.  Is there a more robust logging mechanism?
+  PA: check out:
+        http://leaks.wanari.com/2016/06/29/logging-tools-android-developers/  (comparison of 7 android loggers)
 
   Q: emulator won't start after upgrade to macOS High Sierra (10.13).
      Spinning beachball for a bit, then there is an icon in the bottom dock
