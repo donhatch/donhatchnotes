@@ -1,1 +1,511 @@
-(notes currently in ~/wrk/android/NOTES)
+Detailed table of android version vs api level here (note "MR1" means "maintenance release 1"):
+  https://developer.android.com/guide/topics/manifest/uses-sdk-element.html#api-level-table
+Less detailed table, with user distribution stats:
+  https://developer.android.com/about/dashboards/index.html
+Very cool chart of distribution history here, but it's not completely up to date:
+  https://en.wikipedia.org/wiki/Android_version_history
+
+APPLICATION THEORY:
+  Q: can multiple instances of a given Activity class exist within a process?
+  can multiple instances of a given Service class exist within a process?
+  PA: see https://developer.android.com/guide/components/activities/tasks-and-back-stack.html
+  that shows how there can be multiple activities existing, if they occur at multiple places in the back stack.
+  Not sure if that's relevant to my apps I've been writing so far?
+
+  Q: what's the relationship between tasks and processes?
+  PA: some links:
+  http://opensourceforgeeks.blogspot.com/2014/12/difference-between-running-task-and.html
+  https://stackoverflow.com/questions/8148420/difference-between-running-task-and-running-process-in-android/27571575
+  https://www.sitepoint.com/activities-tasks-and-intents-oh-my/
+
+  Q: What's the point of local broadcasts?  If "local" means "within same process",
+     couldn't I accomplish the same thing more easily with an actual method call?
+
+BUILD THEORY/PRACTICE:
+  Q: how do I compile/install/run from command line (not in AS)?
+  PA: 
+      Compile: per https://developer.android.com/studio/build/building-cmdline.html
+        ./gradlew tasks
+      Note that in the gradle console in AS, it says:
+        Executing tasks: [:app:assembleDebug]
+      So from the command line, that's:
+        ./gradlew :app:assembleDebug
+      The following seems to work too (not sure what the difference is)
+        ./gradlew assembleDebug
+      Looks like there's a task for install, too:
+        ./gradlew installDebug
+      (but that takes about 5 seconds, whereas the explicit commands below take about 4 seconds).
+      (however, I think that's because it does the assembleDebug too, which takes 1 second to realize there's nothing to do..
+      so maybe it's a win when all together.)
+      Q: if there's an emulator running, it will choose that instead of the attached actual device.
+         how to direct it at a particular device?
+
+      Install/run: look at the "4:Run" tab at the bottom of AS, to see this:
+
+         12/27 14:26:04: Launching app
+         $ adb push /Users/donhatch/AndroidStudioProjects/LinearLayoutWeightsQuestionActivity/app/build/outputs/apk/debug/app-debug.apk /data/local/tmp/com.example.donhatch.linearlayoutweightsquestionactivity
+         $ adb shell pm install -t -r "/data/local/tmp/com.example.donhatch.linearlayoutweightsquestionactivity"
+         Success
+         $ adb shell am start -n "com.example.donhatch.linearlayoutweightsquestionactivity/com.example.donhatch.linearlayoutweightsquestionactivity.MainActivity" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER
+
+       If already built:
+         12/27 14:24:12: Launching app
+         No apk changes detected since last installation, skipping installation of /Users/donhatch/AndroidStudioProjects/LinearLayoutWeightsQuestionActivity/app/build/outputs/apk/debug/app-debug.apk
+         $ adb shell am force-stop com.example.donhatch.linearlayoutweightsquestionactivity
+         $ adb shell am start -n "com.example.donhatch.linearlayoutweightsquestionactivity/com.example.donhatch.linearlayoutweightsquestionactivity.MainActivity" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER
+
+       Note, per https://developer.android.com/studio/build/building-cmdline.html#RunningOnDevice , can say this instead of the adb shell pm install:
+         adb install -r app/build/outputs/apk/debug/app-debug.apk
+       (the -r is needed to avoid error if it's already installed)
+       (may be a bit faster than the two shell am/pm commands, and definitely simpler...
+       and maybe it has to be the preferred way, since there's apparently no way to make `./gradlew installDebug`
+       point to a particular device)
+       (also ./gradlew installDebug has the disadvantage that it doesn't give a nice green OK when build is successful)
+
+       So current preferred method is:
+         ./gradlew assembleDebug && adb install -r app/build/outputs/apk/debug/app-debug.apk && adb shell am start -n "com.example.donhatch.linearlayoutweightsquestionactivity/com.example.donhatch.linearlayoutweightsquestionactivity.MainActivity" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER
+
+
+  Q: what's the story on various versions of stuff?
+  PA: At this moment:
+        Android version:
+        SDK/API version:
+          minSdkVersion: 15
+          targetSdkVersion: 26
+          compileSdkVersion: 26
+          buildToolsVersion (not exactly the same track but the major version is the same): 26.0.3 (now omitting per everyone's advice)
+        AS version: 2.3.1 (upgraded to 3.0.1)  (About Android Studio)
+        "Android plugin for gradle" version: 2.3.1 (upgraded to 3.0.1) (in top-level build.gradle: buildscript.dependencies.classpath 'com.android.tools.build:gradle:3.0.1')
+        gradle version: 4.1
+
+  Q: how to find out / set what api version is being used, in what senses?
+  PA:
+     Good overview of considerations and advice here: https://developer.android.com/training/basics/supporting-devices/platforms.html
+
+     There seem to be three different values.  (at one point there was also maxSdkVersion that defaulted
+     to targetSdkVersion, but that's not recommended and pretty much defunct, per https://developer.android.com/guide/topics/manifest/uses-sdk-element.html#max )
+
+     The api version related settings in File->Project_Structure->Modules->app->Properties
+     correspond to those in app/build.gradle,
+     and submenus correspond to variables within that file.
+     Updating in AS automatically updates the gradle files,
+     and updating the gradle files causes AS to notice as soon as you try doing anything nontrivial,
+     and it offers to sync.  Alternatively, sync using Tools->Android->Sync_Project_With_Gradle_Files.
+
+       app/build.gradle android.compileSdkVersion
+         File->Project_Structure->Modules->app->Properties->Compile_Sdk_Version->"API 25: Android 7.1.1 (Nougat)"
+         Library used to compile.
+         Advice is "it is strongly recommended that you always compile with the latest SDK.".
+         To change it, even if the desired one hasn't been downloaded yet,
+         change it in app/build.gradle and try to compile/run in AS; it will offer option to install
+
+       app/build.gradle android.defaultConfig.minSdkVersion
+         File->Project_Structure->Modules/app->Flavors->defaultConfig->Min Sdk Version->"15"
+         Minimum required to be on the machine in order to install and/or run the app.
+
+
+       app/build.gradle android.defaultConfig.targetSdkVersion
+         File->Project_Structure->Modules/app->Flavors->defaultConfig->Target Sdk Version->"15"
+         Vaguely: highest level I've tested it on and am guaranteeing it works on.
+         Q: Advice is "To allow your app to take advantage of these changes and ensure that your app fits the style of each user's device, you should set the targetSdkVersion value to match the latest Android version available."  I don't understand this.
+
+    Q: what constraints should I follow among these levels?
+    A: per https://medium.com/google-developers/picking-your-compilesdkversion-minsdkversion-targetsdkversion-a098a0341ebd
+       and https://stackoverflow.com/questions/24521017/android-gradle-buildtoolsversion-vs-compilesdkversion#answer-24523113 :
+         minSdkVersion <= targetSdkVersion <= compileSdkVersion <= buildToolsVersion
+       but ideally, more like this in steady state:
+         minSdkVersion (lowest possible) <= targetSdkVersion == compileSdkVersion (latest SDK) == buildToolsVersion (maybe with minor version number difference)
+       "You’ll hit the biggest audience with a low minSdkVersion and look and act the best by targeting and compiling with the latest SDK".
+       (and I think compileSdkVersion should be <= buildToolsVersion and ideally ==buildToolsVersion, too, see below... but I think maybe I'm in a state where latest available compileSdkVersion is 27 but latest available buildToolsVersion is '26.0.3'? oh no wait, '27.0.1' appeared)
+
+    Q: how does this relate to the <uses-sdk> stuff in the manifest?
+    PA: hmm, https://medium.com/google-developers/picking-your-compilesdkversion-minsdkversion-targetsdkversion-a098a0341ebd seems to imply that AndroidManifest.xml is autogenerated?
+        Also that if I manually put uses-sdk in manifest, it will be ignored when building with gradle.
+        Okay, I experimented, and what I found:
+          - both targetSdkVersion's are used, but the one in build.gradle seems to take precedence if present.
+        Seems to me that means I should put it in the manifest, doesn't it?  Otherwise it won't be seen by installation filters.
+    A: Ah, per:
+        https://stackoverflow.com/questions/19997509/android-studio-why-are-minsdkversion-and-targetsdkversion-specified-both-in-and
+       gradle puts info missing from app/src/main/AndroidManifest.xml into the final AndroidManifest.xml
+       (apparently, when developing, it appears in app/build/intermediates/manifest/*/*/AndroidManifest.xml)
+
+
+
+
+
+     Here's some explanation, but it's not exactly android studio? https://developer.xamarin.com/guides/android/application_fundamentals/understanding_android_api_levels/
+     Here's some more explanation: https://developer.android.com/guide/topics/manifest/uses-sdk-element.html
+       nominally it's talking about the manifest file... which may or may not be used, but the concepts are good
+       and it has min,target,max   (max is mostly defunct and no one mentions it any more)
+
+    Example of subtlety (from https://developer.android.com/training/basics/supporting-devices/platforms.html#version-codes):
+      Let's say I compileSdkVersion > minSdkVersion.
+      Then I might want to put a runtime condition that only
+      uses a certain function when the current sdk version is >= when the function
+      was introduced.
+      XXX I'm unclear on the failure modes when I get it wrong
+
+  Q: what is buildToolsVersion (e.g. '26.0.1') in app/build.gradle? (mirrors File->Project_Structure->Modules/app->Properties->Build_Tools_Version)
+  A: https://stackoverflow.com/questions/24521017/android-gradle-buildtoolsversion-vs-compilesdkversion#answer-24523113
+     "buildToolsVersion is the version of the compilers (aapt, dx, renderscript compiler, etc...) that you want to use. For each API level (starting with 18), there is a matching .0.0 version."
+     "You can use a higher version of the build-tools than your compileSdkVersion, in order to pick up new/better compiler while not changing what you build your app against."
+     per https://developer.android.com/studio/releases/build-tools.html:
+     "If you're using Android plugin for Gradle 3.0.0 or higher, your project automatically uses a default version of the build tools that the plugin specifies. To use a different version of the build tools, specify it using buildToolsVersion in your module's build.gradle, as follows: ..."
+     Ian lake's page recommends omitting it now, one less thing to worry about.
+
+  Q: ok then whats the "android plugin for gradle 3.0.0 or higher"? where is that specified?
+  PA: per https://developer.android.com/studio/releases/gradle-plugin.html:
+     "You can specify the Android plugin for Gradle version in either the File > Project Structure > Project menu in Android Studio, or the top-level build.gradle file."
+     The latter is apparently buildscript.dependencies.classpath = 'com.android.tools.build:gradle:2.3.1' for
+     one of my projects currently.
+     gag, and there's a correspondence between plugin version and required gradle version,
+     e.g. gradle plugin version 3.0.0+ requires gradle version 4.1+.
+     Actually, it seems to be correlated with the version of AS (e.g. I'm running AS 2.3.1 right now
+     and it says its using android plugin for gradle 2.3.1 ... and when I try changing that to 3.0.0 it barfs).
+     Per https://developer.android.com/studio/releases/gradle-plugin.html#3-0-0:
+     "The Android Studio build system is based on Gradle, and the Android plugin for Gradle adds several features that are specific to building Android apps. Although the Android plugin is typically updated in lock-step with Android Studio, the plugin (and the rest of the Gradle system) can run independent of Android Studio and be updated separately."
+     I don't quite get it... this is a *gradle plugin* called "android plugin for gradle"?
+     Note, it seems to be getting faster and faster, per that page, so its good to keep updated to latest.
+
+  Q: what is the meaning of the words "android plugin for gradle"?
+     Is it a plugin to the android system, that helps android know about gradle?
+     Or a plugin to the gradle system, that helps gradle know about android?
+  A: seems like it must be the latter.
+
+  Q: what files should I commit to git for an android studio project?
+  PA: - well, googlesamples/android-DrawableTinting does it, but I think its file list is excessive.
+      - https://medium.com/@jagonzalez.develop/how-manage-android-plugin-for-gradle-version-in-a-team-df66b904c6b2
+        has something about managing Android Plugin for Gradle version,
+        since "(almost) all AS upgrades need you to upgrade Android Plugin for Gradle version in main build.gradle file".
+
+  A:
+
+
+
+HOW TO DO COMMON THINGS IN ANDROID STUDIO:
+  Q: ok then how do I find out what gradle version I'm using?
+  A: per that same page:
+     "You can specify the Gradle version in either the File > Project Structure > Project menu in Android Studio, or by editing the distributionUrl reference in the gradle/wrapper/gradle-wrapper.properties file."
+     apparently I'm using:
+       android plugin version 2.3.1
+       gradle version 4.1
+
+  Q: how do I update AS to latest?
+  A: Android Studio -> Check for Updates...
+     it says 3.0.1 is available.  downloading it.
+
+  Q: how to keep working while updating to latest?
+    https://stackoverflow.com/questions/37351996/how-to-keep-android-studio-working-while-downloading-tools
+  A: press the Background button in the modal dialog!  yay!
+
+
+  Q: how do I change deployment target?
+  A: Do both of the following:
+       - hit the Stop button if it's running
+       - if "Use same device for future launches" is checked, uncheck it (at least temporarily):
+           Run -> Edit configurations... -> Android App -> app -> Deployment Target Options -> Target -> uncheck "Use same device for future launches"
+  Q: how do I remove a deployment target from dialog listing candidates for Run?
+  A: It shows connected devices (probably no way to prevent that) and available virtual devices.
+     If I want to remove an available virtual device, that would probably be done through AVD Manager: select the virtual device and Actions -> Wipe Data (I haven't tried it).
+
+  Q: how to disable instant run when I hit Run?
+  A:  Preferences -> Build, Execution, Deployment -> Instant Run -> uncheck Enable
+  Q: What's my problem with Instant Run?  Can I reproduce it?
+
+  Q: what's the relationship between Instant Run and "Apply Changes" (the button next to the Run button)?
+  PA: https://stackoverflow.com/questions/43488453/run-app-vs-apply-changes-android-studio-2-3#answer-43500455
+     Run used to use "Instant Run" if enabled... but now there's a separate button for it?
+     But then what does the enabled switch do?  I'm confused.
+     Oh, I guess it just enables/disables "apply changes".  Weird, doesn't seem very useful.
+
+  Q: what is kotlin?
+  A: see kotlin notes
+
+  Q: how to get the kotlin reflection api?
+  PA:
+     This suggested answer doesn't work as advertised
+         compile 'org.jetbrains.kotlin:kotlin-reflect'
+    (you can tell that the error message says it's looking for bogus names like kotlin-reflect-.jar).
+     But this works (for me currently since this is my version):
+         compile 'org.jetbrains.kotlin:kotlin-reflect:1.2.10'
+     and this does (NOTE the double quotes! doesn't work with single)
+	 compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+     But then it fails later with a "com.android.dex.DexIndexOverflowException: method ID not in [0,0xffff]: 65536".
+     See question about that elsewhere in this file.
+
+
+  Q: how the heck do I set the icon?
+  PA: various docs and stackoverflow answers say things like:
+        right-click on res -> New Image Asset, and replace android:icon="@drawable/ic_launcher" with android:icon="@drawable/myicon" in app/src/main/AndroidManifest.xml
+      I tried that, and it didn't work-- it didn't put anything in drawable.
+      But it put stuff in various mipmap-* directories,
+      so I said android:icon="@mipmap/ic_launcher" and it worked.
+      BTW, api level 26 introduced a much more complicated icon creation:
+      "adaptive and legacy", with foreground and background,
+      that makes it hard to make the background transparent.  So I chose
+      "legacy only" in asset studio, it makes it easier and creates fewer files.
+      Note, I had to regenerate the asset when level 26 came,
+      because the old one was missing xxxdpi files (I think).
+      (XXX argh, I think it's actually that level 26 *requires* the adaptive ones)
+      (XXX and it looks like when I ask for that, it creates drawable/typewriter_el_background.xml but nothing for foreground or without-_background-or-_foreground?? is that a bug?)
+  Q: how do I make the icon partially transparent?
+     for "legacy" icon (used by targetSdkLevel<=25), I could do it by setting
+     shape type to None.  Don't know how any more.
+     (TODO: read the extensive doc about adaptive icons; it should explain)
+
+
+  Q: what does it mean when the Run (play) button in Android Studio has a little
+     dot in its lower right?
+  A: per https://stackoverflow.com/questions/40998073/android-studio-what-does-the-green-dot-mean-in-the-run-button#answer-40998217,
+     it means it's running.
+     Oh!  I think I neglected to set the Name (I set foreground and background layer name, that wasn't adequate)
+
+DEVELOPMENT/DEBUGGING:
+  Q: where the heck is adb?
+  PA: on mac: ~/Library/Android/sdk/platform-tools/adb
+
+  Q: how do I adb or telnet to an emulator?
+     `telnet localhost 5554` or whatever says connection refused
+  A: For telnet:
+       Read the instructions it gives: find the auth token and say `auth <token>`.
+       Or, can change the value in that file (newline or not doesn't matter)
+       or clear the file so there's no authentication needed.
+     For adb:
+
+  Q: how do I get a root shell on the emulator?
+  A: not sure how "adb shell" decides to be root or not, but if it's not, you can make it so by:
+       adb -e root
+     that restarts the daemon so subsequent `adb shell` invocations give a root shell.
+
+  Q: How do I "tail -f" a file on the device, through adb?
+     The following behaves badly (every other keystroke is ignored):
+       adb shell tail -1000000 -f /storage/emulated/0/Download/ViewDebugLog | less
+  A: Add `-n` to make it ignore input (wtf?)
+       adb shell -n tail -1000000 -f /storage/emulated/0/Download/ViewDebugLog | less
+
+  Q: how to get bash instead of ash (toybox) through adb?
+  PA: doesn't seem to be a way that anyone knows. here's stuff about toybox here: http://landley.net/toybox/roadmap.html
+
+  Q: how to make /system read-write on emulator?
+  A:
+     You have to run the emulator in a special way, otherwise remounts read-only revert after 10 seconds or so
+     (and corrupts the system, I think).
+        ~/Library/Android/sdk/tools/emulator @Pixel_2_XL_API_27 -writable-system
+        adb -e root
+        adb -e remount
+
+  Q: how to test/exercise android's screen rotation behavior?
+     Asked as:
+       https://stackoverflow.com/questions/43319781/how-to-test-exercise-androids-screen-rotation-behavior
+  A: First of all, not obvious, but the emulator ui lets you choose arbitrary roll/pitch/yaw:
+        menu -> Virtual Sensors -> Accelerometer -> Rotate.
+      Even for just selecting one of the four primary orientations, it has nicer control here
+      via 4 buttons than the simple "rotate 90 degrees CCW" and "rotate 90 degrees CW".
+      As for arbitrary orientations, there's
+      , perhaps some clues here:
+        https://stackoverflow.com/questions/3921467/how-can-i-simulate-accelerometer-in-android-emulator#answer-20361772
+      Ah yes!
+        telnet localhost 5554  # or whatever port it chose
+          sensor list
+          sensor get acceleration
+            acceleration = 0:9.81:0  # if it's in initial portrait orientation
+            acceleration = -9.81:0:0  # if it's rotated 90 degrees CW from initial orientation
+            acceleration = 0:-9.81:0  # if it's upside down
+            acceleration = 9.81:0:0  # if it's rotatated 90 degrees CCW
+          sensor set acceleration -1:1:0  # to set it to rotated 45 degrees CW from initial orientation
+      Is there something analogous using adb?  (Probably not, since adb doesn't really know
+      it's an emulation, and this certainly wouldn't work in a non-emulation since values
+      would be clobbered by the real accelerometer)
+
+      I added an answer to my question on stackoverflow:
+        https://stackoverflow.com/questions/43319781/how-to-test-exercise-androids-screen-rotation-behavior/47842549#answer-47842549
+
+
+  Q: (follow-up question (aborted because it's working now??)) why doesn't android emulator screen rotate in response to accelerometer changes?
+
+      I'd like to script a sequence of physical device orientation changes in the android emulator,
+      to test the "auto-rotate screen" behavior.
+
+      I was hoping I could do it by making the emulated accelerator perceive gravity direction changes.
+      Here's what I tried (using emulator configured as "Pixel 2 XL API 27"):
+
+          telnet localhost 5554
+
+      - Make sure emulated device is in natural portrait orientation
+      - Make sure auto-rotate-screen is on (i.e. [Settings.System.ACCELEROMETER_ROTATION](https://developer.android.com/reference/android/provider/Settings.System.html#ACCELEROMETER_ROTATION) set to 1, i.e. screen orientation should follow accelerometer).
+      - Make sure home screen allows auto-rotate (long-press on home screen -> HOME SETTINGS -> Allow Home screen rotation when phone is rotated -> On)
+
+          telnet> sensor get acceleration
+              acceleration = 0:9.81:0
+
+      - Press emulator "Rotate counterclockwise" button; observe the screen changes to landscape mode, and the accelerometer reports the new "up" direction:
+
+          telnet> sensor get acceleration
+              acceleration = 9.81:0:0
+
+      - Press emulator "Rotate clockwise" button; observe the screen changes back to portrait mode, and "up" direction has reverted to its original value:
+
+          telnet> sensor get acceleration
+              acceleration = 0:9.81:0
+
+      - Now try to do the counterclockwise rotation by changing the "up" direction:
+
+          telnet> sensor set acceleration 9.81:0:0
+          telnet> sensor get acceleration
+              acceleration = 9.81:0:0
+
+      - Hey! The screen changes to landscape mode!  Wtf?  I swear it wasn't doing that correctly,
+        earlier today!
+
+
+  Q: how can I develop stuff in the framework?  E.g. View, ViewGroup, LinearLayout
+  PA: Try to follow this:
+        https://kwagjj.wordpress.com/2017/08/10/using-framework-jar-in-android-studio/
+      (see notes in DIARY.txt... followed all the instructions but it's still not working)
+      (except, using the final dex one because it doesn't work with the INTERMEDIATE one... not sure whether that's the problem?)
+  PA: maybe a good development recipe here: http://blog.udinic.com/2014/07/24/aosp-part-3-developing-efficiently/
+      the key will be something like "make snod" (got it, see recipe elsewhere in this file)
+  PA: Here is a very interesting post that unwraps framework from the device,
+      tweaks something, then recompiles and rewraps it:
+        https://blog.jhot.me/how-to-change-the-default-orientation-of-your-android-device-76724cd759b5
+      It seems to be old since it talks about BOOTCLASSPATH and dex rather than art,
+      but maybe still of use?  I'd like to have a similar recipe for the modern world.
+
+  Q: how to build android sources? (aosp)
+  A:  Follow https://source.android.com/setup/ -> downloading and building
+    To get the repo command:
+      curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+      chmod a+x ~/bin/repo
+    To initialize mirror:
+      mkdir repomirror  # on a case-insensitive filesystem
+      cd repomirror
+      repo init -u https://android.googlesource.com/mirror/manifest --mirror
+      repo sync  # ends up with 185G, currently (2018/02/05)
+    To make local repo from local mirror:
+      mkdir repo  # on a case-insensitive filesystem
+      cd repo
+      repo init -u ../repomirror/platform/manifest.git
+      time repo sync  # took 1h41m, 59G
+    To update mirror and local repo:
+      (cd repomirror && time repo sync)
+      cd repo
+      time repo sync  # 4m after a month or so, 43s when already up to date
+    To diff:
+      repo diff
+      repo diff frameworks/base/core/java/android/
+    To set up environment vars and aliases for builds and runs:
+      . build/envsetup.sh
+      lunch aosp_x86_64-eng  # or whatever
+    Then:
+      To build (the showcommands is optional):
+        time make showcommands -j9    # 211m initially, 141m after significant sync, 133m after another sync a month or so later (oh woops! but it failed because of a typo. another 14m after that)
+        time make showcommands -j9    # initial 1m15s 148G, eventually (previously) 158G
+      Incremental build just framework:
+        time mmm frameworks/base showcommands -j9   # 9m43s
+        time mmm frameworks/base showcommands -j9   # when already build: 8s
+        time mmm frameworks/base showcommands -j9   # after change: 4m22s or 2m11s
+      To make system.img for emulator, based on what's built:
+        time make snod -j9 # 52s
+        # apparently also needs the following, to make system-qemu.img from system.img
+        # (found this from make showcommands to expand the final "Create system-qemu.img" step
+        time SGDISK=out/host/darwin-x86/bin/sgdisk device/generic/goldfish/tools/mk_qemu_image.sh out/target/product/generic_x86_64/system.img  # 5.5s
+      So the whole command to make system-qemu.img after making a change in source is, for me:
+        time (time mmm frameworks/base showcommands -j9 && time make snod -j9 && time SGDISK=out/host/darwin-x86/bin/sgdisk device/generic/goldfish/tools/mk_qemu_image.sh out/target/product/generic_x86_64/system.img); echo $'\007' # 2m56s
+
+      To run emulator:
+        emulator
+          (Note, emulated session brings up notification dialog "Phone has stopped"
+          shortly after starting, but click on the background and it goes away.)
+
+        TODO: see whether the 30-second incremental update works with emulator, described on http://blog.udinic.com/2014/07/24/aosp-part-3-developing-efficiently/
+
+
+TROUBLESHOOTING:
+  Q: what do I do when app crashes on startup with "can't find MainActivity on classpath"
+     or something?
+     (may have something to do with the attempted preBuild rule to try to add custom framework.jar,
+     may be a race condition)
+  PA: make a nontrivial change to MainActivity.java and recompile.
+     (maybe can do something to fix race condition, too?)
+
+  Q: build fails with "com.android.dex.DexIndexOverflowException: method ID not in [0,0xffff]: 65536"
+     (after I added a dependency on kotlin-reflect).
+  PA: Per https://developer.android.com/studio/build/multidex.html:
+     Shouldn't be a problem if minSdkVersion>=21 (multidex enabled by default).
+     But mine is currently 15, so have to do something special.
+     Oh wait... actually, problem went away after "clean project" and "rebuild project"... ?
+
+  Q: Install on emulator (API 17) failed with INSTALL_FAILED_UID_CHANGED.
+  A: the following works sometimes:
+      adb shell
+        rm -r /data/data/com.example.donhatch.linearlayoutweightsquestionactivity  # or whatever the app name is
+     but sometimes it doesn't :-(
+     E.g. if I have:
+       minSdkVersion 15
+       targetSdkVersion 18
+       compile 'com.android.support:multidex:1.0.1'
+     Actually had to toss out my API 17 and 18 emulator images because of this :-(
+     Argh! And still doesn't work!  Even on a brand new emulator.  First "Installation failed since the device possibly has stale dexed jars that don't match the current version (dexopt error). In order to proceed, you have to uninstall the existing application.  WARNING: Uninstalling will remove the application data!  Do you want to uninstall the existing application? [Cancel] [OK}",
+     then the INSTALL_FAILED_UID_CHANGED thing.
+
+  Q: `adb -P 5554 shell` fails with:
+        error: protocol fault (status 41 6e 64 72?!)
+  A: 5554 isn't for adb, silly, it's for communicating with the emulator
+     (which wouldn't make sense for a real device).
+     Say something like this instead:
+       adb shell  # if only one device connected; disconnect the real one if necessary
+     Or:
+       adb -P 7000 shell
+        * daemon not running; starting now at tcp:7000
+
+  Q: how to adb when more than one emulator or device?
+  A:
+     adb devices
+       List of devices attached
+       emulator-5556   device
+       emulator-5554   device
+       710KPLC0178312  device
+     adb -s emulator-5556 shell  # or whatever
+     adb -d shell  # to connect to one that's attached via usb, if there's exactly one
+     adb -e shell  # to connect to one emulator, if there's exactly one
+
+  Q: Intermittent "E AndroidRuntime: java.lang.RuntimeException: Unable to instantiate activity ComponentInfo{com.example.donhatch.linearlayoutweightsquestionactivity/com.example.donhatch.linearlayoutweightsquestionactivity.MainActivity}: java.lang.ClassNotFoundException: Didn't find class "com.example.donhatch.linearlayoutweightsquestionactivity.MainActivity" on path: DexPathList[[zip file "/data/app/com.example.donhatch.linearlayoutweightsquestionactivity-4vPbPMVlnm5zvxIGERf49Q==/base.apk"],nativeLibraryDirectories=[/data/app/com.example.donhatch.linearlayoutweightsquestionactivity-4vPbPMVlnm5zvxIGERf49Q==/lib/arm64, /system/lib64]]"
+     Workaround: tweak the source and recompile, usually it works next time
+  A: I think it happens intermittently when too many methods (I ran into it when trying to use a custom framework.jar);
+     and I think the following fixes it. In app/build.gradle, in android.defaultConfig:
+       multiDexEnabled true
+
+  Q: If too much logcat output at once, ADM (android device monitor) will show:
+       Device disconnected: 1
+     and not be able to see any more logcat messages.
+  A: In a shell:
+       adb reconnect
+     That will make ADM say "Device disconnected" again, but then
+     click on the device in the Devices pane again, and it will be reconnected.
+
+  Q: logging too much results in losing some of it at random.  Is there a more robust logging mechanism?
+  PA: check out:
+        http://leaks.wanari.com/2016/06/29/logging-tools-android-developers/  (comparison of 7 android loggers)
+
+  Q: emulator won't start after upgrade to macOS High Sierra (10.13).
+     Spinning beachball for a bit, then there is an icon in the bottom dock
+     but no app window.
+  A: https://developer.android.com/studio/known-issues.html#body-content
+     But that was a red herring-- it's just that one of my emulator images
+     went bad.  Deleted it and recreated it in AVD manager.
+
+VIEW/LAYOUT BUGS:
+  Q: Can I get control over LinearLayout's distribution of slack/shrinkage?
+     https://stackoverflow.com/questions/47894003/why-isnt-linearlayout-distributing-shrinkage-in-proportion-to-weights
+  A: see that post for my answer.
+
+USER LAND:
+  Q: how to switch launchers once I've installed nova launcher?
+  A: home screen swipe down from top -> Settings -> Apps&notifications -> Advanced -> Default apps -> Home app
+        can set it to Pixel Launcher or Nova Launcher.
+
+
+===========================================================================================================
+
+
+

@@ -44,6 +44,15 @@ A:
         sage: (x + RI50('1e12') - RI50('1e12')).str(style='brackets')
             '[0.333333333333333333333333333333333333329415018830592 .. 0.333333333333333333333333333333333333341169962338816]'
 
+Q: what's a workflow for running/re-running a script that doesn't take forever each time?
+A: per http://doc.sagemath.org/html/en/faq/faq-usage.html#how-can-i-reload-a-python-script-in-a-sage-session
+     $ sage
+            load('runme.py')
+          or:
+            attach('runme.py')
+   The difference (from typing `attach?`) is:
+      "load()" is the same as "attach()", but doesn't
+           automatically reload a file when it changes.
 
 
 QUESTIONS:
@@ -54,6 +63,17 @@ Q: How to make sure I'm using the desired types and precisions,
    polynomial coefficients,
    vector and matrix entries?
    This seems to get away from me sometimes.
+PA: from http://doc.sagemath.org/html/en/tutorial/tour_linalg.html
+   sage: A = Matrix([[1,2,3],[3,2,1],[1,1,1]])
+   sage: kernel(A)
+     Free module of degree 3 and rank 1 over Integer Ring
+     Echelon basis matrix:
+     [ 1  1 -4]
+   sage: A = Matrix([[1.,2,3],[3,2,1],[1,1,1]])
+     Vector space of degree 3 and dimension 1 over Real Field with 53 bits of precision
+     Basis matrix:
+     [ 1.00000000000000  1.00000000000000 -4.00000000000000]
+
 
 
 POSSIBLE BUGS:
@@ -79,3 +99,4 @@ Bug:
 Bug:
     takes too damn long to start up!
     need a workflow to re-read a source file into a running session
+

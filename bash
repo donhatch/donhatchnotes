@@ -24,6 +24,9 @@ set -o pipefail # Fail if any command in pipeline fails
 ==============================================
 Questions about bash:
 
+Q: express newline embedded in a command arg?
+A: echo $'hello\nworld'
+
 Q: unshift?
 A: set -- foo "$@"
 
@@ -101,6 +104,9 @@ A: exec otherprogram "$@"
 Q: boolean expressions?
 A: http://stackoverflow.com/questions/48774/boolean-expressions-in-shell-scripts
 
+Q: arithmetic?
+A: echo $((1+2))
+
 Q: canonical function syntax for readability? (I know there are several)
 A: I have no idea.  The options are:
        function myFunction { commands; }
@@ -114,17 +120,19 @@ A:
    for x in a b c; do echo $x; done
    for x in `echo a b c`; do echo $x; done
    for x in `seq 1 10`; do echo $x; done
+   (and see the following too)
+
+Q: repeat 10 date?
+A:
+   for i in {1..10}; do echo "i = $i"; done
+   for i in {0..10..2}; do echo "i = $i"; done
+   for (( c=0; c<5; c++ )); do echo "c = $c"; done
 
 Q: if true?
 A: if true; then echo foo; fi
 
 Q: while true?
 A: while true; do echo $x; done
-
-Q: repeat 10 date?
-A: for i in {1..10}; do echo "i = $i"; done
-   for i in {0..10..2}; do echo "i = $i"; done
-   for (( c=0; c<5; c++ )); do echo "c = $c"; done
 
 Q: list completions?
 A: complete
@@ -171,6 +179,7 @@ Completion screwups (some local to google, some not):
         (this is another automatic one, see workaround above)
     - blaze run myprogram <tab>  doesn't complete to files
     - g4 changes -lt -u donhatch >| ~/tmp/changes.donhatc<tab>
+    - npm link ../most-gestures-fixe<tab>
 
 
 Posted: http://stackoverflow.com/questions/38843719/emergency-override-of-broken-command-completions-in-bash
@@ -218,4 +227,4 @@ Posted: http://stackoverflow.com/questions/38843719/emergency-override-of-broken
     (b) a way to bind a key/keys to temporarily disable programmable command completion for the current command that I have partially typed
     (c) some other clever non-intrusive way to get at filename completion at the moment I discover it's being hidden by a broken programmable command completion.
     ==============================================================
-    A: Alt-/. (complete-filename)
+    A: Alt-/ (complete-filename)

@@ -47,7 +47,10 @@ GOTCHAS:
 
     - Do not ever use "for line in sys.stdin():"; it will ruin your day!
       If pauses for a while, it won't see any lines even if many are buffered.
-      Good workaround here, although it doesn't state that this is what
+      Workaround:
+        # DO NOT EVER USE 'for line in sys.stdin', IT WILL RUIN YOUR DAY
+        for line in iter(sys.stdin.readline, ''):
+      The workaround is described here here, although it doesn't state that this is what
       it's good for:
         https://docs.python.org/2/library/functions.html#iter
       Several stackoverflow questions related to it, everyone seems

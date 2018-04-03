@@ -1,0 +1,186 @@
+https://steve-yegge.blogspot.com/2017/05/why-kotlin-is-better-than-whatever-dumb.html
+
+Q: I don't understand how to express the most common nullable-or-not-nullable situations.
+   I asked about it on stackoverflow, but the experts were dismissive and useless.
+   It got a -1 score and a bunch of useless condescending comments from people
+   who didn't seem to be paying attention, so I deleted it.
+   Still wondering.
+
+    Asked here, 2017/11/26:
+      https://stackoverflow.com/questions/47493854/does-kotlins-null-safety-help-prevent-these-common-npe-bugs?noredirect=1#comment81944182_47493854
+    I've pasted the dialogue here since I subsequently deleted the question.
+    ============================================
+    According to the documentation,
+
+    Kotlin's type system is aimed to eliminate NullPointerException's from our code.
+
+    Ok, here are the first examples of Java NPE bugs that come to my mind.
+
+    Example #1:
+    Class implementation forgets to initialize a member, and then uses the member.
+
+    class Example1 {
+      private static class Thing {
+        String _s = null;
+        String _sTwice = null;
+        String _sThrice = null;
+        public Thing(String s) {
+          _s = s;
+          _sTwice = s + s;
+          // BUG: forgot to initialize _sThrice
+        }
+        public void printLengths() {
+          System.out.println("_s.length() = " + _s.length());
+          System.out.println("_sTwice.length() = " + _sTwice.length());
+          System.out.println("_sThrice.length() = " + _sThrice.length());
+        }
+      }
+      public static void main(String args[]) {
+        Thing thing = new Thing("x");
+        thing.printLengths(); // crash: NPE trying to access thing._sThrice.length()
+      }
+    }
+    Example #2:
+    Caller calls a method but forgot to call a required initialization method first.
+
+    class Example2 {
+      private static class Thing {
+        String _s = null;
+        String _sTwice = null;
+        String _sThrice = null;
+        public void init(String s) {
+          _s = s;
+          _sTwice = s + s;
+          _sThrice = s + s + s;
+        }
+        // Contract: init(someNonNullString) must be called first
+        public void printLengths() {
+          System.out.println("_s.length() = " + _s.length());
+          System.out.println("_sTwice.length() = " + _sTwice.length());
+          System.out.println("_sThrice.length() = " + _sThrice.length());
+        }
+      }
+      public static void main(String args[]) {
+        Thing thing = new Thing();
+        // BUG: forgot to call thing.init(someNonNullString)
+        thing.printLengths(); // crash: NPE trying to access thing._s.length()
+      }
+    }
+    Can Kotlin's "null safety" features help prevent these bugs?
+
+    Notice that, in both examples above, the familiar pattern is:
+
+    the members are declared, at which time they are necessarily nullable (since they are null)
+    then at some point they get conceptually "upgraded" to non-nullable (when they get initialized);
+    after that, they are known to be safe to dereference, so dereferencing them safely should be able to be done using . rather than requiring syntactic baggage like ?., ?:, or !!.
+    I don't see how to express this very common pattern cleanly at compile time using any of the features described on that Kotlin documentation page; is there a way?
+
+    In any case, how would these examples be best written in Kotlin? The java-to-kotlin converter I tried was no help; it simply gave uncompilable Kotlin code that assigned null to a non-nullable.
+    ============================================
+
+    Comments:
+
+    Unless these are declared as String? _s, you can't assign null to them. – Andy Turner 5 hours ago
+                     
+    +4 In fact, pretty much everything you're asking is described here. – Andy Turner 5 hours ago
+                       
+    Hi @AndyTurner; yes, I know I can't assign null to a non-nullable String in Kotlin; that's completely clear from the documentation. Did you have the impression that I didn't read or understand the doc? – Don Hatch 3 hours ago   
+                       
+    Hi @AndyTurner; are you aware the link you gave is the same doc link I gave at the beginning, from which I got that initial quote? Yes, I've read all of that doc page and I believe I understand it. It describes a type system and syntax that they call "null safety" features with the intent of eliminating NPEs, but it's not clear to me how/whether those features are helpful or relevant to the simple example NPE bugs I showed here, which is why I'm here asking the question. – Don Hatch 3 hours ago   
+                     
+    Well, if you the compiler forces you to assign a non null value to a variable, how could you possibly forget to initialize it? You can't, otherwise the code doesn't compile. So yes, it seems you haven't understood it. When I don't fully understand documentation, I start practicing and experimenting, by writing code and using the documented features. It seems you haven't done that either. – JB Nizet 3 hours ago
+                       
+    @JBNizet neither AndyTurner nor you have said anything remotely helpful or relevant to my question yet, and your tone is dismissive and insulting. Given that, and the fact that Andy's dismissive and entirely wrong comment got 4 upvotes, leads me to believe you people aren't even paying attention, so I'll delete this question now, before it gets an answer and is cast in stone. – Don Hatch 3 hours ago   
+
+    =================================================================
+I'll try asking stevey directly.
+
+Subject: how do I use Kotlin without being an NPE-lover?
+
+Hi Steve,
+
+I read and enjoyed your rant/rave about Kotlin here:
+  https://steve-yegge.blogspot.com/2017/05/why-kotlin-is-better-than-whatever-dumb.html
+You didn't get into details, but you got me interested enough to start learning it, so I've been going through the on-line koans.
+
+The only thing that has really caught my attention so far is the page about null safety:
+  https://kotlinlang.org/docs/reference/null-safety.html
+I've read that page, and I believe I understand it,
+but I don't see how the described type system and syntax can eliminate NPEs as advertised.
+Maybe it can help in some cases, but for the most common java patterns that lead to NPE bugs in my experience, I don't see how it helps,
+nor even how to port these patterns to Kotlin at all.
+
+I actually tried asking about this on stackoverflow ("Does Kotlin's null safety help prevent these common NPE bugs?"), but my question was not well recieved and the comments were getting unpleasant, so I deleted the question.
+
+So I'm still wondering.  You seem quite a bit smarter and more conscious than the people I ran into there, so I thought I'd ask you.
+
+Here is some simple *Java* code that exemplifies the most common situation in which I'd get an unwanted NPE, in my experience.
+(I'm emphasizing that it's *Java* code because I think maybe all the folks on stackoverflow misunderstood and thought I was asking "why doesn't this Kotlin code compile", leading them to conclude *I* was the idiot)
+
+
+    // This is *Java* code.
+    class Example {
+      private static class Thing {
+        private String _s = null;
+        public void init(String s) {
+          _s = s;
+        }
+        // Precondition: init(someNonNullString) must be called first
+        public void printLength() {
+          System.out.println("_s.length() = " + _s.length());
+        }
+      }
+      public static void main(String args[]) {
+        Thing thing = new Thing();
+        // BUG: forgot to call thing.init(someNonNullString) here
+        thing.printLength(); // crash here: NPE trying to access thing._s.length()
+      }
+    }
+
+How would the above Java code best be expressed in Kotlin?
+I tried the on-line java-to-kotlin converter, which gave this:
+
+    class Thing {
+      private var _s:String = null
+      fun init(s:String) {
+        _s = s
+      }
+      // Precondition: init(someNonNullString) must be called first
+      fun printLength() {
+        println("_s.length() = " + _s.length)
+      }
+    }
+    fun main(args:Array<String>) {
+      val thing = Thing()
+      // BUG: forgot to call thing.init(someNonNullString) here
+      thing.printLength() // crash here: NPE trying to access thing._s.length()
+    }
+
+But that results in a compile-time error: `Error:(2, 27) Null can not be a value of a non-null type String`
+
+I could tweak it into the following, which would make it compile:
+
+    class Thing {
+      private var _s:String? = null
+      fun init(s:String) {
+        _s = s
+      }
+      // Precondition: init(someNonNullString) must be called first
+      fun printLength() {
+        println("_s.length() = " + _s!!.length)
+      }
+    }
+    fun main(args:Array<String>) {
+      val thing = Thing()
+      // BUG: forgot to call thing.init(someNonNullString) here
+      thing.printLength() // crash here: NPE trying to access thing._s.length()
+    }
+
+But (1) it didn't help prevent my NPE bug, and (2) the doc page calls me an "NPE-lover", like that's a bad thing, for using the `!!` operator.
+It seems I can't win.
+
+How would *you* write the above code in Kotlin?
+
+Don
+-------------------------------------------------------------------------------------------------------------------------
+

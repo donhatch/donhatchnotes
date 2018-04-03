@@ -15,6 +15,37 @@ Clearest description of automatic semicolon insertion, maybe:
   http://inimino.org/~inimino/blog/javascript_semicolons
   http://blog.izs.me/post/2353458699/an-open-letter-to-javascript-leaders-regarding
 
+  More links to decent arguments:
+    http://benalman.com/news/2013/01/advice-javascript-semicolon-haters/
+    https://github.com/getify/You-Dont-Know-JS/blob/master/types%20%26%20grammar/ch5.md#user-content-automatic-semicolons
+    https://hackernoon.com/an-open-letter-to-javascript-leaders-regarding-no-semicolons-82cec422d67d (starts with an example)
+    https://www.youtube.com/watch?v=gsfbh17Ax9I (entertaining)
+    https://brendaneich.com/2012/04/the-infernal-semicolon/
+
+  Note "standardjs" says omit them but "Never start a line with (, [, or `. This is the only gotcha with omitting semicolons, and standard protects you from this potential issue."
+    https://standardjs.com/rules.html#semicolons
+  (But... wasn't there something about return statements too?)
+
+  The prototypical examples:
+    #1:  (chooses to *not* insert a semicolon-- why?)
+      console.log('it works')
+      [1,2,3].forEach(function(n) { console.log(n) })
+    #2:  (chooses to *not* insert a semicolon-- why?)
+      console.log('it works')
+      (function() { console.log('grr')}())
+    #3:  (chooses to insert a semicolon-- why?)
+      return
+          {bear : 1}
+    #4: (chooses to *not* insert a semicolon-- why? this is an example from the lucumr article)
+      a = b + c
+      (d + e).print()
+
+  I DON'T UNDERSTAND.  When both are legal, does it insert or not?  Seems inconsistent.
+  I thought the standard says ASI only takes effect when the code would be illegal without it?
+  Indeed, according to the brendan eich article, "Remember, if there wasn’t an error, ASI does not apply."
+  So then why is it inserted after the return??
+
+
 Good debugging tips: (TODO: read it thoroughly)
   http://alistapart.com/article/advanced-debugging-with-javascript
 
@@ -24,12 +55,26 @@ Javascript frameworks:
   because it has a really excellent-looking ui toolkit called Dijit, with a nice demo page:
     http://archive.dojotoolkit.org/nightly/dojotoolkit/dijit/themes/themeTester.html
   Haven't explored it much though.
+  See dojo notes in separate file.
+  (Update: Coming to the conclusion that it's crap-- there is not enough
+  understanding of how the tree model relates to the tree view to *ever*
+  be able to adequately write or maintain a program that use them)
 
 
 QUESTIONS:
 ==========
 
+Q: given that both object and JSON define objects as non-ordered,
+   and there is this bug https://bugs.chromium.org/p/v8/issues/detail?id=164
+   that will probably never be fixed,
+   is there an alternative to object that keeps things ordered,
+   with an alternative to JSON.parse/JSON.stringify
+   for serializing/deserializing?
+   The grammar for the serialization would be identical to that of JSON
+   but with different semantics (namely, objects are ordered).
+
 Q: still don't have a good mnemonic for what I have to remember :-(
+   (XXX what was I talking about?)
 
 Q: how to test whether something is a string?
 A: typeof x == "string"
@@ -120,7 +165,7 @@ Q: My main overall question is:
               which no longer exists, or lead to broken links
          Q: is it still "then"-diseased, or not?? there's something called "then" but I'm not sure it's
             the diseased Promises/A+ "then".
-         A: No!  read https://github.com/getify/asynquence#promisesa-compliance: 
+         A: No!  read https://github.com/getify/asynquence#promisesa-compliance:
             "Trying to do so will likely cause unexpected behavior, because Promises/A+ insists on problematic (read: "dangerous") duck-typing for objects that have a then() method, as asynquence instances do."
             So ey's on board!  And there are utilities for interoperating.
             This is looking really good so far!
@@ -137,11 +182,11 @@ Q: My main overall question is:
          due to something I call unexpectedly awaiting.  See example in second article.
          Hmm, but... don't async functions have to declare that they are async?  So it's not true that "you never know when someone might call yield";
          only functions declared "async" can, right?  Not sure whether that helps.
-          
+
 
 
     - cujojs?  what is it and do I want it? he calls it something other
-      than "framework", says it's framework-agnostic and in fact facilitates 
+      than "framework", says it's framework-agnostic and in fact facilitates
       being framework-agnostic
     - https://sanctuary.js.org/ : "refuge from unsafe javascript" ?
 
@@ -163,3 +208,45 @@ PA: removeEventListener, but it says it has to be a "named external" function.
       https://www.broken-links.com/2013/05/22/removing-event-listeners-with-anonymous-functions/
       http://stackoverflow.com/questions/4616525/javascript-removing-an-anonymous-event-listener#answer-4616564
       http://stackoverflow.com/questions/4616525/javascript-removing-an-anonymous-event-listener#comment-5076539
+
+Q: reading https://github.com/getify/You-Dont-Know-JS/blob/master/this%20%26%20object%20prototypes/ch2.md#user-content-everything-in-order ,
+   it says:
+
+     Why is new being able to override hard binding useful?
+
+     The primary reason for this behavior is to create a function (that can be used with new for constructing objects) that essentially ignores the this hard binding but which presets some or all of the function's arguments.
+
+   And the example it gives is:
+
+      // using `null` here because we don't care about
+      // the `this` hard-binding in this scenario, and
+      // it will be overridden by the `new` call anyway!
+      var bar = foo.bind( null, "p1" );
+
+      var baz = new bar( "p2" );
+
+   Wouldn't that work perfectly well if hard binding took precendence
+   over new?
+PA: I guess that would require a special case for null, maybe that's
+    a reason to not do it.
+    However, null is already treated as a special case by explicit binding:
+    it means fall through directly to the default binding.
+    Skipping implicit binding? Yeah, I think so. Weird.
+      function foo() {
+        console.log(this.a);
+      }
+      var a = 'the global a';
+      foo.call(null); // 'the global a'
+
+      var baz = foo.bind(null);
+      var obj = {a:'the a from obj', baz:baz};
+      obj.baz(); // 'the global a' because the implicit binding is ignored
+      foo.bind(obj)(); // 'the a from obj'
+
+      // note that 2nd bind is ignored:
+      foo.bind(null)(); // 'the global a'
+      foo.bind(obj)(); // 'the a from obj'
+      foo.bind(null).bind(obj)(); // 'the global a'
+      foo.bind(obj).bind(null)(); // 'the a from obj'
+
+

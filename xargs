@@ -1,0 +1,74 @@
+(asked on stackoverflow)
+Q: How to make xargs append trailing arguments?
+
+  xargs is good at inserting initial arguments:
+      seq 0 10 | xargs -n 3 echo foo
+  produces this output:
+      foo 0 1 2
+      foo 3 4 5
+      foo 6 7 8
+      foo 9 10
+
+  What about when I also want trailing arguments?
+  That is, what command:
+      seq 0 10 | xargs -n 3 <WHAT GOES HERE?>
+  will produce the following desired output:
+      foo 0 1 2 bar
+      foo 3 4 5 bar
+      foo 6 7 8 bar
+      foo 9 10 bar
+
+  I tried the following:
+      seq 0 10 | xargs -n 3 -I {} echo foo {} bar
+  but that apparently forces 1 item per command line, which isn't what I want:
+      foo 0 bar
+      foo 1 bar
+      foo 2 bar
+      foo 3 bar
+      foo 4 bar
+      foo 5 bar
+      foo 6 bar
+      foo 7 bar
+      foo 8 bar
+      foo 9 bar
+      foo 10 bar
+
+
+PA: netniV gives an answer using a script:
+      Create a script file called runme.sh
+
+      #!/bin/sh
+      echo "foo $@ bar"
+      Make sure to chmod +X and then use
+
+      seq 0 10 | xargs -n 3 ./runme.sh
+
+    Ok, can I just make something like that using sh or perl?
+A:
+
+After figuring this out with a head-start from @netniV's answer,
+I now see that the [man page](https://linux.die.net/man/1/xargs) actually contains an example
+showing how to do it:
+
+    xargs sh -c 'emacs "$@" < /dev/tty' emacs
+
+    Launches  the  minimum  number of copies of Emacs needed, one after the
+    other, to edit the files listed on xargs' standard input.  This example
+    achieves the same effect as BSD's -o option, but in a more flexible and
+    portable way.
+And the [wikipedia page](https://en.wikipedia.org/wiki/Xargs#Shell_trick) does too:
+
+    Another way to achieve a similar effect is to use a shell as the launched command, and deal with the complexity in that shell, for example:
+
+    $ mkdir ~/backups
+    $ find /path -type f -name '*~' -print0 | xargs -0 bash -c 'for filename; do cp -a "$filename" ~/backups; done' bash
+    The word bash at the end of the line is interpreted by bash -c as special parameter $0. If the word bash weren't present, the name of the first matched file would be assigned to $0 and the file wouldn't be copied to ~/backups. Any word can be used instead of bash, but since $0 usually expands to the name of the shell or shell script being executed, bash is a good choice.
+So, here's how to do it:
+
+    seq 0 10 | xargs -n 3 sh -c 'echo foo "$@" bar' some_dummy_string
+The output is as desired:
+
+    foo 0 1 2 bar
+    foo 3 4 5 bar
+    foo 6 7 8 bar
+    foo 9 10 bar
