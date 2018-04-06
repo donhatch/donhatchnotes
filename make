@@ -1,7 +1,5 @@
 http://www.gnu.org/software/make/manual/
 
-
-
 From ewimmer, to debug Makefiles:
 
     FOO:=$(warning pkg config path is $(PKG_CONFIG_PATH))
