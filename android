@@ -5,7 +5,24 @@ Less detailed table, with user distribution stats:
 Very cool chart of distribution history here, but it's not completely up to date:
   https://en.wikipedia.org/wiki/Android_version_history
 
-APPLICATION THEORY:
+APP THEORY:
+  LIFE CYCLE:
+    The standard lifecycle diagram sucks!  It has no clear notion
+    of what the states and transitions are.
+    This basic diagram is much better:
+      https://mobisynth.wordpress.com/2009/07/24/android-activity-lifecycle/
+    And slightly better (more detail on what causes what)
+      http://www.wilsonmar.com/android_lifecycle.htm
+    Ah, this article:
+      https://medium.com/google-developers/the-android-lifecycle-cheat-sheet-part-i-single-activities-e49fd3d202ab
+    is excellent, once I realized:
+      - The enclosing boxes in the diagrams are states
+      - The colored boxes inside them are the callbacks that get called
+        upon *entering* the state.
+    And it goes into detail about fragments and stuff.
+    Strange that there's no single state diagram though; it's implied.
+    
+
   Q: can multiple instances of a given Activity class exist within a process?
   can multiple instances of a given Service class exist within a process?
   PA: see https://developer.android.com/guide/components/activities/tasks-and-back-stack.html
