@@ -81,16 +81,16 @@ Q: I don't understand how to express the most common nullable-or-not-nullable si
     Comments:
 
     Unless these are declared as String? _s, you can't assign null to them. – Andy Turner 5 hours ago
-                     
+
     +4 In fact, pretty much everything you're asking is described here. – Andy Turner 5 hours ago
-                       
-    Hi @AndyTurner; yes, I know I can't assign null to a non-nullable String in Kotlin; that's completely clear from the documentation. Did you have the impression that I didn't read or understand the doc? – Don Hatch 3 hours ago   
-                       
-    Hi @AndyTurner; are you aware the link you gave is the same doc link I gave at the beginning, from which I got that initial quote? Yes, I've read all of that doc page and I believe I understand it. It describes a type system and syntax that they call "null safety" features with the intent of eliminating NPEs, but it's not clear to me how/whether those features are helpful or relevant to the simple example NPE bugs I showed here, which is why I'm here asking the question. – Don Hatch 3 hours ago   
-                     
+
+    Hi @AndyTurner; yes, I know I can't assign null to a non-nullable String in Kotlin; that's completely clear from the documentation. Did you have the impression that I didn't read or understand the doc? – Don Hatch 3 hours ago
+
+    Hi @AndyTurner; are you aware the link you gave is the same doc link I gave at the beginning, from which I got that initial quote? Yes, I've read all of that doc page and I believe I understand it. It describes a type system and syntax that they call "null safety" features with the intent of eliminating NPEs, but it's not clear to me how/whether those features are helpful or relevant to the simple example NPE bugs I showed here, which is why I'm here asking the question. – Don Hatch 3 hours ago
+
     Well, if you the compiler forces you to assign a non null value to a variable, how could you possibly forget to initialize it? You can't, otherwise the code doesn't compile. So yes, it seems you haven't understood it. When I don't fully understand documentation, I start practicing and experimenting, by writing code and using the documented features. It seems you haven't done that either. – JB Nizet 3 hours ago
-                       
-    @JBNizet neither AndyTurner nor you have said anything remotely helpful or relevant to my question yet, and your tone is dismissive and insulting. Given that, and the fact that Andy's dismissive and entirely wrong comment got 4 upvotes, leads me to believe you people aren't even paying attention, so I'll delete this question now, before it gets an answer and is cast in stone. – Don Hatch 3 hours ago   
+
+    @JBNizet neither AndyTurner nor you have said anything remotely helpful or relevant to my question yet, and your tone is dismissive and insulting. Given that, and the fact that Andy's dismissive and entirely wrong comment got 4 upvotes, leads me to believe you people aren't even paying attention, so I'll delete this question now, before it gets an answer and is cast in stone. – Don Hatch 3 hours ago
 
     =================================================================
 I'll try asking stevey directly.
@@ -183,4 +183,11 @@ How would *you* write the above code in Kotlin?
 
 Don
 -------------------------------------------------------------------------------------------------------------------------
+
+
+CURRENT PRACTICES:
+  - It's actually pretty disorienting to have accessors magically available all the time,
+    so I tend to use get/set functions explicitly to call out their use.
+    E.g. I'll say activity.getWindow().getDecorView() instead of activity.window.decorView.
+
 
