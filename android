@@ -521,6 +521,14 @@ USER LAND:
   A: home screen swipe down from top -> Settings -> Apps&notifications -> Advanced -> Default apps -> Home app
         can set it to Pixel Launcher or Nova Launcher.
 
+  Q: 300-350ms delay when tapping ui buttons?
+  A: oh! it was because I had triple-click-to-zoom on.
+     Settings -> Accessibility -> Magnification ->
+       - turn *off* "Magnify with triple-tap"
+       - turn *on* "Magnify with button".
+     That adds a button to the launch bar, which is fine!
+     
+
 
 ===========================================================================================================
 
