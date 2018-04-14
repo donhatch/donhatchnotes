@@ -22,12 +22,22 @@ Highlights of partial workarounds:
          can do many operations (unfortunately not too helpful when I want
          to copy text, since that requires keys too)
     control-option-click seems to work well for Terminal and chrome, but not
-    for iTerm2 (iTerm2 brings up the right-click menu? wonder if there's
+    for iTerm2 (iTerm2 raises the window *and* brings up the right-click menu? just like ctrl-click does. wonder if there's
     a way to disable that?  or file bug against iTerm2? or submit a patch for it?)
+    - to *partially* disable it: preferences -> Pointer -> check "^-click reported to apps, does not open menu".  The "does not open menu" part is desired, the "reported to apps" part is not!  (since that raises the window, dammit!)
+      What Terminal does works well, what is that?  It seems that the first ctrl-alt-click gives it focus, the *second* one raises and brings up menu.  Yeah I want that?
+      I think what Terminal does, which is what I want, is something like: "^-alt-click when not focused focuses without raising?"
+      Bigger picture, it seems iterm2 does not have any way to "focus without raising" (with respect to other apps-- within iterm2, xmouse does
+      achieve that among iterm2 windows).
+      Even better would be hotkeys (so I don't have to touch the mouse) for:
+          - focus window under mouse cursor without bringing to front
+          - raise window under mouse cursor (focusing it is fine, probably)
+          - lower window under mouse cursor
     - and, workaround for *that* -- ctrl-n to create a new iterm window, make it tiny and stick it in a corner of the screen;
       then when I want focus to be on an iterm2 window without raising it, click on that tiny window instead.
       It pops to front, but who cares because it's small and not obscuring anything.
       Rough edge: if I create a new window in the focused-but-not-raised app, then close the new window, the focused-but-not-raised app will come to front :-( also lots of other things make come to front too, e.g. hitting ctrl-w in chrome :-( maybe file bug on that?
+
   - "scroll-follows-mouse" is on by default (or maybe always)
 
   - in the ycombinator thread, someone suggested using some applescript
