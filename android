@@ -90,10 +90,10 @@ BUILD THEORY/PRACTICE:
           minSdkVersion: 15
           targetSdkVersion: 26
           compileSdkVersion: 26
-          buildToolsVersion (not exactly the same track but the major version is the same): 26.0.3 (now omitting per everyone's advice)
-        AS version: 2.3.1 (upgraded to 3.0.1)  (About Android Studio)
-        "Android plugin for gradle" version: 2.3.1 (upgraded to 3.0.1) (in top-level build.gradle: buildscript.dependencies.classpath 'com.android.tools.build:gradle:3.0.1')
-        gradle version: 4.1
+          buildToolsVersion (not exactly the same track but the major version is the same): 26.0.3 (now omitting per everyone's advice) (which means it takes latest?) (upgrading to 27.0.3)
+        AS version: 2.3.1 (upgraded to 3.0.1)(upgraded to 3.1.1)  (About Android Studio)
+        "Android plugin for gradle" version: 2.3.1 (upgraded to 3.0.1)(upgraded to 3.1.1) (in top-level build.gradle: buildscript.dependencies.classpath 'com.android.tools.build:gradle:3.1.1')
+        gradle version: 4.1 (now 4.4)
 
   Q: how to find out / set what api version is being used, in what senses?
   PA:
