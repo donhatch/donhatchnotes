@@ -23,7 +23,11 @@ Highlights of partial workarounds:
          to copy text, since that requires keys too)
     control-option-click seems to work well for Terminal and chrome, but not
     for iTerm2 (iTerm2 brings up the right-click menu? wonder if there's
-    a way to disable that?  or file bug against iTerm2)
+    a way to disable that?  or file bug against iTerm2? or submit a patch for it?)
+    - and, workaround for *that* -- ctrl-n to create a new iterm window, make it tiny and stick it in a corner of the screen;
+      then when I want focus to be on an iterm2 window without raising it, click on that tiny window instead.
+      It pops to front, but who cares because it's small and not obscuring anything.
+      Rough edge: if I create a new window in the focused-but-not-raised app, then close the new window, the focused-but-not-raised app will come to front :-( also lots of other things make come to front too, e.g. hitting ctrl-w in chrome :-( maybe file bug on that?
   - "scroll-follows-mouse" is on by default (or maybe always)
 
   - in the ycombinator thread, someone suggested using some applescript
