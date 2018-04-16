@@ -518,8 +518,14 @@ VIEW/LAYOUT BUGS:
 
 USER LAND:
   Q: how to switch launchers once I've installed nova launcher?
-  A: home screen swipe down from top -> Settings -> Apps&notifications -> Advanced -> Default apps -> Home app
-        can set it to Pixel Launcher or Nova Launcher.
+  A: either:
+        home screen swipe down from top -> Settings -> Apps&notifications -> Advanced -> Default apps -> Home app
+        can set it to Pixel Launcher (the default) or Nova Launcher.
+     or:
+        Nova Settings (either apps drawer -> Nova Settings, or long-click-on-background -> Settings)
+        -> scroll down to NOVA section -> Select Default Home
+  Q: in nova launcher, how to make it *not* bring up the App search (the "Search apps... frequent / recent / new/updated" thing) when I hit Home from Home screen?
+  A: Nova Settings (see above) -> Gestures & Inputs -> Home button -> Change from "App search" to None
 
   Q: 300-350ms delay when tapping ui buttons?
   A: oh! it was because I had triple-click-to-zoom on.
