@@ -21,6 +21,14 @@ APP THEORY:
         upon *entering* the state.
     And it goes into detail about fragments and stuff.
     Strange that there's no single state diagram though; it's implied.
+
+    Non-obvious bits, when a top-level activity is running:
+      - user hits back button (to home screen): onPause->onStop->onDestroy; process still runs and retains any static variable values
+        (unless system decides to kill it).  Relaunch does onCreate->onStart->onResume.
+      - user hits home button: onPause->onStop (no onDestroy! nor onCreate when user brings it back later)
+        The activity object still exists and retains state.
+        (unless system decides to kill it).  Relaunch does onRestart->onStart->onResume.
+      - activity calls finish(): onPause->onStop->onDestroy (like back button, unlike home button)
     
 
   Q: can multiple instances of a given Activity class exist within a process?
@@ -545,6 +553,17 @@ USER LAND:
        - turn *off* "Magnify with triple-tap" !
        - turn *on* "Magnify with button".
      That adds a button to the launch bar, which is fine!
+
+  Q: If I'm in an app, can I stack another app on top of its back stack, so that when I finally hit the back button I get back to the original?
+     (Installing using adb does that, also anything I get to through the top dropdown area does it.)
+     If I want to temporarily switch to another app that's *not* available that way,
+     currently the quickest way I know how to do it is to hit home,
+     bring up second app, then when done, go back to home and then Recents (not called that any more-- now called Overview? lame)
+     to get to original running app.
+
+  Q: can I get seconds in the clock display at the top of the screen? (not sure what the area is called)
+  PA: top dropdown -> long press on settings gear to enable System UI Tuner in Settings.
+      Then: Settings -> System -> System UI Tuner (last menu item) -> Status bar -> Clock -> change to "show hours, minutes, and seconds"
 
 EXCELLENT APPS:
   - Sensor Kinetics
