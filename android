@@ -521,11 +521,23 @@ USER LAND:
   A: either:
         home screen swipe down from top -> Settings -> Apps&notifications -> Advanced -> Default apps -> Home app
         can set it to Pixel Launcher (the default) or Nova Launcher.
-     or:
+     or (from nova to pixel but not back) (XXX actually pixel to nova is available in this area somehow, but I haven't experimented enough to know exactly how it decided):
         Nova Settings (either apps drawer -> Nova Settings, or long-click-on-background -> Settings)
         -> scroll down to NOVA section -> Select Default Home
   Q: in nova launcher, how to make it *not* bring up the App search (the "Search apps... frequent / recent / new/updated" thing) when I hit Home from Home screen?
   A: Nova Settings (see above) -> Gestures & Inputs -> Home button -> Change from "App search" to None
+  Q: how to make home screen allow screen rotation?
+  A: pixel launcher (default launcher):
+        long-press on home screen -> HOME SETTINGS -> Allow Home screen rotation when phone is rotated -> On
+          (note, it's disabled when system is in portrait mode, so first change system to auto-rotate mode)
+     nova launcher:
+       Nova Settings (see above) -> Look&Feel -> Screen orientation
+         - can pick among:
+           - default
+           - auto-rotate  (actually means "allow either landscape or auto", i.e. allow USER_ROTATION (as set by system settings or RotationLockAdaptive, for example)
+              to have effect.
+           - force portrait
+           - force landscape
 
   Q: 300-350ms delay when tapping ui buttons?
   A: oh! it was because I had triple-click-to-zoom on.
