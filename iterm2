@@ -43,6 +43,9 @@ BUG: ctrl-alt-click doesn't focus-without-raise like Terminal does;
      That is, left button (even modified) isn't one of the gestures
      I can customize in Prefs / Pointer / +;
      it says "You can't customize that button".
+     Update:
+     Actually can *partially* customize, as mentioned in xmouse notes:
+     preferences -> Pointer -> check "^-click reported to apps, does not open menu".  The "does not open menu" part is desired, the "reported to apps" part is not!  (since that raises the window, dammit!)
 
 ------------------------------------------------
 Here's an Automator / "Run AppleScript" script I use to open 8 different tabs

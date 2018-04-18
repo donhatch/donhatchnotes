@@ -145,4 +145,8 @@ PA:
           EOF
     Unfortunately it doesn't seem to interact well with "pause -1" :-(
 
+Q: how to set top-down viewing angle?
+PA:
+    set view 0,0,1,1
+    set view equal xy
 
