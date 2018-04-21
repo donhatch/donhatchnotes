@@ -209,6 +209,9 @@ Posted: http://stackoverflow.com/questions/38843719/emergency-override-of-broken
           complete -r vim
           complete -r view
 
+          # Also, `vi ~/save/PRIN<tab>` (and vim, view) is broken if there's a file called '!'
+          # in the *current* directory!
+
           complete -r google-chrome # google-chrome ./myFil<tab>
 
           # The rest of these are gratuitous strong evil magic

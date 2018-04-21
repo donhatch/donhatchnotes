@@ -139,4 +139,5 @@ PA: Use what I learned from the previous failed exercise:
    - click to get cursor after the 2, then type the remainder: "22222<enter><tab>aaaaa<enter>bbbbb" then the two sub-lists won't be associated with each other.
      not ideal since the 2. isn't really associated with the 1. any more.
 
+Q: how to subscribe to changes in a doc?
 
