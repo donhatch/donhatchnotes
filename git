@@ -1123,6 +1123,14 @@ Don
        (and lots of other references):
         git checkout `git rev-list -n 1 --before="2009-07-27 13:37" master`
 
+    Q: I find I'm doing the following workflow a lot:
+       trivial change, commit to checkpoint work, trivial change, commit to checkpoint work, ...
+       I want all the changes, but it would be good if they could be in a separate branch or something.
+       And I never realize want to be on the branch until after I've started editing files
+       and maybe even have made a few commits already.
+
+
+
 POSSIBLE BUG: weird behavior on "git fetch --dry-run"
     - don't use git pull for this, it gets confusing.
     - and especially don't use -n, it does *not* mean --dry-run in general
