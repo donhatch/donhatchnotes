@@ -1,3 +1,74 @@
+What are things called:
+  - Dock: the bottom bar with icons
+  - Mission Control: the multiple Desktops and ways of switching among them
+
+Q: What the hell does Find (⌘--F in Finder, or alt-⌘-space anywhere) do?
+   (It's called Spotlight,
+   although I don't see any label saying that any more).
+   Its options are `This Mac` and `"Desktop"`.
+   I don't know what either of those things mean.
+   When it's `This Mac`:
+   - Is it showing all files&directorieswhose names
+     (not including leading directories) contain
+     the given substring?  NO, it shows more than that.
+   - Is it showing all such files&directories whose full paths contain the given string?
+     NO, it shows less than that (of course)
+     Although, if I ask for "e" <enter>, I get soft spinning beachball
+   - Is it showing all files&directories whose *contents* contain the given string?
+   - Oh wait, is it things whose something (name?contents?pathname?) *begins* with the
+     substring?
+A: This seems to be the good reference:
+     https://blog.superuser.com/2011/06/03/digging-deeper-mastering-spotlight-in-os-x/
+   -----------------
+   Here is my writeup of when I was trying to figure it out on my own:
+   - Whenever it says "matches", it seems to mean "a word starts with" rather than
+     "contains", where "word" means parts delimited by:
+     spaces, dots, underscores, numbers, maybe more
+   - Spaces in the search string are interpreted as "and" (to prevent this, double-quote
+     the whole string)
+   - The search box in upper right seems to be a demented shortcut for
+     "Name or Contents" "matches" (where "matches" doesn't mean what you think it means;
+     see previous)
+   - To do a meaningful search, choose one or more selectors
+     by hitting "+" button (not + key!);
+     each selector is of the form <subject> <verb> <object (editable)>
+     "Name" "contains" is often what I want (*not* "matches",
+     which doesn't mean what you think it means, see above).
+     Also, try hitting "+" more; it keeps offering new different <subject> <verb> pairs
+     (but if I open too many, the window drawing/resizing/lack-of-scrolling
+     starts getting buggy, til I remove some)
+   - Oh! And I can customize what's offered!  Pick "Other..." and then
+     check/uncheck search attributes (i.e. <subject>s); there are a lot.
+   - "Desktop" seems to mean "icons sitting on the desktop".
+     (This became less mystifying once I realized what "matches" means
+     and could then orient myself and test things properly)
+   - Hmm, there's a Spotlight reference:
+       https://developer.apple.com/library/content/documentation/Carbon/Conceptual/MetadataIntro/MetadataIntro.html#//apple_ref/doc/uid/TP40001268
+     And a precise query language; can get to it by "Other..."->"Raw Query" (not obvious!)
+       https://developer.apple.com/library/content/documentation/CoreServices/Reference/MetadataAttributesRef/Reference/CommonAttrs.html#//apple_ref/doc/uid/TP40001694-SW1
+     It seems to understand wildcards in some sense, so:
+        kMDItemDisplayName = *mysuffix
+        kMDItemTextContent = "*aris in the spri*"
+        kMDItemTextContent =[c] "*aris in the spri*"
+                (to make it context insensitive)
+     Q: I'm having trouble understanding how to do queries involving kMDItemTextContent
+        though.  It seems to be word-based in some sense, but not the same sense as the
+        higher-level queries (e.g. digits don't seem to be a delimiter).
+    - ooh and look here:
+        https://superuser.com/questions/51122/how-to-search-with-spotlight-more-effectively?rq=1#answer-412090
+      This takes a few seconds:
+        mdfind 'kMDItemTextContent == "*paris in the spring*"'
+      This is instant, but only matches at beginning of a word:
+        mdfind 'kMDItemTextContent == "paris in the spring*"'
+      Q: when I have a line "in paris in the spring" in a file, why:
+            Succeeds:
+              mdfind 'kMDItemTextContent == "in*the spring*"'
+              mdfind 'kMDItemTextContent == "paris in the sp*ng"'
+              mdfind 'kMDItemTextContent == "paris in*ng"'
+              mdfind 'kMDItemTextContent == "paris * the spring"
+            Fails:
+              mdfind 'kMDItemTextContent == "paris*in the sp*ng"'
+
 Q: how to open finder in the current directory from a command line?
 A: open .
 
@@ -8,3 +79,10 @@ A: apple menu -> System Preferences -> Mission Control ->
 
 Q: screenshot?
 A: shift-command-4
+
+Q: I don't like Mission Control -> "When switching to an application, switch to a Space
+   with open widnows for the application".  But turning it off is even worse,
+   since clicking on the app's icon in the Dock doesn't open a new window
+   of that app!  Can I make it open a new window of that app?  At least for:
+     - chrome
+     - iterm2 (and Terminal)
