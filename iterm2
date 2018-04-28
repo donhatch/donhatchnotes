@@ -42,8 +42,7 @@ My settings:
 
     - Advanced
       - Experimental Features
-        - Show FPS meter (requires Metal) -> Yes
-        - Use Metal GPU-based renderer -> Yes  (should be faster, but no transparency which I don't use anyway)
+        - Use Metal GPU-based renderer -> Yes  (should be faster, but no transparency which I don't use anyway... and it says it may have other missing features)
       - Mouse
         - When Focus Follows Mouse is enabled,
          steal key focus even when inactive -> Yes
