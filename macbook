@@ -5,3 +5,6 @@ Q: how to stop workspaces from rearranging themselves?
 A: apple menu -> System Preferences -> Mission Control ->
    uncheck "Automatically rearrange Spaces based on most recent use"
    also uncheck "When switching to an application, switch to a Space with open windows for the application"  (not sure that did anything though)
+
+Q: screenshot?
+A: shift-command-4

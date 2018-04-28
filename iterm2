@@ -13,9 +13,15 @@ Non-obvious things:
 My settings:
   - Prefs
     - General
+      - Startup
+        - change from "Use System Window Restoration Setting"
+                   to "Only Restore Hotkey Window"
       - Closing
         - uncheck "confirm closing multiple sessions"
         - check "Quit when all windows closed"
+      - Window
+        - uncheck "Adjust window when changing font size"
+           since the auto-adjust is unfriendly to all the other tabs
     - Appearance
       - Dimming
         - check "Dim inactive split panes"
@@ -31,7 +37,30 @@ My settings:
           - Filter Alerts
             - uncheck 'Send "Bell" alert'
     - Pointer
+      - check "^-Click reported to apps, does not open menu"
       - check "Focus follows mouse"
+
+    - Advanced
+      - Experimental Features
+        - Show FPS meter (requires Metal) -> Yes
+        - Use Metal GPU-based renderer -> Yes  (should be faster, but no transparency which I don't use anyway)
+      - Mouse
+        - When Focus Follows Mouse is enabled,
+         steal key focus even when inactive -> Yes
+         NOTE: This is very nice-- it's almost full x-mouse, when iterm2
+         is involved!!!
+         Further steps would be (some of this making iterm2 into a window manager):
+           - *relinquish* key focus to the other app under the cursor
+             even when active.
+           - manage that even among other pairs of apps
+           - manage that even among pairs of windows of another app
+           - hotkey to raise/lower iterm window (and it should work
+             even if iterm is "inactive" but currently stealing focus)
+           - and make *that* work even among other apps and among windows
+             in another app
+      - Session
+        - Enable session restoration -> No
+
 
 Q: can I set tab colors in applescript?
 
@@ -46,13 +75,14 @@ BUG: ctrl-alt-click doesn't focus-without-raise like Terminal does;
      Update:
      Actually can *partially* customize, as mentioned in xmouse notes:
      preferences -> Pointer -> check "^-click reported to apps, does not open menu".  The "does not open menu" part is desired, the "reported to apps" part is not!  (since that raises the window, dammit!)
+     (Hmm, now that I discovered the "When Focus Follows Mouse is enabled, steal key focus even when inactive", I may not need this any more!)
 
 ------------------------------------------------
 Here's an Automator / "Run AppleScript" script I use to open 8 different tabs
 with different text colors and different commands:
 
 on run {input, parameters}
-    
+
     -- Used clues from:
     --     https://www.iterm2.com/documentation-scripting.html
     --     https://gist.github.com/lrdiv/4dfb6b19ed82cbdf5002

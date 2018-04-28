@@ -8,11 +8,11 @@ Other interesting things on OS X (mac):
   http://superuser.com/questions/27306/focus-follows-mouse-or-sloppy-focus-on-mac-os-x
   https://news.ycombinator.com/item?id=8768400
 
-Highlights of partial workarounds:
+Highlights of partial workarounds on OS X (mac)::
   - iTerm2 (which is a nice Terminal replacement anyway) has it,
     but only within the same app:
       Preferences -> Pointer -> Focus follows mouse
-  - Oh! Terminal actually has same thing, with obscure enabling recipe per:
+  - Oh! Terminal actually has it within same app too, with obscure enabling recipe per:
       http://stackoverflow.com/questions/98310/focus-follows-mouse-plus-auto-raise-on-mac-os-x#answer-98331
         defaults write com.apple.Terminal FocusFollowsMouse -bool true
   - hmm, actually, they work great together, *as long as iTerm2 is on top*.
@@ -37,6 +37,10 @@ Highlights of partial workarounds:
       then when I want focus to be on an iterm2 window without raising it, click on that tiny window instead.
       It pops to front, but who cares because it's small and not obscuring anything.
       Rough edge: if I create a new window in the focused-but-not-raised app, then close the new window, the focused-but-not-raised app will come to front :-( also lots of other things make come to front too, e.g. hitting ctrl-w in chrome :-( maybe file bug on that?
+  - UPDATE: iTerm2 *does* have (partial) focus-follows-mouse interaction with other apps after all!
+      It's under Preferences... -> Advanced -> Experimental Features -> Mouse -> "When Focus Follows Mouse is enabled, steal key focus even when inactive -> Yes
+      See iterm2 notes for notes on how far this gets us
+
 
   - "scroll-follows-mouse" is on by default (or maybe always)
 

@@ -511,6 +511,8 @@ TROUBLESHOOTING:
   Q: logging too much results in losing some of it at random.  Is there a more robust logging mechanism?
   PA: check out:
         http://leaks.wanari.com/2016/06/29/logging-tools-android-developers/  (comparison of 7 android loggers)
+  PA: settings gear -> System -> Developer options -> Log buffer sizes ->
+        change from 256K per log buffer to 16M per log buffer
 
   Q: emulator won't start after upgrade to macOS High Sierra (10.13).
      Spinning beachball for a bit, then there is an icon in the bottom dock
@@ -518,6 +520,8 @@ TROUBLESHOOTING:
   A: https://developer.android.com/studio/known-issues.html#body-content
      But that was a red herring-- it's just that one of my emulator images
      went bad.  Deleted it and recreated it in AVD manager.
+
+  Q: what is "turn on view attribute inspection" (in developer options)?
 
 VIEW/LAYOUT BUGS:
   Q: Can I get control over LinearLayout's distribution of slack/shrinkage?
