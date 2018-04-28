@@ -307,6 +307,8 @@ DEVELOPMENT/DEBUGGING:
        adb shell tail -1000000 -f /storage/emulated/0/Download/ViewDebugLog | less
   A: Add `-n` to make it ignore input (wtf?)
        adb shell -n tail -1000000 -f /storage/emulated/0/Download/ViewDebugLog | less
+     Or (not sure what the distinction is, since `adb help` doesn't mention exec-out):
+       adb exec-out tail -1000000 -f /storage/emulated/0/Download/ViewDebugLog | less
 
   Q: how to get bash instead of ash (toybox) through adb?
   PA: doesn't seem to be a way that anyone knows. here's stuff about toybox here: http://landley.net/toybox/roadmap.html
@@ -444,6 +446,17 @@ DEVELOPMENT/DEBUGGING:
 
         TODO: see whether the 30-second incremental update works with emulator, described on http://blog.udinic.com/2014/07/24/aosp-part-3-developing-efficiently/
 
+  Q: how to get a screenshot?
+  A: Incidentally mentioned here: https://stackoverflow.com/questions/13578416/read-binary-stdout-data-from-adb-shell
+       adb shell "screencap -p > /sdcard/foo.png"
+       adb pull /sdcard/foo.png
+     Or, in one step, using exec-out:
+       adb exec-out "screencap -p" > foo.png
+
+  Q: what is `adb exec-out`?  There's lots of mention of it,
+     but `adb help` doesn't mention it.
+  A: https://stackoverflow.com/questions/13578416/read-binary-stdout-data-from-adb-shell#answer-31401447
+     It doesn't use pty which mangles binary output.
 
 TROUBLESHOOTING:
   Q: what do I do when app crashes on startup with "can't find MainActivity on classpath"

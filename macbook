@@ -27,8 +27,10 @@ A: This seems to be the good reference:
    - Spaces in the search string are interpreted as "and" (to prevent this, double-quote
      the whole string)
    - The search box in upper right seems to be a demented shortcut for
-     "Name or Contents" "matches" (where "matches" doesn't mean what you think it means;
-     see previous)
+     "Name or Contents" "matches" (where "matches" doesn't mean what you think it means; see previous),
+     and, beware: it gets and'ed with all your other selectors!  (So if you
+     forget you have something there, you'll wonder why your other selectors
+     aren't matching what they should)
    - To do a meaningful search, choose one or more selectors
      by hitting "+" button (not + key!);
      each selector is of the form <subject> <verb> <object (editable)>
@@ -52,10 +54,15 @@ A: This seems to be the good reference:
         kMDItemDisplayName = *mysuffix
         kMDItemTextContent = "*aris in the spri*"
         kMDItemTextContent =[c] "*aris in the spri*"
-                (to make it context insensitive)
+                (to make it context insensitive, supposedly...
+                 but no, that makes it pull in way too much when on
+                 command line, not sure what, and doesn't match anything
+                 in spotlight. ???  oh, I think, in spotlight, it's just
+                 never returning, nor is it indicating that it's thinking)
      Q: I'm having trouble understanding how to do queries involving kMDItemTextContent
         though.  It seems to be word-based in some sense, but not the same sense as the
         higher-level queries (e.g. digits don't seem to be a delimiter).
+        And, sometimes it works and sometimes not.
     - ooh and look here:
         https://superuser.com/questions/51122/how-to-search-with-spotlight-more-effectively?rq=1#answer-412090
       This takes a few seconds:
