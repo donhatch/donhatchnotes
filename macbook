@@ -20,7 +20,7 @@ Q: What the hell does Find (⌘--F in Finder, or alt-⌘-space anywhere) do?
 A: This seems to be the good reference:
      https://blog.superuser.com/2011/06/03/digging-deeper-mastering-spotlight-in-os-x/
    -----------------
-   Here is my writeup of when I was trying to figure it out on my own:
+   Key realizations:
    - Whenever it says "matches", it seems to mean "a word starts with" rather than
      "contains", where "word" means parts delimited by:
      spaces, dots, underscores, numbers, maybe more
@@ -37,6 +37,8 @@ A: This seems to be the good reference:
      Also, try hitting "+" more; it keeps offering new different <subject> <verb> pairs
      (but if I open too many, the window drawing/resizing/lack-of-scrolling
      starts getting buggy, til I remove some)
+     Also, try holding down Alt when hitting "+" button-- it allows creation
+     of a boolean expression tree!
    - Oh! And I can customize what's offered!  Pick "Other..." and then
      check/uncheck search attributes (i.e. <subject>s); there are a lot.
    - "Desktop" seems to mean "icons sitting on the desktop".
