@@ -458,6 +458,18 @@ DEVELOPMENT/DEBUGGING:
   A: https://stackoverflow.com/questions/13578416/read-binary-stdout-data-from-adb-shell#answer-31401447
      It doesn't use pty which mangles binary output.
 
+  Q: What's a good way of commenting / commenting-out parts of xml files
+     such as layout/activity_main.xml or AndroidManifest.xml?
+     In particular, for documenting and/or commenting-out attributes.
+  PA: I like to do the following:
+     In the start of the top-level element:
+       xmlns:ignored="dummy_identifier"
+       ignored:comment="the `ignored` namespace is for notes and comments"
+     In some cases, turning the ":" into an "X" works,
+     but AS will complain about it (louder than it complains about the above).
+     That complained can in turn be suppressed, but the suppression net
+     is too wide, so there's no perfect solution :-(
+
 TROUBLESHOOTING:
   Q: what do I do when app crashes on startup with "can't find MainActivity on classpath"
      or something?
