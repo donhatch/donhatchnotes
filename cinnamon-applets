@@ -1,0 +1,39 @@
+
+
+Things to try:
+  https://wiki.gnome.org/Projects/GnomeShell/LookingGlass
+  alt-F2 -> lg<Enter>
+
+Q: how to print debugging traces from cinnamon applets?  e.g. in ~/.local/share/cinnamon/applets/workspace-grid@hernejj/GridStyle.js
+A: 
+  1. tail -f ~/.cinnamon/glass.log
+     (per https://stackoverflow.com/questions/14025722/how-to-debug-cinnamon-applet#answer-28512708 )
+     That shows stuff that you print from the javascript using:
+       global.log("FOO");
+  2. tail -f ~/.xsession-errors
+     That shows some warnings from the javascript, e.g.:
+       Cjs-Message: JS WARNING: [/usr/local/google/home/donhatch/.local/share/cinnamon/applets/workspace-grid@hernejj/BarIndicatorStyle.js 96]: anonymous function does not always return a value
+       Cjs-Message: JS WARNING: [/usr/local/google/home/donhatch/.local/share/cinnamon/applets/workspace-grid@hernejj/GridStyle.js 81]: anonymous function does not always return a value
+  3. If you restart cinnamon using `cinnamon --replace &`, then those messages will appear on that terminal instead.
+      
+   To reload: Remove from panel and Add to panel, using System Settings -> Preferences -> Applets 
+Q: where is the javascript source for workspace-grid@hernjj and workspace-switcher@cinnamon.org?
+A: 
+  ~/.local/share/cinnamon/applets/workspace-grid@hernejj/
+  /usr/share/cinnamon/applets/workspace-switcher@cinnamon.org
+So, to work on it, I would think:
+  cp -a /usr/share/cinnamon/applets/workspace-switcher@cinnamon.org ~/.local/share/cinnamon/applets/workspace-switcher-hacked/
+
+Q: how to get the system to recognize a new applet that I've added to ~/.local/share/cinnamon/applets/ ?
+PA: Don't know the real way, but a hacky way
+    is to just install any applet from `Available applets (online)`.
+    That will refresh the list.
+Q: but when I do that and Add the thing, it turns red without any indication
+   of what went wrong??
+A: Some gotchas:
+   - uuid in metadata.json must match directory name!
+   - workspace-grid@hernejj has 'workspace-grid@hernejj' hard-coded inside it, you have to change that every place it occurs
+     except outright log messages.  If you don't, each place you mess it up will give an inscrutible error,
+     e.g. "workspace-grid@hernejj Main Applet Exception: TypeError: xletDir is undefined"
+
+Q: can I exit an applet instead of going off the rails?  throwing an Error doesn't seem to.

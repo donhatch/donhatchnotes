@@ -71,6 +71,19 @@ Q: set time = 0?  (i.e. time every command)
    (in general, bash's timing output seems pretty lame compared to tcsh's.)
    (bleah, seems totally impossible)
 
+Q: What if I want to know how long a command took, after the fact?
+   Is there a way, using history?  I'm sure the answer is no...
+   but how about the walltime between two consecutive command executions?
+   I know I can see the timestamps via:
+     HISTTIMEFORMAT="%F %T" history
+PA:
+   See whether this does it:
+     https://jakemccrary.com/blog/2015/05/03/put-the-last-commands-run-time-in-your-bash-prompt/
+   See whether this (or any of the other answers there) does it:
+     https://stackoverflow.com/questions/1176386/automatically-timing-every-executed-command-and-show-in-bash-prompt#answer-1177511
+
+
+
 Q: arg processing?
 A: here's an example, although there are several ways:
       #!/bin/bash
