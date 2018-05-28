@@ -1,0 +1,15 @@
+nc = netcat
+
+https://www.sans.org/security-resources/sec560/netcat_cheat_sheet_v1.pdf
+
+Q: I am ssh'ing from a local machine mac past a firewall.
+   From the remote shell, I want to be able to open URLs on the local machine.
+   How?
+PA:
+  On local machine:
+    In either order:
+      ssh -R 5000:localhost:5000 the_remote_host
+      nc -l 5000 | (while true; do line=`head -1`; echo open $line; open $line; done)
+  On remote matchine (in the ssh shell):
+    mkfifo ~/tmp/myfifo
+    tail -f ~/tmp/myfifo | nc localhost 5000   # *after* starting the `nc -l 5000` on local
