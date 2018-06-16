@@ -368,9 +368,20 @@ A: Use extension Stylish:
    that refers to it)
 
    And use that CSS fragment in all web pages I care about.
-
         
 Q: is there a good workflow for pinning tabs? e.g. mail, calendar...
 PA: https://www.howtogeek.com/howto/7264/make-google-chrome-open-with-pinned-tabs/
     hmm, have to manually open and pin, in each new window... I think? not sure.
     Hmm and there's supposedly Basics -> On tartup -> Open the following pages -> Open current pages
+
+Q: how do I keep 2-finger-scroll from going forward and back on mac?  I hate it!
+A: System Preferences -> Trackpad -> More Gestures -> "Swipe between pages: Scroll left or right with two fingers" -> uncheck
+   It worked!
+   The following didn't work and/or don't exist any more:
+      defaults write com.google.Chrome.plist AppleEnableSwipeNavigateWithScrolls -bool FALSE
+      defaults write com.google.Chrome       AppleEnableSwipeNavigateWithScrolls -bool FALSE
+      chrome://flags/#overscroll-history-navigation
+
+Q: how do I upgrade chrome on mac?
+A: I think Chrome -> About  will show if an update is available
+
