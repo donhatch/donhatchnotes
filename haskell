@@ -1,3 +1,87 @@
 Haskell tutorial I like best: http://learnyouahaskell.com
 "A gentle introduction to Haskell" is also probably good,
 intended as a supplement to the original technical report.
+
+Hmm, this appeared too, it looks quite good:
+  https://en.wikibooks.org/wiki/Haskell
+and it references a meta-tutorial for finding a good tutorial:
+  https://wiki.haskell.org/Meta-tutorial
+
+Other good references:
+  Good intro/overview of syntax:
+  https://www.fpcomplete.com/blog/2012/09/ten-things-you-should-know-about-haskell-syntax
+
+  http://www.haskellforall.com/2015/09/how-to-make-your-haskell-code-more.html
+
+
+Q: What are the operator precendences?
+   All I know is they go from 0 (lowest) to 9 (highest),
+    - $ (function application) has precedence 0 (lowest),
+    - . (function composition) has precendence 9 (highest)
+    - whitespace (function application) has precedence even higher than that.
+
+Quiz: how many different ways can you express f(g(x)), using
+      different combinations of parentheses, . (function composition), $ (function application)
+Answer:
+   f(g(x)) can be expressed as:
+
+     f (g x)
+     f (g $ x)
+     f $ (g x)
+     f $ g x
+     f $ (g $ x)
+     f $ g $ x
+
+     (f $) (g x)
+     f $ ((g $) x)
+     (f $) ((g $) x)
+
+     f (($ x) g)
+     ($ (g $ x)) f
+     ($ (($ x) g)) f
+
+     (f $) (($ x) g)
+     ($ ((g $) x)) f
+
+     -- maybe should disallow the prefix forms, there's too much blowup:
+     f (($) g x)
+     f ((($) g) x)
+
+     ($) f (g x)
+     (($) f) (g x)
+     ($) f (g $ x)
+     (($) f) (g $ x)
+     ($) f ((g $) x)
+     (($) f) ((g $) x)
+
+     f $ (($) g x)
+     (f $) (($) g x)
+     f $ ((($) g) x)
+     (f $) ((($) g) x)
+
+     ($) f (($) g x)
+     ($) f ((($) g) x)
+     (($) f) (($) g x)
+     (($) f) ((($) g) x)
+     -- I probably missed some.  Note that ($) f is just f, so you can
+        pretty much stick a ($) in front of any function even itself,
+        so it's not that interesting.
+
+     -- but even if we disallow the prefix form, these forms
+        can blow up too:
+        f$, g$, $(g x), $x
+
+     (f . g) x
+     f . g $ x
+     ((f .) g) x
+     ((f .) g) $ x
+     ((. g) f) x
+     ((. g) f) $ x
+
+   Try them out:
+     f = (*3)
+     g = (+100)
+     x = 1
+
+     
+
