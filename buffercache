@@ -1,0 +1,10 @@
+The thing to clear buffer cache on linux:
+  free -m && sync && sudo bash -c 'echo 3 > /proc/sys/vm/drop_caches' && free -m
+                  total        used        free      shared  buff/cache   available
+    Mem:          32167       11254       11951         448        8960       20006
+    Swap:         32695        4648       28047
+    [sudo] password for donhatch:
+                  total        used        free      shared  buff/cache   available
+    Mem:          32167       11219       19703         448        1243       20108
+    Swap:         32695        4648       28047
+
