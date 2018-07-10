@@ -45,10 +45,11 @@ GOTCHAS:
               def non_insane_split(s,sep): return [] if s=="" else s.split(sep)
       But then I deleted it on 9/7.
 
-    - Do not ever use "for line in sys.stdin():"; it will ruin your day!
+    - Do not ever use "for line in sys.stdin:"; it will ruin your day!
       If pauses for a while, it won't see any lines even if many are buffered.
       Workaround:
-        # DO NOT EVER USE 'for line in sys.stdin', IT WILL RUIN YOUR DAY
+        # DO NOT EVER USE 'for line in sys.stdin:', IT WILL RUIN YOUR DAY
+        # (see https://bugs.python.org/issue26290)
         for line in iter(sys.stdin.readline, ''):
       The workaround is described here here, although it doesn't state that this is what
       it's good for:
@@ -435,6 +436,35 @@ QUESTIONS (most recent first):
     Q: Why would I want to use a tuple instead of a list? (Faster for const?)
 
 ANSWERED QUESTIONS (most recent first):
+    Q: Cascading regular expression matching logic using re is awkward.
+       Is there a better way?
+    A: I've been using the following which works pretty well.
+	  # https://stackoverflow.com/questions/1663995/how-to-avoid-writing-request-get-get-twice-in-order-to-print-it#answer-1664013
+	  class DataHolder:
+	    def __init__(self, value=None): self.value = value
+	    def set(self, value): self.value = value; return value
+	    def get(self): return self.value
+	  # DataHolder makes cascading re searches/matches less awkward.
+	  # Instead of this:
+	  #       match = re.search(pat0, line)
+	  #       if match is not None:
+	  #         ... do something with match ...
+	  #       else:
+	  #         match = re.search(pat1, line)
+	  #         if match is not None:
+	  #           ... do something with match ...
+	  #         else:
+	  #           ...
+	  # Say this:
+	  #       match = Data()
+	  #       if match.set(re_search(pat0, line)) is not None:
+	  #         ... do something with match.get() ...
+	  #       elif match.set(re_search(pat1, line)) is not None:
+	  #         ... do something with match.get() ...
+	  #       else:
+	  #         ...
+
+
     Q: where's that cool writeup of datetime,time,etc stuff with diagrams?
     A: a few different nice ones
         https://wiki.python.org/moin/WorkingWithTime

@@ -1,3 +1,7 @@
+NOTE: a lot of this is applicable to more general linux/gnome/cinnamon,
+even though I'm not using ubuntu any more.
+See ./cinnamon-applets for notes on that.
+
 Q: screen magnifier? (have xmag, continuous would be better)
 A: kmag
     and click on Mouse (not sure what weird state it was in before)
@@ -202,5 +206,22 @@ A: ccsm -> Utility -> check "Resize Info"
 
 Q: keyboard shortcut to lock screen?
 A: ctrl-alt-L
+
+Q: turn off the damn magnetism ("sticky edges") between the two screens
+   in a dual-monitor setup?
+PA: https://askubuntu.com/questions/109338/how-do-i-disable-mouse-magnet-on-middle-edge-with-multi-monitors
+    - Javier Rivera's answer didn't work because there's no such section "sticky edges" on my "Display" preference dialog
+    - Jo-Erlend Schinstad's answer didn't work because there's no /apps/compiz-1
+    - SirSid's answer didn't work because there's no "unity" in my ccsm
+PA: https://askubuntu.com/questions/109338/how-do-i-disable-mouse-magnet-on-middle-edge-with-multi-monitors
+    ccsm, filter by "edge"
+    -> Window Management / Snapping Windows
+        (it's turned off already, supposedly :-( )
+        (but tried turning it on and turning off all features in it;
+         i.e. unchecked Snap_Type:"edge resistance" and Edges:"screen edges"
+         which were checked, and lowered the resistance & attraction
+         distances from 30 to 1 and 20 to 1, respectively)
+    (none of it had any effect :-( )
+
 
    

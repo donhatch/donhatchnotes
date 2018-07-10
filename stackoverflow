@@ -14,6 +14,8 @@ My addition:
 
   @AaronDigulla I see that, but I'm not sure *why* you're talking about buffering between processes. As far as I can see, your answer is simply incorrect (starting with "it's not python that's buffering but the shell") and not relevant to the question at all, and you've spent a large part of this comment thread making and defending claims that aren't true either (e.g. your "Conclusion: What you experience must have another cause. It's not related to readline() or readlines() in Python."). I believe you have the ability to delete this whole answer and thread... maybe that would be a good idea? – Don Hatch 48 secs ago    edit   
 
+  [deleted]
+
 
 ===================================================================
 http://stackoverflow.com/questions/2342826/how-to-pipe-stderr-and-not-stdout#answer-2381643
