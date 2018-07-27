@@ -277,3 +277,6 @@ tkdiff questions:
   PA: kind of described in the Gui Help.
       Seems to be pretty much there, but not quite usable since it's difficult to tell at a glance which pieces came from which sides.
 
+General command line diff programs:
+  Q: how to get colored word diffs, like git diff --word-diff?
+  A: wdiff file0 file1 | colordiff
