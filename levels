@@ -1,0 +1,25 @@
+Here is a brain dump of all the relevant common uses of high/low level I can think of at the moment.
+
+high=coarse, low=fine
+---------------------
+- pyramid (apex at top)
+- {high,low}-level explanation/details
+- {high,low} viewing elevation
+- systems that label the levels 0 finest, 1 next-coarser, etc.
+
+high=fine, low=coarse
+---------------------
+- inverted pyramid (apex at bottom)
+- {high,low} detail <-> {high,low} level-of-detail (LOD) <-> {high,low} level
+- {high,low} resolution
+- {up,down}-res
+- {up,down}-sample
+- {high,low}-frequency signal,  {high,low}-pass filter
+- systems that label the levels 0 coarsest, 1 next-finer, etc.
+
+It's interesting to note that, in some cases, a very minor difference in wording
+completely flips the meaning.
+The most dramatic case of this being:
+  - high-level details   (sounds to me like it means coarse)
+  - high level-of-detail  (sounds to me like it means fine)
+
