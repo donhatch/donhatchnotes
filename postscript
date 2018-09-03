@@ -1,0 +1,246 @@
+Good notes and books:
+  https://en.wikibooks.org/wiki/PostScript_FAQ
+  http://wwwcdf.pd.infn.it/localdoc/tips.pdf "Thinking in Postscript" book
+
+  "Mathematical Illustrations, A manual of geometry and PostScript" by Bill Cassleman
+    https://www.math.ubc.ca/~cass/graphics/manual/
+      "Getting started in postscript" is a good intro:
+        https://www.math.ubc.ca/~cass/graphics/manual/pdf/ch1.pdf
+      Appendix is a very good reference:
+        https://www.math.ubc.ca/~cass/graphics/manual/pdf/a1.pdf
+
+  Some good printer test patterns:
+    http://www.bealecorner.com/trv900/respat/
+      -> http://www.bealecorner.com/trv900/respat/respat.pdf
+           instructions here: http://www.bealecorner.com/trv900/respat/respat-ps.txt
+
+Pro tips:
+ - use bind on procedure bodies,
+   and on outermost loop bodies outside procedure bodies
+   (doesn't help otherwise, since binding is done recursively)
+ - use // to refer to constants. This gets evaluated immediately,
+   even when inside code blocks (in which evaluation is otherwise deferred).
+ - save/restore to save memory, surrounding the ? not sure.  (see Thinking in Postscript p.76)
+
+QUESTIONS:
+
+Q: is there a reference for all operators?  e.g. I'm having trouble finding "where"
+A: more extensive and terse:
+      http://www.math.ubc.ca/~cass/courses/ps.html
+    less extensive and more detailed:
+      http://www.tailrecursive.org/postscript/operators.html
+    Evidently it's all in the book "Postscript language reference manual" (red book),
+    although that's hard to navigate on line:
+      https://www.adobe.com/content/dam/acom/en/devnet/actionscript/articles/PLRM.pdf
+      Chapter 8: Operators           page 505
+              8.1: Operator Summary  page 508
+              8.2: Operator Details  page 524
+    If the name isn't a common english word, just search for it (possibly
+    surrounded by spaces if it helps).  If it is a common english word (e.g. `where`,
+    then start with the index at the end of the book, or in Operator Summary
+    which is in alphabetical order.
+
+Q: On p.76 of "Thinking in Postscript", it shows a recursive function,
+   that uses save/restore.  I don't understand what the save/restore is for.
+   It would work without it, right?
+
+
+Q: is there a way to distinguish between:
+        - being processed by ps2pdf
+        - being opened by `open` (i.e. Preview) on mac
+        - being printed on a specific printer
+
+Q: Is drawing a line the same as drawing a rectangle of the given line width
+   and center?
+
+Q: If I want, say, color A on left and color B on right,
+   Are the following three equivalent?
+     fill with A, draw box with B on right
+     fill with B, draw box with A on left
+     box with A on left, box with B on right
+
+Q: What's the best way to draw a gradiant?
+
+Q: How to debug?
+PA: some good hints in the FAQ: https://en.wikibooks.org/wiki/PostScript_FAQ#How_to_debug_a_PostScript_program?
+    - can use gs on the file and then examine the operand stack interactively:
+
+        $ gs
+        GS> (foo.ps) run
+PA:
+   Use gs (or ps2pdf myfile.ps SCRATCH.pdf), and use '=' to make things
+   come out on terminal
+   (x=) = x =
+   (XXX how to get it all on one line?)
+
+Q: How to experiment?
+PA: Run `gs` and type stuff into it
+
+Q: how to redefine an operator or procedure, and have it call the real (previous) one?
+A: from the faq:
+   /real_moveto /moveto load def
+   /moveto { exch 1 add exch 1 add real_moveto } bind def
+
+Q: how to give all lines a bit of jitter?
+PA: TODO: insert a recipe here
+
+Q: how to concatenate strings?
+A: there's a procedure for it in the faq.
+
+Q: Can I replace the error handler with a nicer custom error handler?
+
+Q: Error recovery?
+
+Q: can I throw a specific error?  E.g. make it say "Error: /typecheck in myfunction"
+   rather than "Error: /typecheck in --ifelse--" if it fails on an ifelse inside my function
+
+Q: assert/CHECK?  Not sure what is most useful behavior.
+   - print failure message (gets completely lost in most circumstances), and/or
+   - display failure page, and/or
+   - throw actual error (text gets lost in most circumstances)
+
+Q: how to construct a unit test for my library functions,
+   including testing CHECK and other failure mechanisms?
+
+Q: what's the difference between def and store?
+A: `def` always puts the entry in the current dictionary.
+   store first searches for the entry in the dictionary stack;
+   if it finds it, it stores there, otherwise does a `def`.
+
+Q: what's the cleanest way to write cascading if/elseif/elseif/else?
+PA:
+   well the original way of writing:
+        if (a) {A}
+        else if (b) {B}
+        else if (c) {C}
+        else {D}
+   is:
+        a {
+          A
+        } {
+          b {
+            B
+          } {
+            c {
+              C
+            } {
+              D
+            } ifelse
+          } ifelse
+        } ifelse
+    So maybe:
+        a { A } {
+        b { B } {
+        c { C } {
+            D } ifelse } ifelse } ifelse
+    And can I write some kind of helper function for it?  E.g.
+        [a {A} b {B} c {C} {D}] switch
+    or (more efficient, but less readable:
+        [a {A} b {B} c {C} {D} switch
+        mark a {A} b {B} c {C} {D} switch
+    Note, this will unfortunately not make use of short-circuiting.
+    Ok, how about:
+        a {A} {b {B} {c {C} {D}}}} switch
+    i.e.
+        a { A } {
+        b { B } {
+        c { C }
+           {D}}} switch
+    i.e.
+        a {
+          A
+        } {
+        b {
+          B
+        } {
+        c {
+          C
+        } {
+          D
+        }}} switch
+    I'm not feeling like this is a good idea, but let's try it.
+    So:
+       a {A} {B} switch   -> a {A} {B} ifelse,  if B doesn't end in {something}
+       a {A} {b {B} {C}} switch -> a {A} {b {B} {C} switch} ifelse
+                                -> a {A} {b {B} {C} ifelse} ifelse
+    In general:
+       {X} switch -> {X switch} ifelse
+       if X is *not* code:
+         X switch -> X
+    So, maybe:
+      /switch {dup iscode {{exec switch} ifelse} if} bind def
+    XXX but what is "iscode"?  See question below
+PA: there's a recipe in "Thinking in Postscript" p.89:
+      Example 7.14: Compound Conditional with loop
+        currentfile 256 string readline token { %ifelse
+          % a token is a command
+          { %dummy loop, always exited
+            dup /PRINT eq { do_print exit } if
+            dup /QUIT eq { do_quit exit } if
+            dup /HELP eq { do_help exit } if
+            do_unknown
+            exit
+          } loop
+        }{ %else
+          (no more commands.) = stop
+        } ifelse
+
+Q: how to test the difference between an executable code block and a normal array?
+   i.e. {1} vs. [1]
+A: xcheck
+
+
+Q: Can I break out of a `for` loop?
+A: yes: `exit`
+
+
+
+=================================================================================
+Some library functions
+
+% nice 1-line print-stack
+% Useful to put at end of program:
+%   (final stack = ) print ps
+/ps {
+  [ % a b c [
+  count % a b c [ 4
+  1 roll % [ a b c
+  ] % [a b c]
+  aload % a b c [a b c]
+  == % a b c
+} bind def
+
+% x a b frac -> (x-a)/(b-a)
+/frac {
+  1 index  % x a b a
+  sub  % x a b-a
+  3 1 roll  % b-a x a
+  sub % b-a x-a
+  exch % x-a b-a
+  div % (x-a)/(b-a)
+} bind def
+
+% a b t lerp -> (1-t)*a+t*b
+/lerp {
+  1  % a b t 1
+  1 index  % a b t 1 t
+  sub  % a b t 1-t
+  4 -1 roll  % b t 1-t a
+  mul  % b t (1-t)*a
+  3 1 roll  % (1-t)*a b t
+  mul  % (1-t)*a b*t
+  add  % (1-t)*a + b*t
+} bind def
+
+% x a b c d relerp -> lerp(c, d, (x-a)/(b-a))
+/relerp {
+  5 2 roll  % c d x a b
+  frac  % c d (x-a)/(b-a)
+  lerp  % lerp(c, d, (x-a)/(b-a))
+} bind def
+
+% Simple convert-to-string (works for numbers, not sure what else)
+/tostring {100 string cvs} bind def
+
+% If float value is integer, convert int, otherwise leave alone
+/int_if_int { dup dup round eq { round cvi } if } bind def
