@@ -44,6 +44,84 @@ Q: On p.76 of "Thinking in Postscript", it shows a recursive function,
    that uses save/restore.  I don't understand what the save/restore is for.
    It would work without it, right?
 
+Q: Why use save/restore in recursive Postscript procedures?
+   (asked as https://stackoverflow.com/questions/52144038/why-use-save-restore-in-recursive-postscript-procedures)
+
+    In Glenn C. Reid's book Thinking in Postscript (1990), two versions
+    of a recursive function are shown.
+
+    The function takes one integer argument: if the argument is odd,
+    it returns the argument; if the argument is even, the function
+    calls itself recursively and returns the result plus one, so the result is always an odd number.
+
+    >     Example 6.5: Recursion Using the Dictionary Stack
+    >
+    >     /recurse_proc % int recurse_proc int
+    >     { %def
+    >           save
+    >           2 dict begin
+    >                   /save_obj exch def
+    >                   /arg exch def
+    >                   arg 2 div truncate
+    >                   2 mul cvi
+    >                   arg eq { %ifelse
+    >                          % even number
+    >                          arg 1 add recurse_proc
+    >                   }{ %else
+    >                          arg
+    >                   } ifelse
+    >                   save_obj % leave on stack
+    >           end
+    >           restore % to save_obj on stack
+    >     } bind def
+    >     2 recurse_proc
+    >
+    > In Example 6.6 is the same procedure as the one in Example 6.5, rewritten to use the operand stack instead of the dictionary stack.
+    >
+    >     Example 6.6: Recursion Using the Operand Stack
+    >
+    >     /recurse_proc % int recurse_proc int
+    >     { %def
+    >           dup 2 div truncate
+    >           2 mul cvi
+    >           1 index eq { %ifelse
+    >                   % even number
+    >                   1 add recurse_proc
+    >           } if
+    >     } bind def
+    >     2 recurse_proc
+
+    My question is: what is the point of the `save`/`restore`
+    in Example 6.5?  The program works fine without it (if the `save_obj` manipulation is omitted too), right?
+    Would omitting it make the program worse in some way?
+
+    The explanation given is:
+
+    > In this example, the memory allocated by the dictionary is
+    > reclaimed by `save` and `restore`, putting each save object into the recursion
+    > dictionary until it is needed. If the function is called recursively, more
+    > than one save object may be generated, but each will ultimately be
+    > restored as the recursive calls return.
+    >
+
+    I don't understand that.  Isn't the `begin`/`end` sufficient to reclaim any memory that needs reclaiming?  I don't have a very deep understanding of what `save`/`restore` do, but they sound like fairly heavyweight operations, which makes their appearance here seem all the more odd.
+
+    André Heck's ["Learning PostScript by Doing" (2005)](https://staff.science.uva.nl/a.j.p.heck/Courses/Mastercourse2005/tutorial.pdf) uses `save`/restore similarly for its examples, and its explanation is essentially the same.
+
+  ======================================== WRONG WRONG WRONG
+  But I don't see a `save`/`restore` in some other examples of recursive
+  functions elsewhere; for example, here is a factorial function from
+  [The Postscript programming language by Carl Burch](http://www.cburch.com/csbsju/cs/portfolio/postscript.pdf).  This is how I expected such functions to look.
+
+      /fact {
+	  1 dict begin
+	  /i exch def
+	  1
+	  1 1 i { mul } for
+	  end
+      } def
+
+
 
 Q: is there a way to distinguish between:
         - being processed by ps2pdf
