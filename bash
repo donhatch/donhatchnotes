@@ -244,3 +244,6 @@ Posted: http://stackoverflow.com/questions/38843719/emergency-override-of-broken
     (c) some other clever non-intrusive way to get at filename completion at the moment I discover it's being hidden by a broken programmable command completion.
     ==============================================================
     A: Alt-/ (complete-filename)
+
+More command completion screw-ups not listed above:
+  echo a='b' <tab>

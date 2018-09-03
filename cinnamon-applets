@@ -15,8 +15,26 @@ A:
        Cjs-Message: JS WARNING: [/usr/local/google/home/donhatch/.local/share/cinnamon/applets/workspace-grid@hernejj/BarIndicatorStyle.js 96]: anonymous function does not always return a value
        Cjs-Message: JS WARNING: [/usr/local/google/home/donhatch/.local/share/cinnamon/applets/workspace-grid@hernejj/GridStyle.js 81]: anonymous function does not always return a value
   3. If you restart cinnamon using `cinnamon --replace &`, then those messages will appear on that terminal instead.
+
+Q: easiest way to restart cinnamon?
+A: alt-F2, r, Enter.
+   (however, it will still be running from the same terminal where
+   it was started, somehow.)
       
-   To reload: Remove from panel and Add to panel, using System Settings -> Preferences -> Applets 
+Q: easiest way to reload an applet?
+PA: This way sucks, but:
+   Remove from panel and Add to panel, using System Settings -> Preferences -> Applets 
+   Unfortunately, sometimes the old keeps running.  To clean out olds,
+   restart cinnamon.
+A: per https://gist.github.com/hyOzd/35e913db620b3ba086fb :
+    # replace the EXTENSION_UUID with your extension/applet/desklet name
+    # replace the APPLET with other types if you are not working with an applet
+    dbus-send --session --dest=org.Cinnamon.LookingGlass --type=method_call /org/Cinnamon/LookingGlass org.Cinnamon.LookingGlass.ReloadExtension string:'EXTENSION_UUID' string:'APPLET'
+   e.g.
+    dbus-send --session --dest=org.Cinnamon.LookingGlass --type=method_call /org/Cinnamon/LookingGlass org.Cinnamon.LookingGlass.ReloadExtension string:'workspace-switcher-hacked@donhatch' string:'APPLET'
+   Nice!  (still has problem that sometimes old keeps running though,
+   requiring restarting cinnamon)
+
 Q: where is the javascript source for workspace-grid@hernjj and workspace-switcher@cinnamon.org?
 A: 
   ~/.local/share/cinnamon/applets/workspace-grid@hernejj/
