@@ -16,7 +16,7 @@ Useful settings:
 # from "help set"
 set -e # Exit immediately if a command exits with a non-zero status.
 set -u # Treat unset variables as an error when substituting.
-set -o pipefail # Fail if any command in pipeline fails
+set -o pipefail # Fail if any command in pipeline fails.
 #set -v # Print shell input lines as they are read. (like set verbose in tcsh)
 #set -x # Print commands and their arguments as they are executed. (like set echo in tcsh)
 
@@ -114,6 +114,40 @@ A: exec otherprogram "$@"
         "$@" is All the positional parameters (as separate strings)
         "$*" is All the positional parameters (as a single word) (must be quoted, otherwise it defaults to $@) (which means args with embedded spaces get spilled out into parts, I guess)
 
+Q: In a script, how do you print out the current command-line (i.e. script
+   name and args), suitably escaped so a user can copy-paste it into a bash
+   shell in order to re-execute the exact same command?
+   E.g.
+     ./myscript.bash a b 'c d' "e f" "single quote: '" 'double quote: "' 'dollar sign: $' 'backslash: \' "single: ' "'and double: "'
+   could produce output:
+     ./myscript.bash a b 'c d' 'e f' "single quote: '" 'double quote: "' 'dollar sign: $' 'backslash: \' 'single: '"'"' and double: "'
+A: Here's one way, though not pretty:
+      #!/bin/bash
+      echo -n 'invoked as:'; for arg in "$0" "$@"; do printf " %q" "$arg"; done; echo
+   Here's another way, prettier but not entirely robust (non-printing chars are handled better by printf):
+      #!/bin/bash
+      quote_arg_if_necessary() {
+	if [[ "$1" =~ ^[-=_-:/.@%+a-zA-Z0-9]+$ ]]; then
+	  # The arg consists of only known-to-be-safe chars,
+	  # so it doesn't need to be quoted at all.
+	  echo "$1"
+	  # Note: we use [\'] instead of \' in the following only because
+	  # \' by itself derails vim's syntax highlighting.
+	elif [[ "$1" =~ [\'] && ! "$1" =~ [\"\!\$\`\\] ]]; then
+	  # The arg contains at least one single quote,
+	  # and no double quote nor any other char that might be special inside double quotes;
+	  # therefore double quotes would be more concise than single quotes, so use them.
+	  echo '"'"$1"'"'
+	else
+	  # General robust strategy: surround by single quotes,
+	  # and turn each embedded single quote ' into 5 chars: '"'"'
+	  # (that is: close single, open double, single, close double, open single).
+	  echo "'${1/\'/\'\"\'\"\'}'"
+	fi
+      }
+      echo -n 'invoked as:'; for arg in "$0" "$@"; do echo -n " "$(quote_arg_if_necessary "$arg"); done; echo
+
+
 Q: boolean expressions?
 A: http://stackoverflow.com/questions/48774/boolean-expressions-in-shell-scripts
 
@@ -173,6 +207,28 @@ Q: why the hell do commands that begin with a space get excluded from being
 A: actually this may have just been a google-specific setting:
    my HISTCONTROL was set to ignoreboth, which includes ignorespace.
    Need to set it to ignoredups or nothing.
+
+Q: is there a nice way of commenting out something in the middle of a line?
+   E.g. if I want to comment out the b from either of the following:
+        echo a b c
+        echo a \
+             b \
+             c \
+   and I want to comment out the b?
+A:
+        echo a $(: b )
+        echo a \
+             $(: b ) \
+             c \
+
+Q: is there a nice way to get multiple processes to start simultaneously?
+A:
+   manager:
+     touch /tmp/foo
+   each worker:
+     inotifywait /tmp/foo
+   manager:
+     touch /tmp/foo
 
 =========================================================================
 Completion screwups (some local to google, some not):

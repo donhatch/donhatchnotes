@@ -18,19 +18,20 @@ they all have color choosers with eyedroppers:
          other 3-slider schemes too?
    - CMYK
      - kind of lame:
-       - the gradient should appear on the slider like fo h,s,v,r,g,b
+       - the gradient should appear on the slider like for h,s,v,r,g,b
        - should be able to show this at same time as the GIMP
          selector, and make it one of the options (I think?
          not clear how the 4 dimensions work and map to 3)
    - Triangle selector
        hue circle, sat/val triangle that's kind of a pointer
        this is actually pretty sweet! tri more elegant
-       than square in this case.
+       than square in this case (as it is any time the slider is any of H,S,V)
    - watercolor mode doesn't seem to relevant or useful to me
 - gpick is quite awesome as well
    - it has an eyedropper that shows the rgb under mouse continuously...
      it's the only standard tool I know that does!
      hit spacebar to put the picked color on the palette.
+     (if using focus-follows-mouse, need to hold down mouse button to keep focus)
    - extensive 3-slider options (and cmyk which is 4-slider),
      can show them all simultaneously and updating.  Bravo!
    - and also a selector something like gimp's triangle selector,

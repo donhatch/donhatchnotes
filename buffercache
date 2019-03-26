@@ -8,7 +8,7 @@ The thing to clear buffer cache on linux:
     Mem:          32167       11219       19703         448        1243       20108
     Swap:         32695        4648       28047
 
-And by the way, to make it swap in that swapped-out stuff so the machine us usable again
+And by the way, to make it swap in that swapped-out stuff so the machine is usable again
 after a swapping disaster:
 sudo swapoff -a
 (that actually permanently disables swap.  which I think I like anyway.)

@@ -456,10 +456,10 @@ ANSWERED QUESTIONS (most recent first):
 	  #         else:
 	  #           ...
 	  # Say this:
-	  #       match = Data()
-	  #       if match.set(re_search(pat0, line)) is not None:
+	  #       match = DataHolder()
+	  #       if match.set(re.search(pat0, line)) is not None:
 	  #         ... do something with match.get() ...
-	  #       elif match.set(re_search(pat1, line)) is not None:
+	  #       elif match.set(re.search(pat1, line)) is not None:
 	  #         ... do something with match.get() ...
 	  #       else:
 	  #         ...

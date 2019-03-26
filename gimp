@@ -96,3 +96,6 @@ A: the help for + (view->zoom release mouse, hover over '+', F1)
           numeric-keyboard-+.
           Okay so I'll reassign the first one to be = instead.
 
+Q: how to see what rgb color is under the cursor?
+A: Pointer dialog
+
