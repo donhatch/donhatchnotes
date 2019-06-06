@@ -27,6 +27,7 @@ On Linux/X:
       yes '' | cat -n | watch -n 0.25 --precise 'read COUNT; echo -n '"'"'PRIMARY/"select": '"'"'; xclip -o -sel p; echo; echo -n '"'"'CLIPBOARD/"copy": '"'"'; xclip -o -sel c; echo; echo -n "$COUNT: "; date "+%Y-%m-%dT%H:%M:%S.%N%:z"'
       for ((n=1;;n++)) do echo $n; done | watch -n 0.25 --precise 'read n; echo -n '"'"'PRIMARY/"select": '"'"'; xclip -o -sel p; echo; echo -n '"'"'CLIPBOARD/"copy": '"'"'; xclip -o -sel c; echo; echo -n "$n: "; date "+%Y-%m-%dT%H:%M:%S.%N%:z"'
       for ((n=1;;n++)) do echo $n; done | watch -n 0.25 --precise 'read n; echo -n '"'"'PRIMARY/"select": '"'"'; xclip -o -sel p; echo; echo -n '"'"'CLIPBOARD/"copy": '"'"'; xclip -o -sel c; echo; echo -n "count=$n pid=$$ "; date "+%Y-%m-%dT%H:%M:%S.%N%:z"'
+    ANSWER, MAYBE: it seems to pause for a long time after I do a bunch of window resizes... but then it eventually resumes.  Maybe it's reacting weirdly to SIGWINCH?
 
   Here's the story.
 
