@@ -1,40 +1,122 @@
+References:
+  "X Selections, Cut Buffers, and Kill Rings." by Jamie Zawinski
+  https://www.jwz.org/doc/x-cut-and-paste.html
+
+  great page on X clipboard
+  http://www.freedesktop.org/wiki/Specifications/ClipboardsWiki
+
+  https://en.wikipedia.org/wiki/X_Window_selection
+
+  https://tronche.com/gui/x/icccm/sec-2.html
+
+  https://wiki.ubuntu.com/ClipboardPersistence
+
+  "responsibilities of clipboard managers, responsibilities of clipboard owners", distilled from the icccm thing I think
+  https://freedesktop.org/wiki/ClipboardManager/
+
+  And some stuff about spying on it here, including an example of "here, xsel took over the selection from xclip". Fascinating, those programs fork into background!  Didn't realize that.
+  https://unix.stackexchange.com/questions/368775/how-do-command-line-clipboard-tools-like-xclip-and-xsel-persist-the-clipboar
+
 On Linux/X:
 
-  A good way to debug what's going on is to use "xclip -o" with one of various
-  -sel options.
+  A good way to monitor PRIMARY and CLIPBOARD (no one really uses SEONDARY for anything)
+    watch -n 0.25 --precise 'echo -n '"'"'PRIMARY/"select": '"'"'; xclip -o -sel p; echo; echo -n '"'"'CLIPBOARD/"copy": '"'"'; xclip -o -sel c; echo; date "+%Y-%m-%dT%H:%M:%S.%N%:z"'
+    (note that it says "Every 0.2s" but it's lying)
+
+    TODO: hmm, the watch stops eventually for some reason... !?  let's put a counter there to see.  Hmm, it's not stopping any more :-(
+      yes '' | cat -n | watch -n 0.25 --precise 'read COUNT; echo -n '"'"'PRIMARY/"select": '"'"'; xclip -o -sel p; echo; echo -n '"'"'CLIPBOARD/"copy": '"'"'; xclip -o -sel c; echo; echo -n "$COUNT: "; date "+%Y-%m-%dT%H:%M:%S.%N%:z"'
+      for ((n=1;;n++)) do echo $n; done | watch -n 0.25 --precise 'read n; echo -n '"'"'PRIMARY/"select": '"'"'; xclip -o -sel p; echo; echo -n '"'"'CLIPBOARD/"copy": '"'"'; xclip -o -sel c; echo; echo -n "$n: "; date "+%Y-%m-%dT%H:%M:%S.%N%:z"'
+      for ((n=1;;n++)) do echo $n; done | watch -n 0.25 --precise 'read n; echo -n '"'"'PRIMARY/"select": '"'"'; xclip -o -sel p; echo; echo -n '"'"'CLIPBOARD/"copy": '"'"'; xclip -o -sel c; echo; echo -n "count=$n pid=$$ "; date "+%Y-%m-%dT%H:%M:%S.%N%:z"'
+
   Here's the story.
 
-  xclip (from man page):
+  xclip -i (default) or -o:
     -sel p[rimary] (default)
     -sel s[econdary]
     -sel c[lipboard]
-  vim (from help):
+  xsel -o (default) or -i:
+    -p (primary) (default)
+    -s (secondary)
+    -b (clipboard)  (because -c means clear; argh)
+  vim (from help; good more complete info here, involving CUT_BUFFER0 through CUT_BUFFER8 too, although I think those are essentially obsolete)
     :help clipboard
     :help x11-selection
     :help x11-cut-buffer
     "* is PRIMARY
     "+ is CLIPBOARD
+
   gnome-terminal
     dragging out or double-clicking to select puts it into PRIMARY
     middle-clicking to paste gets it from PRIMARY
+    shift-ctrl-c copies from highlighted (if any, in which case it's in PRIMARY) to CLIPBOARD
+    shift-ctrl-v pastes from CLIPBOARD
+
   chrome (and other gui apps, no doubt):
-    selecting (or things like ctrl-a) puts it in PRIMARY
-    ctrl-c copies selection to both PRIMARY (if someone stole it) and CLIPBOARD
-    ctrl-v pastes from CLIPBOARD
+    in url bar:
+      single-clicking highlights the whole url but does *not* put it in PRIMARY nor CLIPBOARD (confusing!) and puts it in a state where ctrl-a doesn't put it there either
+      single-clicking again in url (when already highlighted) changes to single cursor; then ctrl-a works (but shift-ctrl-a doesn't unhighlight or anything)
+      ctrl-c when initially all highlighted puts highlighted into PRIMARY and CLIPBOARD
+      starting to type sends it into a bizarre hard-to-describe state machine, in which sometimes ctrl-a does something and sometimes it doesn't  XXX try to nail this down and describe it
+      dragging out a selection does nothing til release; on release, it gets put in PRIMARY
 
-    Note: single clicking on URL highlights/selects but doesn't
-    put it anywhere! If you want it in primary, you have to either:
+    on page:
+      single-clicking does nothing to any selection buffer
+      selecting (by dragging-out or double- or triple-clicking or things like ctrl-a) puts it in PRIMARY only.  when dragging, it goes into PRIMARY continuously with each new character
+      ctrl-c copies highlighted to both PRIMARY (if it's not already there, e.g. someone clobbered it or it was highlighted without putting it there, e.g. by single-clicking) and CLIPBOARD
+      ctrl-x is like ctrl-c but also deletes the text if editable
+      ctrl-v pastes from CLIPBOARD if editable
+      middle-clicking pastes from PRIMARY if editable
+
+    Note: single clicking on URL (or ctrl-a on it) highlights/selects but doesn't
+    put it *anywhere*! If you want it in primary, you have to either:
         - ctrl-a or triple-click to get it in PRIMARY
-        - ctrl-c to get it in both PRIMARY and CLIPBOARD
+        - ctrl-c (or ctrl-x) to get it in both PRIMARY and CLIPBOARD
 
-  Possibly useful programs to have running:
-    - klipper (seems to be broken on latest ubuntu)
-    - glipper
-    - parcellite
+  Possibly useful programs to have running, but they all kind of suck, except for my "watch" invocation above:
+    - klipper
+      - seems to be broken on latest ubuntu
+      - didn't exist on even later ubuntu; I installed it as part of plasma-workspace, but that was a big mistake; subsequently uninstalled
+    - glipper:
+      - clicking on the applet (or typing ctrl-alt-c) shows a confusing muddle of histories of PRIMARY (which it calls the "select" clipboard) and CLIPBOARD (which it calls the "copy" clipboard)
+      - I think whenever something changes (PRIMARY or CLIPBOARD), it puts it at the top of the list
+      - CLIPBOARD ("copy") is in bold with a bullet
+      - clicking on any item puts that in both PRIMARY and CLIPBOARD (and makes the list disappear-- complete ui failure right there)
+    - parcellite:
+      - clicking on the applet shows CLIPBOARD history only.
+      - claims to have -p(rimary) option, but I haven't seen that do anything.
+        in fact I have no idea what any of the examples in the man page are doing.  seems overall pretty unusable.
+
+  Q: is it possible to listen for changes to PRIMARY and CLIPBOARD, rather than the busy-wait "watch" loop I show above?
+  PA:
+    on android: https://stackoverflow.com/questions/22277598/permanently-listen-to-clipboard-changes#answer-22287217
+    in pygtk, this claims to have it but it's wrong: https://askubuntu.com/questions/25964/how-to-check-if-clipboard-contents-have-changed-from-a-script-other-than-pollin
+    python3 and Xlib module have all X stuff, if I can find the call...
+    something about PropertyNotify or SelectionClear or SelectionRequest or SelectionNotify?  (see https://www.x.org/releases/X11R7.7/doc/xproto/x11protocol.html#events:PropertyNotify) ... I don't think so.
+    I'm getting the feeling it can't be done.
+    Oh wait, there is an "XFIXES" extension mentioned on https://freedesktop.org/wiki/ClipboardManager/ ?
+    and here:
+    https://stackoverflow.com/questions/26161916/listen-for-xsetselectionowner#answer-26170965
+    Specifically SelectSelectionInput
+    Try this example program to use xfixes:
+      https://github.com/python-xlib/python-xlib/blob/master/examples/xfixes.py
+    Ok, screen.root.xfixes_select_selection_input() was added only recently (2019/05/19),
+    so it's not in my installed version.  Frustrating :-(
+    Actually more direct example here:
+      https://github.com/python-xlib/python-xlib/blob/a21842a7ba64316401f3a22fa0de493b7f4d8aa6/examples/xfixes-selection-notify.py
+    But still, not supported yet in my version; it gives:
+      AttributeError: module 'Xlib.ext.xfixes' has no attribute 'XFixesSetSelectionOwnerNotifyMask'
+      import Xlib.ext.xfixes
+      dir(Xlib.ext.xfixes)
+        ['HideCursor', 'QueryVersion', 'ShowCursor', '__builtins__', '__cached__', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__', 'extname', 'hide_cursor', 'init', 'query_version', 'rq', 'show_cursor']
+    So I think I have to do it in C/C++ for now.
+    Gag, there's a dearth of examples, even in C/C++ :-(
+    Okay maybe this?
+      https://www.youtube.com/watch?v=dda4xLYx0XM
+      That refers to https://github.com/cdown/clipnotify
+      But it seems to me it has a race.  I filed a bug.
 
 
-  great page on X clipboard (but maybe even more detail than I need?):
-  http://www.freedesktop.org/wiki/Specifications/ClipboardsWiki
+
 
   Q: how the hell do I copy-paste from a terminal window into acroread??
      problem is copying from terminal window only puts it into PRIMARY
@@ -45,10 +127,25 @@ On Linux/X:
       of clipboard and selection", but they aren't great
       since they short-circuit the ctrl-c/ctrl-v functionality
       of programs like chrome.
-  A: xclip -o -sel p | xclip -sel c
+  A: Use xclip:
+       sh -c 'xclip -o -sel p | xclip -i -sel c'
+       xclip -o -sel p | xclip -i -sel c
+       xclip -o -sel p | xclip -sel c
+     Or use xsel (this doesn't work as a keyboard shortcut for some reason!?)
+       sh -c 'xsel | xsel -b'
+       xsel | xsel -b
      Or use vim:
         - "+yy or whatever to yank into clipboard.
         - :let @+ = @*
+     Or click on glipper (or ctrl-alt-c) which will bring up sort-of-history in which PRIMARY is first, click on that
+     (or anything else in the history) to put it in both PRIMARY and SECONDARY
+
+     To make a keyboard shortcut for it:
+       Settings -> Preferences -> Keyboard -> Shortcuts -> Add custom shortcut
+Name: copy primary to clipboard
+Command: sh -c 'xclip -o -sel p | xclip -i -sel c'
+         double-click on one of the "unassigned"s, and type in the desired accelerator (e.g. ctrl-shift-c)
+     (not sure how to do it from command line; neither gsettings nor dconf seem to work, despite various web advice)
 
   Q: copy something from a cmd or console2 on windows...
      can paste it back,
@@ -56,7 +153,7 @@ On Linux/X:
      but, can paste it into gnome-terminal on linux (through synergy),
      then copy-paste it from there to thunderbird.  what the fuck??
      Really need to monitor what's happening to get a clear idea of how things work.
-     TODO: revisit this using xclip to see what's going on
+     TODO: revisit this using the "watch" command to see what's going on
 
 
 Q: (linux) when I've selected lots,
@@ -73,6 +170,19 @@ A: A couple of nice ways:
          "*p
          "+p
 
+
+Q: is SECONDARY interesting?
+PA: not sure.  see http://www.cs.man.ac.uk/~lindsec/secondary-selection.html
+    also the proposal on https://www.freedesktop.org/wiki/Specifications/ClipboardsWiki/ which I need to think more about, I think
+
+Q: I think a program like xclipboard needs to be running in order to make all this work?
+   (See NOTES at bottom of xsel man page).  There's no xclipboard running,
+   but when I run it, it says "Error: another clipboard is already running".
+   What's that other program?
+PA: `psgrep clip` shows:
+   /usr/lib/x86_64-linux-gnu/cinnamon-settings-daemon/csd-clipboard
+   when I kill that, it allows xclipboard to run (and reveals that it's just another incomprehensible gui, that flakily sometimes sees selection change)
+   and killing it doesn't prevent the general primary/clipboard behavior from happening, so I don't really get what's being said.
 
 On Windows:
     Clipboard stack would be nice.
