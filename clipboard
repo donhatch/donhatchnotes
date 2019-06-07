@@ -14,20 +14,24 @@ References:
   "responsibilities of clipboard managers, responsibilities of clipboard owners", distilled from the icccm thing I think
   https://freedesktop.org/wiki/ClipboardManager/
 
-  And some stuff about spying on it here, including an example of "here, xsel took over the selection from xclip". Fascinating, those programs fork into background!  Didn't realize that.
-  https://unix.stackexchange.com/questions/368775/how-do-command-line-clipboard-tools-like-xclip-and-xsel-persist-the-clipboar
+  And some stuff about spying on it here, including an example of "here, xsel took over the selection from xclip".
+  Fascinating, those programs fork into background and stick around until someone else wants to own the clipboard!  Didn't realize that.
+  Also shows how to see who owns a given selection (but for xprop and xwininfo, doesn't show much):
+
+
+  https://unix.stackexchange.com/questions/139191/whats-the-difference-between-primary-selection-and-clipboard-buffer
+  https://unix.stackexchange.com/questions/213840/how-to-toggle-or-turn-off-text-selection-being-sent-to-the-clipboard#answer-213843
+  https://askubuntu.com/questions/12047/inconsistent-copy-and-paste-behaviour-is-there-a-fix
 
 On Linux/X:
 
-  A good way to monitor PRIMARY and CLIPBOARD (no one really uses SEONDARY for anything)
-    watch -n 0.25 --precise 'echo -n '"'"'PRIMARY/"select": '"'"'; xclip -o -sel p; echo; echo -n '"'"'CLIPBOARD/"copy": '"'"'; xclip -o -sel c; echo; date "+%Y-%m-%dT%H:%M:%S.%N%:z"'
-    (note that it says "Every 0.2s" but it's lying)
-
-    TODO: hmm, the watch stops eventually for some reason... !?  let's put a counter there to see.  Hmm, it's not stopping any more :-(
-      yes '' | cat -n | watch -n 0.25 --precise 'read COUNT; echo -n '"'"'PRIMARY/"select": '"'"'; xclip -o -sel p; echo; echo -n '"'"'CLIPBOARD/"copy": '"'"'; xclip -o -sel c; echo; echo -n "$COUNT: "; date "+%Y-%m-%dT%H:%M:%S.%N%:z"'
-      for ((n=1;;n++)) do echo $n; done | watch -n 0.25 --precise 'read n; echo -n '"'"'PRIMARY/"select": '"'"'; xclip -o -sel p; echo; echo -n '"'"'CLIPBOARD/"copy": '"'"'; xclip -o -sel c; echo; echo -n "$n: "; date "+%Y-%m-%dT%H:%M:%S.%N%:z"'
-      for ((n=1;;n++)) do echo $n; done | watch -n 0.25 --precise 'read n; echo -n '"'"'PRIMARY/"select": '"'"'; xclip -o -sel p; echo; echo -n '"'"'CLIPBOARD/"copy": '"'"'; xclip -o -sel c; echo; echo -n "count=$n pid=$$ "; date "+%Y-%m-%dT%H:%M:%S.%N%:z"'
-    ANSWER, MAYBE: it seems to pause for a long time after I do a bunch of window resizes... but then it eventually resumes.  Maybe it's reacting weirdly to SIGWINCH?
+  A good way to monitor PRIMARY and CLIPBOARD (no one really uses SECONDARY for anything):
+    watch -n 0.25 'echo -n '"'"'PRIMARY/"select": '"'"'; xclip -o -sel p; echo; echo -n '"'"'CLIPBOARD/"copy": '"'"'; xclip -o -sel c; echo; date "+%Y-%m-%dT%H:%M:%S.%N%:z"'
+      (note that it says "Every 0.2s" but it's lying)
+      (note, do *not* use --precise, since that freezes for a while after dragging window resize)
+    for ((n=1;;n++)) do echo $n; done | watch -n 0.25 'read n; echo -n '"'"'PRIMARY/"select": '"'"'; xclip -o -sel p; echo; echo -n '"'"'CLIPBOARD/"copy": '"'"'; xclip -o -sel c; echo; echo -n "$n: "; date "+%Y-%m-%dT%H:%M:%S.%N%:z"'
+    for ((n=1;;n++)) do echo $n; done | watch -n 0.25 'read n; echo -n '"'"'PRIMARY/"select": '"'"'; xclip -o -sel p; echo; echo -n '"'"'CLIPBOARD/"copy": '"'"'; xclip -o -sel c; echo; echo -n "count=$n pid=$$ "; date "+%Y-%m-%dT%H:%M:%S.%N%:z"'
+    for ((n=1;;n++)) do echo $n; done | watch -n 0.25 'read n; echo -n '"'"'PRIMARY/"select": '"'"'; xclip -o -sel p; echo; echo -n '"'"'CLIPBOARD/"copy": '"'"'; xclip -o -sel c; echo; xprop -notype -root CUT_BUFFER0; echo -n "count=$n pid=$$ "; date "+%Y-%m-%dT%H:%M:%S.%N%:z"'
 
   Here's the story.
 
@@ -39,12 +43,15 @@ On Linux/X:
     -p (primary) (default)
     -s (secondary)
     -b (clipboard)  (because -c means clear; argh)
-  vim (from help; good more complete info here, involving CUT_BUFFER0 through CUT_BUFFER8 too, although I think those are essentially obsolete)
+  vim (from help; good more complete info here, involving its use of CUT_BUFFER0 which it uses as a kind of backup)
     :help clipboard
     :help x11-selection
     :help x11-cut-buffer
-    "* is PRIMARY
-    "+ is CLIPBOARD
+    "* is PRIMARY (sort of. yanking into it writes to PRIMARY, pasting from it gets from PRIMARY if it exists, else CUT_BUFFER0)
+    "+ is CLIPBOARD (sort of. yanking into it writes to CLIPBOARD (which is handed over to xclipboard if running), pasting from it gets from PRIMARY if it exists, else CUT_BUFFER0)
+    - writes contents of any owned selection to CUT_BUFFER0, and releases it, when exiting or becoming suspended.  but doesn't restore anything on start or resume.
+        xprop -notype -root CUT_BUFFER0
+    - for a while I thought I was observing it owning CLIPBOARD (if xclipboard not running), but now I'm observing it immediately hands any "+ yank into a background `xsel --logfile /dev/null -i --clipboard`.  weird.
 
   gnome-terminal
     dragging out or double-clicking to select puts it into PRIMARY
@@ -73,19 +80,52 @@ On Linux/X:
         - ctrl-a or triple-click to get it in PRIMARY
         - ctrl-c (or ctrl-x) to get it in both PRIMARY and CLIPBOARD
 
-  Possibly useful programs to have running, but they all kind of suck, except for my "watch" invocation above:
-    - klipper
-      - seems to be broken on latest ubuntu
-      - didn't exist on even later ubuntu; I installed it as part of plasma-workspace, but that was a big mistake; subsequently uninstalled
+  "Clipboard managers": these all kind of suck, except for my "watch" invocation above.
     - glipper:
-      - clicking on the applet (or typing ctrl-alt-c) shows a confusing muddle of histories of PRIMARY (which it calls the "select" clipboard) and CLIPBOARD (which it calls the "copy" clipboard)
+      - this is the only one that tracks PRIMARY (which it calls the "select" clipboard) as well as CLIPBOARD (which it calls the "copy" clipboard).
+      - clicking on the applet (or typing ctrl-alt-c) shows a muddle of histories of PRIMARY and CLIPBOARD.
       - I think whenever something changes (PRIMARY or CLIPBOARD), it puts it at the top of the list
       - CLIPBOARD ("copy") is in bold with a bullet
       - clicking on any item puts that in both PRIMARY and CLIPBOARD (and makes the list disappear-- complete ui failure right there)
+      - you have to killall it to make it exit
     - parcellite:
-      - clicking on the applet shows CLIPBOARD history only.
+      - tracks CLIPBOARD only.
+      - clicking on an item in history puts it in only CLIPBOARD.
       - claims to have -p(rimary) option, but I haven't seen that do anything.
         in fact I have no idea what any of the examples in the man page are doing.  seems overall pretty unusable.
+      - hmm, when I kill an "xsel --logfile /dev/null -i --clipboard" that's holding CLIPBOARD in the background,
+        the watch shows CLIPBOARD temporarily disappears, but then parcellite restores it and takes it over!
+        similarly if I suspend exit a vim that's holding CLIPBOARD (don't know why it does sometimes).
+    - xfce4-clipman
+      - tracks CLIPBOARD only.
+      - clicking on an item in history puts it in both PRIMARY and CLIPBOARD.
+    - diodon
+      - tracks CLIPBOARD only.
+      - clicking on an item in history puts it in only CLIPBOARD.
+    - klipper
+      - seems to be broken on recent ubuntu
+      - didn't exist on even later ubuntu; I installed it as part of plasma-workspace, but that was a big mistake; subsequently purged it
+      - hmm, there's this: https://github.com/yshui/klipper, with description:
+         "Klipper is arguably the best clipboard management tool on Linux.
+          Unfortunately klipper can only installed as part of plasma-workspace. which will pull in a large part of KDE.
+          What I did here is split klipper out of plasma-workspace.
+          There're still some dependency on kde-frameworks, but this is way better than before."
+        No idea how to build it, though.
+    - xclipboard
+      - usually fails to start, with "Error: another clipboard is already running"
+        (temporariliy killing /usr/lib/x86_64-linux-gnu/cinnamon-settings-daemon/csd-clipboard seems to help;
+         not sure what that process is)
+      - omg this interface is awful
+      - tracks CLIPBOARD only
+      - each time something gets put in CLIPBOARD, 2 entries are appended (wtf?)
+      - cycling Next and Prev immediately puts that in CLIPBOARD
+      - grabs ownership of CLIPBOARD when it starts
+    - `gpaste-client ui`
+      - install:  `sudo apt install gnome-shell-extensions-gpaste gpaste`,  then alt-f2 r
+         but I don't see any tray icon :-(
+         and the advice to use gnome-tweak-tool -> Extensions doesn't work, there is no Extensions
+
+"
 
   Q: is it possible to listen for changes to PRIMARY and CLIPBOARD, rather than the busy-wait "watch" loop I show above?
   PA:
@@ -101,7 +141,7 @@ On Linux/X:
     Try this example program to use xfixes:
       https://github.com/python-xlib/python-xlib/blob/master/examples/xfixes.py
     Ok, screen.root.xfixes_select_selection_input() was added only recently (2019/05/19),
-    so it's not in my installed version.  Frustrating :-(
+    so it's not in my installed version.  rustrating :-(
     Actually more direct example here:
       https://github.com/python-xlib/python-xlib/blob/a21842a7ba64316401f3a22fa0de493b7f4d8aa6/examples/xfixes-selection-notify.py
     But still, not supported yet in my version; it gives:
@@ -116,8 +156,45 @@ On Linux/X:
       That refers to https://github.com/cdown/clipnotify
       But it seems to me it has a race.  I filed a bug.
 
+  Q: wait a minute!  strace xclipboard is waiting nicely, not busy-waiting!  how's it doing that?
+  A: oh I see, it always grabs ownership of CLIPBOARD, and waits til someone else takes it away before waking up and grabbing it back.
+     So that doesn't tell us how to wait non-intrusively.
 
+  Q: but then what is glipper doing??  It actually notices when PRIMARY or CLIPBOARD changes, but without owning it!
 
+  Q: how to see what process *owns* PRIMARY and CLIPBOARD?  (note, it may not even be on the local machine)
+  PA:   Start here: https://unix.stackexchange.com/questions/368775/how-do-command-line-clipboard-tools-like-xclip-and-xsel-persist-the-clipboar
+
+  Q: is there a way to map from window id to process, to aid with that?
+  PA:
+    - `xdotool getwindowpid <id>` does it, but relies on the _NET_WM_PID property (same as `xprop -id <id>`)
+    - `xlsclients -a -l` and `wctrl -lp` shows some stuff (even remote) but not pids, and the xclip/xsel window doesn't apper
+    - some hints here:  https://unix.stackexchange.com/questions/5478/what-process-created-this-x11-window#answer-84981
+        particularly the `xwininfo -root -tree` trick, but it's all just hints really; the "xsel" or "xclip -i" that owns the selection generally just has a 1x1+0+0 window that's a direct child of the root
+        whoa, and then there's a way to do it for hackers.
+        https://stackoverflow.com/questions/37283179/python-pid-to-x11-window-id-using-xresqueryclientids  for more info on an extension that may help.
+        specifically, XResQueryClientIds in extension X-Resource 1.2.
+        yes! had to install libxcb-res0-dev in order to compile the program; calling it windowid_to_pid.
+        then:
+          watch -n 1 './who_owns_selection PRIMARY; ./windowid_to_pid $(./who_owns_selection PRIMARY); ./who_owns_selection CLIPBOARD; ./windowid_to_pid $(./who_owns_selection CLIPBOARD)'
+
+        unfortunately, in the case of xsel, the process has exited... BUT, can find it by psgrepping for numbers after that; it's usually 2 (but I've seen as many as 4) processes later:
+          psgrep 76129
+          psgrep 76130
+          psgrep 76131
+            1 S donhatch  76131      1  0  80   0 -  5578 x64_sy 02:58 ?        00:00:00 xsel
+        and in the case of xprop -i, it's 1 or more processes later:
+          psgrep 79328
+          psgrep 79329
+            1 S donhatch  79329      1  0  80   0 -  8844 x64_sy 03:00 pts/36   00:00:00 xclip -i
+
+        TODO: make a python program, using some xcb wrapper (xpyb? xcffib which is "a drop in replacement for xpyb"?) that does all this nicely:
+          - queries what window id owns the selection
+          - maps that window id to process id
+          - prints the process command (maybe searching several pids later?), using ps -f -p <pid>, maybe
+        Ok, got something:
+          watch -n 1 'pwid=$(./who_owns_selection PRIMARY);   ppid0=$(./windowid_to_pid $pwid 2>&1 | awk '"'"'{print $2}'"'"'); ppid=$ppid0; while kill -0 "$ppid" 2>&1 | grep "No such process" > /dev/null; do let ppid++; done; echo -n "  PRIMARY: id=$pwid pid=$ppid0+$(($ppid-$ppid0)) = $ppid "; ps -f -p $ppid -o command | tail -1; \
+                      cwid=$(./who_owns_selection CLIPBOARD); cpid0=$(./windowid_to_pid $cwid 2>&1 | awk '"'"'{print $2}'"'"'); cpid=$cpid0; while kill -0 "$cpid" 2>&1 | grep "No such process" > /dev/null; do let cpid++; done; echo -n "CLIPBOARD: id=$cwid pid=$cpid0+$(($cpid-$cpid0)) = $cpid "; ps -f -p $cpid -o command | tail -1'
 
   Q: how the hell do I copy-paste from a terminal window into acroread??
      problem is copying from terminal window only puts it into PRIMARY
@@ -145,7 +222,7 @@ On Linux/X:
        Settings -> Preferences -> Keyboard -> Shortcuts -> Add custom shortcut
 Name: copy primary to clipboard
 Command: sh -c 'xclip -o -sel p | xclip -i -sel c'
-         double-click on one of the "unassigned"s, and type in the desired accelerator (e.g. ctrl-shift-c)
+         double-click on one of the "unassigned"s, and type in the desired accelerator (e.g. super-c)
      (not sure how to do it from command line; neither gsettings nor dconf seem to work, despite various web advice)
 
   Q: copy something from a cmd or console2 on windows...
@@ -182,8 +259,25 @@ Q: I think a program like xclipboard needs to be running in order to make all th
    What's that other program?
 PA: `psgrep clip` shows:
    /usr/lib/x86_64-linux-gnu/cinnamon-settings-daemon/csd-clipboard
-   when I kill that, it allows xclipboard to run (and reveals that it's just another incomprehensible gui, that flakily sometimes sees selection change)
+   when I kill that, it allows xclipboard to run (and reveals that it's just another incomprehensible gui, see notes earlier)
    and killing it doesn't prevent the general primary/clipboard behavior from happening, so I don't really get what's being said.
+PA: conjecture: it's a clipboard manager as mentioned in various places (e.g. the vim help pages),
+    that takes over when a process holding the selection exits without handing it over to anyone.
+    Q: Can I prove that?
+    A: yes.
+       - if xclipboard is the one holding the CLIPBOARD selection, and I quit from it, then the selection disappears, according to the `watch` invocation:
+                Error: target STRING not available
+       - if I kill the `xsel` or `xprop -i` process that's holding either selection (e.g. after `date | xsel` or `date | xprop -i`),
+         then the selection disappears.
+       - if vim is holding PRIMARY and/or SECONDARY, and no clipboard managers are running, then both PRIMARY and CLIPBOARD get lost on vim exit.
+         but:
+          - if csd-clipboard is running, vim behavior doesn't seem to change
+          - if xclipboard is running, vim hands CLIPBOARD selections over immediately to it, so that doesn't get lost on exit (but PRIMARY still does)
+
+          - I *thought* I saw: if glipper is running, vim hands CLIPBOARD over to a process that no longer exists, then `./windowid_to_pid $(./who_owns_selection CLIPBOARD)`
+            shows that, a few processes later, there's something like `xsel -i -somethingsomething /dev/null` .  But I'm having a hard time reproducing.
+            OH! something wrote that, when vim owned both PRIMARY and SECONDARY and then suspended!
+            no wait, I think vim sometimes immediately writes clipboard to that!   but sometimes it doesn't. I'm confused.
 
 On Windows:
     Clipboard stack would be nice.
