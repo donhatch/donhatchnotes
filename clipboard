@@ -16,8 +16,7 @@ References:
 
   And some stuff about spying on it here, including an example of "here, xsel took over the selection from xclip".
   Fascinating, those programs fork into background and stick around until someone else wants to own the clipboard!  Didn't realize that.
-  Also shows how to see who owns a given selection (but for xprop and xwininfo, doesn't show much):
-
+  Also shows how to see who owns a given selection (but for xprop and xwininfo, doesn't show much... but can drill more in other ways; see below):
 
   https://unix.stackexchange.com/questions/139191/whats-the-difference-between-primary-selection-and-clipboard-buffer
   https://unix.stackexchange.com/questions/213840/how-to-toggle-or-turn-off-text-selection-being-sent-to-the-clipboard#answer-213843
@@ -47,17 +46,22 @@ On Linux/X:
     :help clipboard
     :help x11-selection
     :help x11-cut-buffer
-    "* is PRIMARY (sort of. yanking into it writes to PRIMARY, pasting from it gets from PRIMARY if it exists, else CUT_BUFFER0)
-    "+ is CLIPBOARD (sort of. yanking into it writes to CLIPBOARD (which is handed over to xclipboard if running), pasting from it gets from PRIMARY if it exists, else CUT_BUFFER0)
+    "* is PRIMARY (sort of. yanking into it writes to PRIMARY (which is handed over to gpaste-daemon if running), pasting from it gets from PRIMARY if it exists, else CUT_BUFFER0)
+    "+ is CLIPBOARD (sort of. yanking into it writes to CLIPBOARD (which is handed over to xclipboard or gpaste-daemon (in preference order) if running), pasting from it gets from PRIMARY if it exists, else CUT_BUFFER0)
     - writes contents of any owned selection to CUT_BUFFER0, and releases it, when exiting or becoming suspended.  but doesn't restore anything on start or resume.
-        xprop -notype -root CUT_BUFFER0
-    - for a while I thought I was observing it owning CLIPBOARD (if xclipboard not running), but now I'm observing it immediately hands any "+ yank into a background `xsel --logfile /dev/null -i --clipboard`.  weird.
+      to see what's in CUT_BUFFER0: xprop -notype -root CUT_BUFFER0
+      Also, when that happens, if gpaste-daemon is running, even if it didn't previously own anything,
+      it grabs ownership of PRIMARY and copies CLIPBOARD to it (rude! wtf?)
+    - for a while I thought I was observing vim CLIPBOARD (if neither xclipboard nor gpaste-daemon is running), but now I'm observing it immediately hands any "+ yank into a background `xsel --logfile /dev/null -i --clipboard`.  weird.
 
   gnome-terminal
     dragging out or double-clicking to select puts it into PRIMARY
     middle-clicking to paste gets it from PRIMARY
     shift-ctrl-c copies from highlighted (if any, in which case it's in PRIMARY) to CLIPBOARD
     shift-ctrl-v pastes from CLIPBOARD
+
+  xterm
+    like gnome-terminal, presumably... except selecting puts it in both PRIMARY and CUT_BUFFER0  (learned this from vim: :help x11-cut-buffer)
 
   chrome (and other gui apps, no doubt):
     in url bar:
@@ -273,11 +277,16 @@ PA: conjecture: it's a clipboard manager as mentioned in various places (e.g. th
          but:
           - if csd-clipboard is running, vim behavior doesn't seem to change
           - if xclipboard is running, vim hands CLIPBOARD selections over immediately to it, so that doesn't get lost on exit (but PRIMARY still does)
-
           - I *thought* I saw: if glipper is running, vim hands CLIPBOARD over to a process that no longer exists, then `./windowid_to_pid $(./who_owns_selection CLIPBOARD)`
             shows that, a few processes later, there's something like `xsel -i -somethingsomething /dev/null` .  But I'm having a hard time reproducing.
             OH! something wrote that, when vim owned both PRIMARY and SECONDARY and then suspended!
             no wait, I think vim sometimes immediately writes clipboard to that!   but sometimes it doesn't. I'm confused.
+          - hmm, and now that I installed gpaste, gpaste-daemon is also in the mix, grabbing PRIMARY and/or CLIPBOARD
+            and doing sometimes rude things with them (e.g. when vim exits, it grabs ownership of PRIMARY)
+            and copies CLIPBOARD into it!?)
+
+Q: who started gpaste-daemon?  (I installed gpaste explicitly, but I'm not sure what that set in motion)
+A: it gets started automatically when I run "gpaste-client ui"
 
 On Windows:
     Clipboard stack would be nice.
@@ -290,6 +299,7 @@ On Windows:
         PureText (has "paste as unformatted)
         Yankee Clipper
         something using AutoHotKey
+        gpaste
     A bunch of them described here: http://www.nonags.com/nonags/clipb.html
 
     But... do we really need a menu?
