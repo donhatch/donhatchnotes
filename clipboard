@@ -25,12 +25,11 @@ References:
 On Linux/X:
 
   A good way to monitor PRIMARY and CLIPBOARD (no one really uses SECONDARY for anything):
-    watch -n 0.25 'echo -n '"'"'PRIMARY/"select": '"'"'; xclip -o -sel p; echo; echo -n '"'"'CLIPBOARD/"copy": '"'"'; xclip -o -sel c; echo; date "+%Y-%m-%dT%H:%M:%S.%N%:z"'
+    for ((n=1;;n++)) do echo $n; done | watch -n 0.25 -t 'read n; echo -n '"'"'PRIMARY/"select": '"'"'; xclip -o -sel p; echo; echo -n '"'"'CLIPBOARD/"copy": '"'"'; xclip -o -sel c; echo; xprop -notype -root CUT_BUFFER0; echo -n "count=$n pid=$$ "; date "+%Y-%m-%dT%H:%M:%S.%N%:z"'
       (note that it says "Every 0.2s" but it's lying)
       (note, do *not* use --precise, since that freezes for a while after dragging window resize)
-    for ((n=1;;n++)) do echo $n; done | watch -n 0.25 'read n; echo -n '"'"'PRIMARY/"select": '"'"'; xclip -o -sel p; echo; echo -n '"'"'CLIPBOARD/"copy": '"'"'; xclip -o -sel c; echo; echo -n "$n: "; date "+%Y-%m-%dT%H:%M:%S.%N%:z"'
-    for ((n=1;;n++)) do echo $n; done | watch -n 0.25 'read n; echo -n '"'"'PRIMARY/"select": '"'"'; xclip -o -sel p; echo; echo -n '"'"'CLIPBOARD/"copy": '"'"'; xclip -o -sel c; echo; echo -n "count=$n pid=$$ "; date "+%Y-%m-%dT%H:%M:%S.%N%:z"'
-    for ((n=1;;n++)) do echo $n; done | watch -n 0.25 'read n; echo -n '"'"'PRIMARY/"select": '"'"'; xclip -o -sel p; echo; echo -n '"'"'CLIPBOARD/"copy": '"'"'; xclip -o -sel c; echo; xprop -notype -root CUT_BUFFER0; echo -n "count=$n pid=$$ "; date "+%Y-%m-%dT%H:%M:%S.%N%:z"'
+
+  (and look for ./who_owns_selection below for a companion watch command, which uses some helper binaries)
 
   Here's the story.
 
@@ -48,11 +47,11 @@ On Linux/X:
     :help x11-cut-buffer
     "* is PRIMARY (sort of. yanking into it writes to PRIMARY (which is handed over to gpaste-daemon if running), pasting from it gets from PRIMARY if it exists, else CUT_BUFFER0)
     "+ is CLIPBOARD (sort of. yanking into it writes to CLIPBOARD (which is handed over to xclipboard or gpaste-daemon (in preference order) if running), pasting from it gets from PRIMARY if it exists, else CUT_BUFFER0)
-    - writes contents of any owned selection to CUT_BUFFER0, and releases it, when exiting or becoming suspended.  but doesn't restore anything on start or resume.
+    - writes contents of any owned selection (CLIPBOARD if both owned) to CUT_BUFFER0, and releases it, when exiting or becoming suspended.  but doesn't restore anything on start or resume.
       to see what's in CUT_BUFFER0: xprop -notype -root CUT_BUFFER0
       Also, when that happens, if gpaste-daemon is running, even if it didn't previously own anything,
-      it grabs ownership of PRIMARY and copies CLIPBOARD to it (rude! wtf?)
-    - for a while I thought I was observing vim CLIPBOARD (if neither xclipboard nor gpaste-daemon is running), but now I'm observing it immediately hands any "+ yank into a background `xsel --logfile /dev/null -i --clipboard`.  weird.
+      it grabs ownership of PRIMARY, and copies CLIPBOARD to it (rude! wtf?)
+    - for a while I thought I was observing vim taking ownership of CLIPBOARD when it puts something in it (if neither xclipboard nor gpaste-daemon is running), but now I'm observing it immediately hands any "+ yank into a background `xsel --logfile /dev/null -i --clipboard`.  weird.
 
   gnome-terminal
     dragging out or double-clicking to select puts it into PRIMARY
@@ -181,6 +180,7 @@ On Linux/X:
         yes! had to install libxcb-res0-dev in order to compile the program; calling it windowid_to_pid.
         then:
           watch -n 1 './who_owns_selection PRIMARY; ./windowid_to_pid $(./who_owns_selection PRIMARY); ./who_owns_selection CLIPBOARD; ./windowid_to_pid $(./who_owns_selection CLIPBOARD)'
+          (refined to something better below)
 
         unfortunately, in the case of xsel, the process has exited... BUT, can find it by psgrepping for numbers after that; it's usually 2 (but I've seen as many as 4) processes later:
           psgrep 76129
@@ -197,8 +197,8 @@ On Linux/X:
           - maps that window id to process id
           - prints the process command (maybe searching several pids later?), using ps -f -p <pid>, maybe
         Ok, got something:
-          watch -n 1 'pwid=$(./who_owns_selection PRIMARY);   ppid0=$(./windowid_to_pid $pwid 2>&1 | awk '"'"'{print $2}'"'"'); ppid=$ppid0; while kill -0 "$ppid" 2>&1 | grep "No such process" > /dev/null; do let ppid++; done; echo -n "  PRIMARY: id=$pwid pid=$ppid0+$(($ppid-$ppid0)) = $ppid "; ps -f -p $ppid -o command | tail -1; \
-                      cwid=$(./who_owns_selection CLIPBOARD); cpid0=$(./windowid_to_pid $cwid 2>&1 | awk '"'"'{print $2}'"'"'); cpid=$cpid0; while kill -0 "$cpid" 2>&1 | grep "No such process" > /dev/null; do let cpid++; done; echo -n "CLIPBOARD: id=$cwid pid=$cpid0+$(($cpid-$cpid0)) = $cpid "; ps -f -p $cpid -o command | tail -1'
+          watch -n 1 -t 'pwid=$(./who_owns_selection PRIMARY);   ppid0=$(./windowid_to_pid $pwid 2>&1 | awk '"'"'{print $2}'"'"'); ppid=$ppid0; while kill -0 "$ppid" 2>&1 | grep "No such process" > /dev/null; do let ppid++; done; echo -n "  PRIMARY: id=$pwid pid=$ppid0+$(($ppid-$ppid0)) = $ppid "; ps -f -p $ppid -o command | tail -1; \
+                         cwid=$(./who_owns_selection CLIPBOARD); cpid0=$(./windowid_to_pid $cwid 2>&1 | awk '"'"'{print $2}'"'"'); cpid=$cpid0; while kill -0 "$cpid" 2>&1 | grep "No such process" > /dev/null; do let cpid++; done; echo -n "CLIPBOARD: id=$cwid pid=$cpid0+$(($cpid-$cpid0)) = $cpid "; ps -f -p $cpid -o command | tail -1'
 
   Q: how the hell do I copy-paste from a terminal window into acroread??
      problem is copying from terminal window only puts it into PRIMARY

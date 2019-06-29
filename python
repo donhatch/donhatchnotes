@@ -436,7 +436,7 @@ QUESTIONS (most recent first):
     Q: Why would I want to use a tuple instead of a list? (Faster for const?)
 
 ANSWERED QUESTIONS (most recent first):
-    Q: Cascading regular expression matching logic using re is awkward.
+    Q: Cascading regular expression matching logic using re.match is awkward.
        Is there a better way?
     A: I've been using the following which works pretty well.
 	  # https://stackoverflow.com/questions/1663995/how-to-avoid-writing-request-get-get-twice-in-order-to-print-it#answer-1664013

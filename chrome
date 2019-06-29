@@ -56,6 +56,107 @@ Q: when I execute google-chrome (or google-chrome-beta) from command line,
 PA: looks like if there's a ":" in the url it opens a new window!?
    so don't to that.
 
+Q: how to open something from command line, to an *existing* window/tab?
+   (e.g. I regenerated a file and I want to make it refresh, from command line)
+PA: seems like it's not supported.
+   Relevant links:
+     https://askubuntu.com/questions/150705/open-url-in-chromium-and-switching-to-existing-tab-open-if-url-already-open
+     https://stackoverflow.com/questions/5588658/auto-reload-browser-when-i-save-changes-to-html-file-in-chrome/29466420
+     https://bugs.chromium.org/p/chromium/issues/detail?id=661125
+     https://chrome.google.com/webstore/detail/refresh-monkey/ljngnafhejmefmijjoedbclkadhacebd?hl=en
+     https://sakthipriyan.com/2016/02/15/auto-refresh-chrome-when-files-modified.html
+    Q: what's a decent workaround?  an extension to help? a wrapper page
+     to auto refresh the page on file change?  Or just every 5 seconds or so?
+    PA: ooh someone has a hack that might work!
+        http://razius.com/articles/auto-refreshing-google-chrome-on-file-changes/
+        Bleah, can't seem to get xdotool to send keystrokes to chrome windows for some reason?
+        Oh!  Just need to run "xdotool windowactivate 0x5c0002d" before the other.
+        Still, pretty fragile.
+    PA: I'm trying the "Super Auto Refresh Plus" extension.
+        Ooh it's nice, it has a countdown timer in the extension icon!  Cool!
+        Things I don't like:
+        - It keeps updating even when the tab isn't visible
+          Verified by putting this inside the html:
+           <script> console.log("LOADING! "+new Date().toString()); </script>
+        - timing isn't right.  I'd like it to do the following, solidly:
+            3<1sec>2<1sec>1<1sec>bam! blank for a moment while it refreshes, then come back with 3<1sec>2<1sec> etc.
+          Instead, it updates flakily, sometimes showing the 3 and sometimes not, sometimes showing 0 and sometimes not, sometimes showing the final 1 for half a second and then disappearing.
+
+        Let's see, can I do a poor man's version of this?
+        I can do this from the console once:
+          (()=>{
+              console.log("5...");
+              document.title = "5...";
+              setTimeout(()=>{
+                  console.log("4...");
+                  document.title = "4...";
+                  setTimeout(()=>{
+                      console.log("3...");
+                      document.title = "3...";
+                      setTimeout(()=>{
+                          console.log("2...");
+                          document.title = "2...";
+                          setTimeout(()=>{
+                              console.log("1...");
+                              document.title = "1...";
+                              setTimeout(()=>{
+                                console.log("RELOADING!");
+                                document.title = "0!!!!!";
+                                window.location.reload(true);
+                                console.log("RELOADED!");
+                                setTimeout(()=>{
+                                    console.log("haHA!");  // this never comes out
+                                    document.title = "haHA!";  // this never comes out
+                                }, 1000);
+                              }, 1000);
+                          }, 1000);
+                      }, 1000);
+                  }, 1000);
+              }, 1000);
+          })();
+        Or, put it in a <script> in the file and it gets repeated.  Cool.
+        So then can I set some extension title to it?
+        It *does* have somewhat flaky timing, though... the console messages are responsive, the tab title change
+        lags behind by a quarter second or so.
+        Interesting to note: if I switch to another tab, that one's countdowns slow down to about half speed!
+
+        Rewriting using a promise:
+
+        (()=>{
+          const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+          console.log("5...");
+          document.title = "5...";
+          delay(1000).then(()=>{
+            console.log("4...");
+            document.title = "4...";
+            return delay(1000);
+          }).then(()=>{
+            console.log("3...");
+            document.title = "3...";
+            return delay(1000);
+          }).then(()=>{
+            console.log("2...");
+            document.title = "2...";
+            return delay(1000);
+          }).then(()=>{
+            console.log("1...");
+            document.title = "1...";
+            return delay(1000);
+          }).then(()=>{
+            console.log("RELOADING!");
+            document.title = "0!!!!!";
+            window.location.reload(true);
+            console.log("RELOADED!");
+            return delay(1000);
+          }).then(()=>{
+            console.log("haHA!");  // this never comes out
+            document.title = "haHA!";  // this never comes out
+          });
+        })();
+
+
+
+
 Q: vim hotkey to open cs to the right place?
    maybe *?
    possible resources which aren't panning out yet:
@@ -241,6 +342,13 @@ A:
 
 EXTENSIONS:
 
+Q: how do I customize the icon menu?
+PA: maybe this is relevant: https://stackoverflow.com/questions/19468429/add-contextmenu-items-to-a-chrome-extensions-browser-action-button
+
+Q: what's the quickest way to reload an extension after modifying source code?
+PA: hit ctrl-R in its background page, that will reload the background page, but not the manifest.
+    To get the manifest, I think you need to do "Load unpacked" in the "Manage Extensions" (which means "Manage this extension") page?
+
 Q: how do I make a user script?
 A: make a chrome extension
 
@@ -249,12 +357,10 @@ PA: see this answer, which covers extension code (background page, content scrip
   http://stackoverflow.com/questions/9915311/chrome-extension-code-vs-content-scripts-vs-injected-scripts#answer-9916089
   However, it doesn't cover user scripts.
 
-
-
-
 Q: on redirect, the url in the url bar gets rewritten
    and there's no way to get back to the original robust url.
    Any way to make life easier?
+   (see other stuff about history in this doc, too.  have not got anyhthing working yet though, chrome.history.addUrl seems to be non-functional :-()
 PA:
    read and understand this flow chart:
    https://developer.chrome.com/extensions/webRequest
@@ -265,12 +371,17 @@ PA:
    https://chrome.google.com/webstore/detail/switcheroo-redirector/cnmciclhnghalnpfhhleggldniplelbg
    (installed it, it's good for some other things)
 
+   Also some web pages rewrite the URL too, e.g. google maps... think about whether to fight or cooperate with that.
+
 Q: why are my extensions hidden behind a menu?  I want Clear Cache or Cache Killer to be an always-visible button.
 A: OH! drag the lhs of the address bar to the left, they will appear!!
    (someone was complaining they don't stick if you exit chrome and start again, but they seem to)
 
 Q: can I put the extension browser-action icons on a row below the address bar?
    there are too many of them and it's making the address bar too small :-(
+
+Q: I selected "Hide in chrome menu" for an extension.  How do I un-hide it?
+A: it got moved to the top of the vertical ellipses icon menu over on the very right side.  Just drag it back.
 
 Ideas for extensions:
     - on redirect, put original url in history (instead of, or in addition to, the new one)?
@@ -280,6 +391,7 @@ Ideas for extensions:
         (OH NO it's gone??? 
         (installed "Redirect path" which is a good viewer for exactly what the redirect path is...
            it can be long! e.g. go/who)
+      (see other extensive thoughts on this elsewhere in this doc)
 
     - substitute patterns, like switcheroo does, using chrome.webRequest api, but,
         - less unusable ui (maybe no ui, just file configuration and a reload button?)
@@ -384,4 +496,26 @@ A: System Preferences -> Trackpad -> More Gestures -> "Swipe between pages: Scro
 
 Q: how do I upgrade chrome on mac?
 A: I think Chrome -> About  will show if an update is available
+
+Q: When I run `google-chrome foo.png` from a shell, it brings up the image
+   in a new tab, as expected.
+   But when I try to open foo.png from inside google-chrome
+   after downloading it, it opens up some other helper viewer
+   that I usually don't like.
+   What is that helper, and how can I get chrome to just bring up
+   the image in a tab, instead?
+PA:
+   The helper is called `eog` ("eye of gnome").
+   If, instead of clicking the .png file in the download bar, I just say ctrl-o and open it, it does the right thing.
+   So it's just the download bar that's weird.
+   Maybe one of the following is relevant?
+     ~/.local/share/applications/mimeapps.list
+     /usr/share/applications/
+     /usr/local/share/applications/
+
+Q: blue #0000ff was coming out as 002eff = rgb(0,46,255) on my monitor at work, according to color picker!? wtf?
+  maybe relevant: https://www.reddit.com/r/Fedora/comments/74h5yh/blue_shows_as_purple_in_chrome/
+  they suggest chrome://flags/#force-color-profile
+  huh, changing color profile from "Default" to sRGB fixed it.
+  Q: wtf does that mean?
 

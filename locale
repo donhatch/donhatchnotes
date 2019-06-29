@@ -1,0 +1,30 @@
+https://www.gnu.org/software/gettext/manual/html_node/Locale-Environment-Variables.html
+
+Excerpt:
+  A locale is composed of several locale categories, see Aspects. When a program looks up locale dependent values, it does this according to the following environment variables, in priority order:
+
+    1. LANGUAGE
+    2. LC_ALL
+    3. LC_xxx, according to selected locale category: LC_CTYPE, LC_NUMERIC, LC_TIME, LC_COLLATE, LC_MONETARY, LC_MESSAGES, ...
+    4. LANG
+
+  ... see that page for more info (I included the above only for grepping purporses) ...
+
+Rude surprises:
+  - $ date
+    Tue 11 Jun 2019 01:26:27 PM PDT
+    $ LANG= date
+    Tue Jun 11 13:26:43 PDT 2019
+    $ echo $LANG
+    en_US.UTF-8
+
+  - $ echo $'a2b\na3b\na b' | sort
+    a2b
+    a3b
+    a b
+    $ echo $'a2b\na3b\na b' | LC_COLLATE=C sort
+    a b
+    a2b
+    a3b
+    $ echo $LC_COLLATE
+        # empty
