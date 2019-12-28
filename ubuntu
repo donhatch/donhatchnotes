@@ -30,6 +30,10 @@ PA: sudo apt-get install <package name>
     or sudo apt install <package name>    (maybe same thing but doesn't prompt?)
     and, there's something called ineptitude?
     not sure if that's just a front-end for apt-get or what
+    Stephen Gildea says:
+      apt-get is old one
+      apt2 is newer
+      apt is latest and greatest
 
 Q: how do I tell what's installed? it's not rpm evidently
     dpkg-query?

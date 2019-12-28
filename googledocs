@@ -144,3 +144,15 @@ PA: for notification about comments:  open `comments thread` (floating button) -
     I don't think there's any way to subscribe to changes.
 
 Q: How do margins work?? There are two sliders on the left and two on the right.
+
+Q: How to make a snippet of shell commands copy-pasteable?
+   Problems are:
+     - 2 spaces turns into some funky nbsp which turns into funky utf-8
+     - double-spacing
+A:
+   Make sure all newlines within the snippet are shift-newline
+   (prevents double-spacing),
+   and then select the region of interest, Format -> Align&Indent
+   - can indent whole thing without adding space chars, by setting Left Indent
+   - can do additional indent of first line only 
+   - can do "Hanging Indent"; that is, additional indent of all-but-first-line
