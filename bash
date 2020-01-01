@@ -1,4 +1,14 @@
-Advanced Bash-Scripting Guide: http://www.tldp.org/LDP/abs/html/
+@PaulTomblin I hope you don't object that I removed the word "now" from your answer,
+so that your answer no longer implies the OP changed the meaning of their question,
+which (in my perception) was inappropriately putting them in a negative light.
+I'm not looking for an editing war here, but I *am* interested in improving your answer
+by making it more respectful to the OP.
+
+
+
+Note: this has bad press, people think it gives bad advice, see comments on https://stackoverflow.com/questions/592620/how-to-check-if-a-program-exists-from-a-bash-script?rq=1#answer-677212
+  Advanced Bash-Scripting Guide: http://www.tldp.org/LDP/abs/html/
+
 Internal Bash functions, useful when writing loadable builtins: https://gist.github.com/sshaw/8017032
 The Ultimate Bash Array Tutorial with 15 Examples: http://www.thegeekstuff.com/2010/06/bash-array-tutorial/
 Handling positional parameters: http://wiki.bash-hackers.org/scripting/posparams
@@ -23,6 +33,120 @@ set -o pipefail # Fail if any command in pipeline fails.
 
 ==============================================
 Questions about bash:
+
+Q: I'm confused about when stdout and stderr are being directed
+   to the same file or pipe:
+      my_command >my_file 2>&1
+      my_command 2>&1 | second_command
+   This is a common thing, keeps output in correct interleaved order,
+   and doesn't lose output.
+   How does it do that? I guess, in the file case,
+   it seeks to the end of the file before each write?
+   (This must be a different mode from the mode I'm in
+   when I'm writing stuff to the middle of a file.)
+
+Q: How do I place a redirect before a compound command in bash?
+   (asked here: https://stackoverflow.com/questions/59483752/how-do-i-place-a-redirect-before-a-compound-command-in-bash)
+    -----------------------------------------------------------
+    I was sad to find out that bash (and most other sh-derived shells) interpret sequences of redirects backwards,
+    with respect to the logical grouping.
+    E.g. to run my_command with file descriptors 1 (stdout) and 2 (stderr) swapped, I have to say:
+        my_command 3>&1 1>&2 2>&3 3>&-
+    which does *not* mean:
+        { { { my_command 3>&1; } 1>&2; } 2>&3; } 3>&-
+    Instead, it means:
+        { { { my_command 3>&-; } 2>&3; } 1>&2; } 3>&1
+
+    This backwards interpretation is always an annoying speedbump for me when I'm trying to make sense of a sequence of redirects.
+
+    But then, I was happy to find out that I can put the redirects *before* the command:
+        3>&1 1>&2 2>&3 3>&- my_command
+    which *does* mean the same thing as the following (if only the following were legal):
+        3>&1 { 1>&2 { 2>&3 { 3>&- my_command; }; }; }
+    Hooray!  So I was thinking, maybe I'll start putting all my redirects before my commands,
+    so that the order will agree with the logical grouping.
+
+    But then I was sad again, to find that `3>&1 1>&2 2>&3 3>&- my_command`
+    is legal only when `my_command` is a simple command, not when it's a compound command (i.e. delimited by `{}`),
+    and not even when it's an *alias* for a compound command.
+
+    For example, I'd like to say the following, but it doesn't work:
+        3>&1 1>&2 2>&3 3>&- { echo to stdout; echo to stderr >&2; } | cat -n
+        bash: syntax error near unexpected token `}'
+    The desired output is:
+        to stdout
+          1      to stderr
+
+    I can think of the following workarounds; these all work correctly,
+    but none of them really satisfy my wish, which is to express the logical grouping clearly.
+
+    Workaround #1: give in, and put the redirects after the command:
+        { echo to stdout; echo to stderr >&2; } 3>&1 1>&2 2>&3 3>&- | cat -n
+    Workaround #2: use `exec`
+        { exec 3>&1 1>&2 2>&3 3>&- && { echo to stdout; echo to stderr >&2; }; } | cat -n
+    Workaround #3: fork an explicit subshell, thereby avoiding a compound command:
+        3>&1 1>&2 2>&3 3>&- sh -c 'echo to stdout; echo to stderr >&2' | cat -n
+    Workaround #4: wrap the command in a function (not an alias):
+        function my_command() { echo to stdout; echo to stderr >&2; }
+        3>&1 1>&2 2>&3 3>&- my_command | cat -n
+
+    Is there some nicer syntax I'm missing, that will let me place a redirect before a compound command in bash?
+    Or are these two features that simply don't work together?
+    -----------------------------------------------------------
+
+
+Q: is there a way to protect against the current script file changing?
+A: Yes!  https://stackoverflow.com/questions/21096478/overwrite-executing-bash-script-files#answer-21100710
+    {
+      ... what the script was before ...
+      exit  # so that we don't risk reading past the '}'
+    }
+
+Q: can I reliably make a shell script tee all its output to a file?
+   (it's fine if it merges stdout and stderr)
+A:
+    {
+      ... what was the script before
+    } 2>&1 | tee logfile
+    NOTE: if using {} to protecting the whole script from being overwritten (see previous Q),
+    make sure to put *another* {} around the whole thing, since this {} will no longer protect it.
+
+
+Q: is there a way to implement my favorite tcsh trick
+   that kicks a job into background in bash?
+        bindkey -c ^Z bg  # so hitting ^Z twice kicks it into background
+A: Yes!  A bit hacky but it seems to work:
+    https://superuser.com/questions/378018/how-can-i-do-ctrl-z-and-bg-in-one-keypress-to-make-process-continue-in-backgroun#answer-1289414
+   It uses both $PS0 and $PROMPT_COMMAND, and therefore
+   needs to be integrated with other uses of those:
+     bind -x '"\C-z":bg'
+     PS0='$(stty susp ^z)'
+     PROMPT_COMMAND='stty susp ^@; other_stuff_I_want_my_prompt_command_to_do'
+
+Q: how to get a pristine/vanilla/clean-environment bash session (i.e. don't source any of my startup files)?
+A: env -i bash --noprofile --norc
+   although that doesn't have USER nor HOME.
+   So maybe:
+     env -i USER="${USER?}" HOME="${HOME?}" bash --noprofile --norc
+   Also maybe -l which is "make bash act as if it had been invoked in a login shell"
+
+Q: Why is my fd 255 open?
+A: https://unix.stackexchange.com/questions/475389/in-bash-what-is-file-descriptor-255-for-can-i-use-it#answer-475409
+   Don't close it; that will make bad things happen.
+   Note, it can be used to restore any of fds 0,1,2 if I accidentally "lose" them:
+     exec 2>&255
+
+Q: how the heck do I implement 'calc'?  It's an alias I use in csh/tcsh
+   for evaluating numeric expressions.  In bash, I have to explicitly
+   excape parens and '*'.  Haven't figured out a way around it.
+
+   Maybe for stackoverflow:
+
+   Q: How to write a bash command that interprets shell chars before bash can?
+
+   My former interactive shell was tcsh, in which one of my productivity aliases was a calculator:
+     alias
+
 
 Q: express newline embedded in a command arg?
 A: echo $'hello\nworld'
@@ -127,23 +251,23 @@ A: Here's one way, though not pretty:
    Here's another way, prettier but not entirely robust (non-printing chars are handled better by printf):
       #!/bin/bash
       quote_arg_if_necessary() {
-	if [[ "$1" =~ ^[-=_-:/.@%+a-zA-Z0-9]+$ ]]; then
-	  # The arg consists of only known-to-be-safe chars,
-	  # so it doesn't need to be quoted at all.
-	  echo "$1"
-	  # Note: we use [\'] instead of \' in the following only because
-	  # \' by itself derails vim's syntax highlighting.
-	elif [[ "$1" =~ [\'] && ! "$1" =~ [\"\!\$\`\\] ]]; then
-	  # The arg contains at least one single quote,
-	  # and no double quote nor any other char that might be special inside double quotes;
-	  # therefore double quotes would be more concise than single quotes, so use them.
-	  echo '"'"$1"'"'
-	else
-	  # General robust strategy: surround by single quotes,
-	  # and turn each embedded single quote ' into 5 chars: '"'"'
-	  # (that is: close single, open double, single, close double, open single).
-	  echo "'${1/\'/\'\"\'\"\'}'"
-	fi
+        if [[ "$1" =~ ^[-=_-:/.@%+a-zA-Z0-9]+$ ]]; then
+          # The arg consists of only known-to-be-safe chars,
+          # so it doesn't need to be quoted at all.
+          echo "$1"
+          # Note: we use [\'] instead of \' in the following only because
+          # \' by itself derails vim's syntax highlighting.
+        elif [[ "$1" =~ [\'] && ! "$1" =~ [\"\!\$\`\\] ]]; then
+          # The arg contains at least one single quote,
+          # and no double quote nor any other char that might be special inside double quotes;
+          # therefore double quotes would be more concise than single quotes, so use them.
+          echo '"'"$1"'"'
+        else
+          # General robust strategy: surround by single quotes,
+          # and turn each embedded single quote ' into 5 chars: '"'"'
+          # (that is: close single, open double, single, close double, open single).
+          echo "'${1/\'/\'\"\'\"\'}'"
+        fi
       }
       echo -n 'invoked as:'; for arg in "$0" "$@"; do echo -n " "$(quote_arg_if_necessary "$arg"); done; echo
 

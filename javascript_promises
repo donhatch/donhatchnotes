@@ -533,38 +533,46 @@ Tue Dec  6 21:31:39 PST 2016
 
   Maybe file a bug.  What would be a good title?
 
-    Issue: sloppy language in description of compliance test suite
-    Issue: misleading language in description of compliance test suite
-    Issue: misleading language in description of what compliance test suite does
-    Issue: hyperbole in description of what compliance test suite does
-    Issue: misleading description of what compliance test suite does
-    Issue: false and misleading description of what compliance test suite does
+    Issue: sloppy language in descriptions of compliance test suite
+    Issue: misleading language in descriptions of compliance test suite
+    Issue: misleading language in descriptions of what compliance test suite does    <--- favoring this one
+    Issue: hyperbole in descriptions of what compliance test suite does
+    Issue: misleading descriptions of what compliance test suite does
+    Issue: false and misleading descriptions of what compliance test suite does
+    Issue: false and misleading descriptions compliance test suite
+    Issue: false and misleading language in descriptions of compliance test suite   <-- or this one
+    Issue: false and misleading language in descriptions of what compliance test suite does  <-- or this one
     Issue: does conformance/compliance refer to the spec or to the test suite?
 
     Both the Compliance Test Suite doc and the Conformant Implementations list
-    make statements saying or implying that passing the test suite is equivalent to complying with the spec:
+    make statements saying or implying that passing the test suite is equivalent to complying with the spec.
+    Such statements are both false and misleading.
 
-    In https://promisesaplus.com/implementations :
-      There are many conformant implementations of Promises/A+.
-      Here are the ones we know about.
-      Note that an implementation’s conformance is determined by it passing the test suite.
+    [NOTE: The terms "compliance (with the spec)" and "conformance (with the spec)" seem to be used interchangeably; I'll follow suit, under the assumption that everyone agrees they are synonyms.]
 
-    Um, no. An implementation's conformance to a spec is determined by whether it does what the spec says it must do, every time, for every possible input.
-    That's a stricter criterion than passing a test suite, no matter how thorough the test suite may be.
+    Details:
 
-    In https://github.com/promises-aplus/promises-tests :
-      This suite tests compliance of a promise implementation with the Promises/A+ specification.
-      Passing the tests in this repo means that you have a Promises/A+ compliant implementation of the then() method, [...]
+    * In https://promisesaplus.com/implementations :
+        There are many conformant implementations of Promises/A+.
+        Here are the ones we know about.
+        Note that an implementation’s conformance is determined by it passing the test suite.
 
-    Of course the equivalence doesn't hold-- no test suite could possibly accomplish that;
-    this is something that should be clear after a moment's
-    thought by anyone who has taken an introductory computer science course.
+      Um, no. An implementation's conformance to a spec is determined by whether it does what the spec says it must do, every time, for every possible input.
+      That's a stricter criterion than passing any test suite, no matter how thorough the test suite may be.
+
+    * In https://github.com/promises-aplus/promises-tests :
+        This suite tests compliance of a promise implementation with the Promises/A+ specification.
+        Passing the tests in this repo means that you have a Promises/A+ compliant implementation of the then() method, [...]
+
+      Of course that equivalence doesn't hold-- no test suite could possibly accomplish that;
+      this is something that should be clear after a moment's
+      thought by anyone who has taken an introductory computer science course.
 
     The most that can be said truthfully is something like:
       - the test suite will catch many common errors in implementations
       - if the test suite fails, the implementation is not conformant
-      - if the test suite passes, the implementation *might* be conformant, but no test suite can ever tell you for sure.
-    (This glosses over the possibility of bugs in the suite and timeouts, which is fine; and it assumes spec bugs like https://github.com/promises-aplus/promises-spec/issues/240
+      - if the test suite passes, the implementation *might* be conformant, but obviously no test suite can ever tell you for sure.
+    (This glosses over the possibility of bugs in the suite and timeouts, which is fine; and it assumes spec bugs such as https://github.com/promises-aplus/promises-spec/issues/240
     have been fixed.)
 
     One might be tempted to dismiss this issue as simply informal/loose/sloppy language
