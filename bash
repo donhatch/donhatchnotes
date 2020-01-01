@@ -147,6 +147,17 @@ Q: how the heck do I implement 'calc'?  It's an alias I use in csh/tcsh
    My former interactive shell was tcsh, in which one of my productivity aliases was a calculator:
      alias
 
+Q: what's a nice way to make a barrier, that will let a bunch of processes
+   proceed at the same time?
+A: 
+     everybody waits:
+       inotifywait somefile
+     someone releases everybody:
+       touch somefile
+
+Q: start without sourcing my startup files?
+A: bash --noprofile --norc
+   (still inherits environment and limits though)
 
 Q: express newline embedded in a command arg?
 A: echo $'hello\nworld'
@@ -427,3 +438,85 @@ Posted: http://stackoverflow.com/questions/38843719/emergency-override-of-broken
 
 More command completion screw-ups not listed above:
   echo a='b' <tab>
+  dpkg -s /usr/share/doc/texlive-doc/texlive/index.htm<tab>
+
+Q: what about that redirect question?
+  https://stackoverflow.com/questions/363223/how-do-i-get-both-stdout-and-stderr-to-go-to-the-terminal-and-a-log-file/53051506?noredirect=1#answer-53051506
+  is this valuable?
+  https://unix.stackexchange.com/questions/3514/how-to-grep-standard-error-stream-stderr/3540#answer-3540
+
+  Maybe, leveraging this: https://unix.stackexchange.com/questions/3514/how-to-grep-standard-error-stream-stderr/3540#answer-3540
+
+    This works!
+      { ( echo "to stdout"; echo "to stderr" >&2 ) 2>&1 1>&3 | (sleep 2; cat -n | cat -n | tee stderr.txt) 1>&2; } 3>&1 | (sleep 1; cat -n | tee stdout.txt)
+    This works!
+      { my_cmd 2>&1 1>&3 | { sleep 2; cat -n | cat -n | tee stderr.txt; } 1>&2; } 3>&1 | { sleep 1; cat -n | tee stdout.txt; }
+
+    This works!
+      alias my_cmd='{ echo "to stdout"; echo "to stderr" >&2;}'
+      alias stdout_filter='{ sleep 1; cat -n | tee stdout.txt; }'
+      alias stderr_filter='{ sleep 2; cat -n | cat -n | tee stderr.txt; }'
+
+    And then either of these:
+      { my_cmd 2>&1 1>&3 | stderr_filter 1>&2; } 3>&1 | stdout_filter
+      { { my_cmd | stdout_filter } 2>&1 1>&3 | stderr_filter 1>&2; } 3>&1
+
+    What about swapping?  As suggested in https://unix.stackexchange.com/questions/3514/how-to-grep-standard-error-stream-stderr/3540#answer-341014
+    This one's cute.
+      { { my_cmd | stdout_filter; } 3>&2 2>&1 1>&3- | stderr_filter; } 3>&2 2>&1 1>&3-
+      { my_cmd 3>&2 2>&1 1>&3- | stderr_filter; } 3>&2 2>&1 1>&3- | stdout_filter
+
+      or (using other order)
+
+      { my_cmd 3>&1 1>&2 2>&3- | stderr_filter; } 3>&1 1>&2 2>&3- | stdout_filter
+
+      I think that's the best!
+
+    Q: what's with the '-' ? should I be using it for the others?
+
+
+  My initial answer to https://stackoverflow.com/questions/363223/how-do-i-get-both-stdout-and-stderr-to-go-to-the-terminal-and-a-log-file/53051506
+  =================================
+
+    I've been wanting an answer that preserves the distinction between stdout and stderr.
+    Unfortunately all of the answers given so far that preserve that distinction
+    are race-prone: they risk programs seeing incomplete input, as I pointed out in comments.
+
+    I think I finally found an answer that preserves the distinction,
+    is not race prone, and isn't terribly fiddly either.
+
+    First building block: to swap stdout and stderr:
+
+        my_command 3>&1 1>&2 2>&3-
+
+    Second building block: if we wanted to filter (e.g. tee) only stderr,
+    we could accomplish that by swapping stdout&stderr, filtering, and then swapping back:
+
+        { my_command 3>&1 1>&2 2>&3- | stderr_filter;} 3>&1 1>&2 2>&3-
+
+    Now the rest is easy: we can add a stdout filter, either at the beginning:
+
+        { { my_command | stdout_filter;} 3>&1 1>&2 2>&3- | stderr_filter;} 3>&1 1>&2 2>&3-
+
+    or at the end:
+
+        { my_command 3>&1 1>&2 2>&3- | stderr_filter;} 3>&1 1>&2 2>&3- | stdout_filter
+
+    To convince myself that both of the above commands work, I used the following:
+
+        alias my_command='{ echo "to stdout"; echo "to stderr" >&2;}'
+        alias stdout_filter='{ sleep 1; sed -u "s/^/teed stdout: /" | tee stdout.txt;}'
+        alias stderr_filter='{ sleep 2; sed -u "s/^/teed stderr: /" | tee stderr.txt;}'
+
+    Output is:
+
+        ...(1 second pause)...
+        teed stdout: to stdout
+        ...(another 1 second pause)...
+        teed stderr: to stderr
+
+    and my prompt comes back immediately after the "`teed stderr: to stderr`", as expected.
+
+
+
+

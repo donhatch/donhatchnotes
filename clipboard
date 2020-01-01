@@ -1,3 +1,11 @@
+Quick reference to what I do lately to monitor:
+  First window:
+    for ((n=1;;n++)) do echo $n; done | watch -n 0.25 -t 'read n; echo -n '"'"'PRIMARY/"select": '"'"'; xclip -o -sel p; echo; echo -n '"'"'CLIPBOARD/"copy": '"'"'; xclip -o -sel c; echo; xprop -notype -root CUT_BUFFER0; echo -n "count=$n pid=$$ "; date "+%Y-%m-%dT%H:%M:%S.%N%:z"'
+  Second window:
+    cd ~/wrk/clipboard; watch -n 1 -t 'pwid=$(./who_owns_selection PRIMARY);   ppid0=$(./windowid_to_pid $pwid 2>&1 | awk '"'"'{print $2}'"'"'); ppid=$ppid0; while kill -0 "$ppid" 2>&1 | grep "No such process" > /dev/null; do let ppid++; done; echo -n "  PRIMARY: id=$pwid pid=$ppid0+$(($ppid-$ppid0)) = $ppid "; ps -f -p $ppid -o command | tail -1; \
+                                       cwid=$(./who_owns_selection CLIPBOARD); cpid0=$(./windowid_to_pid $cwid 2>&1 | awk '"'"'{print $2}'"'"'); cpid=$cpid0; while kill -0 "$cpid" 2>&1 | grep "No such process" > /dev/null; do let cpid++; done; echo -n "CLIPBOARD: id=$cwid pid=$cpid0+$(($cpid-$cpid0)) = $cpid "; ps -f -p $cpid -o command | tail -1'
+-----------------------------------------------
+
 References:
   "X Selections, Cut Buffers, and Kill Rings." by Jamie Zawinski
   https://www.jwz.org/doc/x-cut-and-paste.html
@@ -197,6 +205,7 @@ On Linux/X:
           - maps that window id to process id
           - prints the process command (maybe searching several pids later?), using ps -f -p <pid>, maybe
         Ok, got something:
+          cd ~/wrk/clipboard
           watch -n 1 -t 'pwid=$(./who_owns_selection PRIMARY);   ppid0=$(./windowid_to_pid $pwid 2>&1 | awk '"'"'{print $2}'"'"'); ppid=$ppid0; while kill -0 "$ppid" 2>&1 | grep "No such process" > /dev/null; do let ppid++; done; echo -n "  PRIMARY: id=$pwid pid=$ppid0+$(($ppid-$ppid0)) = $ppid "; ps -f -p $ppid -o command | tail -1; \
                          cwid=$(./who_owns_selection CLIPBOARD); cpid0=$(./windowid_to_pid $cwid 2>&1 | awk '"'"'{print $2}'"'"'); cpid=$cpid0; while kill -0 "$cpid" 2>&1 | grep "No such process" > /dev/null; do let cpid++; done; echo -n "CLIPBOARD: id=$cwid pid=$cpid0+$(($cpid-$cpid0)) = $cpid "; ps -f -p $cpid -o command | tail -1'
 
