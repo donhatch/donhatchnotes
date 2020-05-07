@@ -229,6 +229,26 @@ FOLDS
 
 General Questions
 =================
+
+Q: what is this speedbump?
+     yy  (yank current line)
+     p   (put a copy of the line I just yanked, and go to it)
+     O   (create line above current line, i.e. between the two copies of the line, and go into insert mode in it)
+     Esc (get out of insert mode)
+     Enter (go to next line)
+   If I do it too fast, it says:
+     E78: Unknown mark
+   Dammit!  Now it's not doing it any more!  Can't seem to get it to do it reliably.
+   And, maybe the line has to be indented?  Not sure.
+     (There does seem to be some magic having to do with a delayed move of the cursor back to column 0 after Esc, not sure if it's related).
+   I notice it more when working from home, I think?
+   Q: what's a good way to simulate low baud rate?
+   A: trickle and tritty is nice.  Didn't help isolate this bug though.
+
+
+Q: show the 80 column mark?
+A: se cc=80
+
 Q: show a variable?
 A: :set foo?
    More generally:
