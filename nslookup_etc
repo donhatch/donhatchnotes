@@ -1,0 +1,8 @@
+Q: wtf? everyone says stop using nslookup, use dig instead,
+   but dig often shows incomprehensible output that doesn't even include
+   the thing nslookup returns.
+
+nslookup
+dig
+host
+systemd-resolve
