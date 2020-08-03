@@ -2,6 +2,9 @@ NOTE: a lot of this is applicable to more general linux/gnome/cinnamon,
 even though I'm not using ubuntu any more.
 See ./cinnamon-applets for notes on that.
 
+Q: how to tell what version of linux or whatever is being run?
+A: uname -a
+
 Q: screen magnifier? (have xmag, continuous would be better)
 A: kmag
     and click on Mouse (not sure what weird state it was in before)
@@ -109,21 +112,47 @@ A: get rid of the center launcher panel, it's an eyesore anyway:
     settings / Displays
       changed Launcher Placement from "All Displays" to just the left one
 
-Q: I hate the sticky windows that stick to screen boundaries.  how do I get
-   rid of it?
-A: settings gear -> System Settings -> Displays -> Sticky edges OFF!
+Q: I hate the sticky windows that stick to screen boundaries,
+   and the automatic blow-window-up-to-full-screen when I accidentally
+   bump into the screen side edge.  How do I get rid of them?
+PA: settings gear -> System Settings -> Displays -> Sticky edges OFF!
    WOOHOO! that fixed the previous speed bump issue too!
    But weeks later, the problem is back, and this fix doesn't fix it
    any more :-(
+
    oh wait maybe it's called "window snapping"
    there are a couple of suggestions here: http://askubuntu.com/questions/105028/force-disable-snapping-windows . namely,
    under ccsm's "Window Management":
        - disable "Snapping Windows" (this seems to be the one that does it!)
        - disable "Place Windows" (no don't! if it's not on, windows appear in a really inconvenient place)
        - disable "Scale" (but it says it's needed by Ubuntu Unity Plugin so I kept it on)
-
-Q: I hate the automatic blow-window-up-to-full-screen when I accidentally
-   bump into the screen side edge. how do I get rid of it?
+   and here:
+   https://askubuntu.com/questions/1110301/can-i-turn-off-window-snapping-in-gnome-3
+     sudo apt-get install gnome-tweaks
+     gnome-tweaks
+       Windows -> Edge Tiling  ("When on, windows are tiled when dragged to screen edges")
+         it's already off :-(
+   An internal google thread also mentions dconf key:
+     org.gnome.shell.overrides.edge-tiling
+   Web searching for that yields:
+     gsettings get org.gnome.shell.overrides edge-tiling
+       true
+     gsettings set org.gnome.shell.overrides edge-tiling false
+     gsettings get org.gnome.shell.overrides edge-tiling
+       false
+   Didn't help :-(
+     gsettings get org.gnome.mutter edge-tiling
+       false
+   Didn't help :-(
+     gconftool-2 --set /apps/compiz-1/plugins/grid/screen0/options/top_edge_action --type int 0
+     (that made the setting appear in gconf-editor, too)
+   Didn't help :-(
+ A: Upper-left-of-screen menu -> Preferences -> Window Tiling
+        Enable Window Tiling and Snapping -> OFF
+    IT WORKED!!!
+    Also, unrelated, but:
+      Menu -> Preferences -> Applets -> Window list -> Configure (gears)
+        Show window thumbnails on hover: OFF
 
 Q: system/cpu load monitor applet for the unity plugin thing?
 PA: sudo apt-get install indicator-multiload

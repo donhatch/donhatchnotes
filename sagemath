@@ -58,6 +58,25 @@ A: per http://doc.sagemath.org/html/en/faq/faq-usage.html#how-can-i-reload-a-pyt
 QUESTIONS:
 =========
 
+Q: What exactly is the difference between running sage
+   and running python with the relevant libraries imported?
+   My current understanding is:
+     sage = python + import some libraries + magic
+   What exactly is the magic?
+
+PA:
+   There are non-satisfying statements here:
+     http://doc.sagemath.org/html/en/faq/faq-usage.html#how-do-i-import-sage-into-a-python-script
+   You can import Sage as a library in a Python script.
+   One caveat is that you need to run that Python script using the version of Python that is bundled with Sage; currently Python 2.6.x.
+   To import Sage, put the following in your Python script:
+      from sage.all import *
+PA:
+   http://doc.sagemath.org/html/en/faq/faq-usage.html#what-exactly-does-sage-do-when-i-type-0-6-2
+   ... so you would not be able to just type the above into Python and expect it to work without first an import statement such as:
+      from sage.all import RealNumber, Integer, preparse
+
+
 Q: How to make sure I'm using the desired types and precisions,
    in literals, python variable values,
    polynomial coefficients,

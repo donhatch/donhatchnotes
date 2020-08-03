@@ -1,0 +1,25 @@
+https://sourceware.org/bugzilla/show_bug.cgi?id=15310
+
+ISSUE:
+  Seems like the to-reproduce Makefile doesn't work any more.
+  Need to add --no-as-needed?
+
+  I think that's what this says:
+  https://stackoverflow.com/questions/6411937/what-are-the-effects-of-linking-to-a-library-you-do-not-make-function-calls-to#answer-6412134
+
+  Yeah, that works.
+  And, be sure to put it *before* the relevant -l flags.
+
+  Q: the `ld` man page implies --no-as-needed is the default, but it doesn't
+     seem to be.  wtf?
+
+
+After I do that:
+  time ./main500 > /dev/null
+    real        0m0.374s
+  time ./main1000 > /dev/null
+    real        0m2.865s
+  time ./main2000 > /dev/null
+    real        0m22.543s
+  time ./main4000 > /dev/null
+

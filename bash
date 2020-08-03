@@ -439,6 +439,8 @@ Posted: http://stackoverflow.com/questions/38843719/emergency-override-of-broken
 More command completion screw-ups not listed above:
   echo a='b' <tab>
   dpkg -s /usr/share/doc/texlive-doc/texlive/index.htm<tab>
+  tar zxvf tar zxvf sage-8.9-Ubuntu_18.04-x86_64.tar.bz<tab>
+    (z actually wasn't right, but whatever)
 
 Q: what about that redirect question?
   https://stackoverflow.com/questions/363223/how-do-i-get-both-stdout-and-stderr-to-go-to-the-terminal-and-a-log-file/53051506?noredirect=1#answer-53051506
