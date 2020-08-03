@@ -22,4 +22,6 @@ After I do that:
   time ./main2000 > /dev/null
     real        0m22.543s
   time ./main4000 > /dev/null
+    real	3m18.744s
+Yep, still O(n^3)
 
