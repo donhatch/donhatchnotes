@@ -1,5 +1,5 @@
 Q: how to password-protect a pdf file?
 A: on ubuntu:
-     sudo apt-get install pdftk
+     sudo apt install pdftk
        pdftk    # to see options
        pdftk myfile_unencrypted.pdf output myfile_encrypted.pdf user_pw MYPASSWORD

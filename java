@@ -17,4 +17,7 @@ A: Use hprof, as described in:
    Hmm, it's not believable.  The top traces are *near* where I expect them to be (that is, in the same function)
    but they are in places near the end of the function, which I believe can't be the bottleneck.
 
-
+Q: Why is javac -source 1.5 allowing @Override on interface methods?
+   asked as https://stackoverflow.com/questions/63541942/why-is-javac-source-1-5-allowing-override-on-interface-methods
+A: Apparently @Override on interface methods isn't regarded as a language change,
+   but, rather, a bug in some 1.5 SDK compilers.
