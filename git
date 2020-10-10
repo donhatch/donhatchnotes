@@ -414,6 +414,7 @@ SWIMLANES!
       and theyr tutorial is full of great pictures, all of which have
       swimlanes:
           https://www.atlassian.com/git/tutorials/comparing-workflows
+      (argh! not any more! but http://justinhileman.info/article/changing-history/ seems to have some of what I remember)
       and supposedly "github network view" tries to give swim lanes?
           https://github.com/git/git/network
       It's a pain though-- lots of bitching about it, see for example: http://subimage.com/blog/2011/08/30/github-your-network-graph-sucks/
@@ -545,6 +546,78 @@ CRLF ISSUES:
 
 
 QUESTIONS:
+
+    Q: picture of all diff options?
+    A: Simple one: https://stackoverflow.com/questions/1587846/how-do-i-show-the-changes-which-have-been-staged?noredirect=1&lq=1#answer-1587952
+       A little more complete:
+       https://marklodato.github.io/visual-git-guide/index-en.html#diff
+
+    Q: graphical git client? especially for log graph view.
+    PA:
+        https://git-scm.com/downloads/guis
+        subQ: What's easily available on ubuntu?
+        subPA: apt install git-all  # which includes git-gui
+                 wait wtf? can't expand the tree to more than 2 inches vertically??
+                 ah, yes I can, it's obcure though.  the bar in question is under the "Find ... commit containing:".
+                 https://stackoverflow.com/questions/35723579/expanding-commit-history-in-gitk#answer-35724476
+               apt install gitk
+                 ah, this is what `git gui` brings up when you select visualization
+
+
+    Q: what does "-m 1" (i.e. --mainline 1) etc. mean, in `git revert` ?
+    A: Apparently parents are numbered internally: first parent
+       was the branch being merged into, second parent was the branch
+       being merged into it.
+       If I'm not mistaken, `git log --graph` seems to always show
+       the first parent on the left, i.e. straight line downward,
+       and the second parent slanting down to the right.
+       Also can do either of these,
+       which includes the list of parents in order:
+         git cat-file -p 4a77
+         git show --pretty=raw 4a77
+         git show 4a77
+       Incidentally, if you've ever wondered why the graph looks like this (no slanted lines down and to the right from a commit):
+          *
+          |\
+          | *
+          | |\
+          | |/
+          |/|
+          * |
+          * |
+          |\|
+          | *
+          | *
+          | |\
+          | |/
+          |/|
+          * |
+          | *
+          |/
+          *
+        instead of like this, which seems like it would be simpler:
+          *
+          |\
+          | *
+          |/|
+          * |
+          * |
+          |\|
+          | *
+          | *
+          |/|
+          * |
+          | *
+          |/
+          *
+          This is why (so you can tell by looking at it which is parent 1 and which is parent 2).
+          Note that `git gui` does *not* do this, making it less useful!
+          Note that there *are* some cases when lines slant down and to left;
+          that is: "when the first parent fuses with another edge to its left":
+          https://stackoverflow.com/questions/20200226/how-to-understand-git-log-graph#answer-59147423
+          but in this case, the leftmost is still the first parent.
+
+
 
     Q: fast-forwarding a branch without checking out?
     A: As recommended in various places, if you want to fast-forward branch "follower"
@@ -740,9 +813,19 @@ Don
     A: it's listed in .gitignore
 
     Q: git log is coming out in baffling order, wtf?
-    A: I don't think the commits are shown in reverse chronological order
-       like the help page claims; I think they are in topo order.
-       can fix them using --date-order.
+    A: Here's the deal.
+        - The --pretty=fuller output shows two dates: AuthorDate and CommitDate.
+        - AuthorDate is shown as simply Date in the normal output.
+       As shown in `git help log`:
+        - default ordering is reverse chronological (presumably by CommitDate?
+          not clear, but it doesn't matter since nothing's very interesting
+          to me without the graph, which means sort by topo first).
+        - --date-order means top first and then CommitDate order.
+        - --author-date-order means top first and then author date order.
+        - --topo-order means topo first, and then try to avoid interleaving
+            (which means show some stuff out of order).
+        - --graph presumably implies topo-order? unless overridden by
+            --date-order or --author-date-order?
 
     Q: whoa, git log graph is still wicked confusing.
        can I get exactly one dedicated column per branch?
