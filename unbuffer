@@ -17,3 +17,26 @@ Good answer using 'script' command here,
 there are versions for both freebsd/mac and linux
 (DO NOT MIX or you might overwrite files!)
   http://stackoverflow.com/questions/3465619/how-to-make-output-of-any-shell-command-unbuffered#answer-16422308
+
+For particular programs:
+  grep: --line-buffered
+  sed: --unbuffered
+  python: -u 
+
+  Note the defaults for python are:
+    python2.7:
+      +-----------------------------------------+
+      |        | tty           | file or pipe   |
+      |--------+--------------------------------|
+      | stdout | line buffered | fully buffered |
+      | stderr | unbuffered    | unbuffered     |
+      | other  | line buffered | fully buffered |
+      +-----------------------------------------+
+    python3.5:
+      +-----------------------------------------+
+      |        | tty           | file or pipe   |
+      |--------+--------------------------------|
+      | stdout | line buffered | fully buffered |
+      | stderr | line buffered | fully buffered |
+      | other  | line buffered | fully buffered |
+      +-----------------------------------------+
