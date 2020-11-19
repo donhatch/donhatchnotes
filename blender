@@ -1,0 +1,12 @@
+Q: how to make it load, say, an obj file on startup?
+A: https://blenderartists.org/t/import-obj-file-automatically-when-starting-blender/525992/8
+
+
+Q: how to disable the splash screen?
+A: Edit->Preference->Interface -> uncheck Splash Screen
+
+Q: how to make it not show a cube on startup?
+
+Q: how do I get the console?  I don't see anything in the menus for it.
+A: oh, I didn't have my window wide enough, there are more menus, in particular
+   Scripting.  I don't have a sense of how to control it yet, but whatever.

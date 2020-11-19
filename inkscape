@@ -10,6 +10,9 @@ QUESTIONS:
 =======================================================================
 How to do some stuff:
 
+  group: ctrl-G
+  ungroup: ctrl-shift-G
+
   Create segments and turn them into arrows:
     F6 (or click on pencil tool) to draw line segments
 
@@ -27,8 +30,8 @@ How to do some stuff:
       Extensions > Modify Path > Color Markers to Match Stroke.
     Once I have one, it's most efficent do just dup it (ctrl-d) and move endpoints.
 
-  Edit segment endpoints:
-    F2 (or click on Edit Paths by Nodes tool)
+  Connector tool / Edit segment endpoints:
+    F2 or 'o' (or click on Edit Paths by Nodes tool)
     click on object to select it, then drag nodes. simple!
 
   Text:

@@ -54,6 +54,10 @@ Output buffering summary:
       +-----------------------------------------+
 
 GOTCHAS:
+    - ** is relatively expensive for small exponents of small numbers!
+      E.g. always use x*x instead of x**2, and even (x*x)*(x*x) instead of x*4,
+      not sure where the cutoff is.
+
     - "".split(",") returns [""].
       I actually think maybe this is the best answer, now that I've thought about it.
       Originally I thought was insane, so I wrote this:
@@ -373,6 +377,61 @@ FEATURES TO KEEP IN MIND:
 
 
 QUESTIONS (most recent first):
+====================================
+Q: Technical reason for `pass` in Python?
+
+Is there a *technical* reason why `pass` must be used
+to express "no action" in python, rather than simply letting
+absence-of-a-statement signify it?
+
+According to the [python3.8 doc](https://docs.python.org/3/tutorial/controlflow.html#pass-statements):
+
+The `pass` statement "does nothing. it can be used when a statement is required syntactically but the program requires no action".
+
+This is followed by the following three examples:
+
+  while True:
+    pass  # Busy-wait for keyboard interrupt (Ctrl+C)
+
+  class MyEmptyClass:
+    pass
+
+  def initlog(*args):
+    pass  # Remember to implement this!
+
+It looks to me like all these usages of `pass` are driven by
+the fact that each of the keywords `while`, `if`, `class`, `def`, etc.
+require one-or-more following indented statements.
+So, if the language were relaxed so that each of those keywords could be
+followed by *zero*-or-more statements, then `pass` wouldn't be necessary.
+
+If that were done, then the above examples could be written as:
+
+  while True:
+    # Busy-wait for keyboard interrupt (Ctrl+C)
+
+  class MyEmptyClass:
+
+  def initlog(*args):
+    # Remember to implement this!
+
+Is there any *technical* reason why this wouldn't work?
+
+What I'm seeking is an example where allowing absence-of-a-statement
+to mean `pass` would introduce a parsing ambiguity
+or other concrete parsing difficulty.
+
+NOTE: This is *not* an opinion question;
+I am neither offering nor soliciting opinions
+on whether `pass` is more or less readable or error-resistant
+than absense-of-a-statement would be.
+====================================
+
+    Q: Technical reason for `if` expression order in Python?
+       OH I think this is moot: it's listed in https://www.python.org/dev/peps/pep-0308/
+       Apparently reasonable alternatives were considered and rejected,
+       and the ridiculous alternative won.
+
     Q: Can I make a PRINT function?
 
     Q: beazley p.16 it says "s1" u "s2" can be different from u"s1s2" ...

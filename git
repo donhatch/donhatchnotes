@@ -546,6 +546,30 @@ CRLF ISSUES:
 
 QUESTIONS:
 
+    Q: fast-forwarding a branch without checking out?
+    A: As recommended in various places, if you want to fast-forward branch "follower"
+       to "leader", then instead of this
+       (which has several assumptions/restrictions and fragilities):
+         git checkout follower
+         get merge --ff-only leader
+       do one of the following instead (they are equivalent):
+         git fetch . leader:follower
+         # or...
+         git push . leader:follower
+
+       Explanation: `.` in this case is the current repo; so, in either case,
+       you're saying "update current repo with itself (i.e. do nothing),
+       followed by a fast-forward update of follower to leader if possible".
+
+       These are preferable to other ways of moving the `follower` ref
+       (such as `git branch -f follower leader` or
+       `git update-ref refs/head/follower leader`)
+       since they will simply fail, rather than doing something you didn't intend,
+       if you are mistaken about a fast-forward merge being possible or if you get
+       the syntax wrong (e.g. for update-ref, it's easy to mistakenly say `follower`
+       instead of `refs/head/follower`, creating a garbage ref).
+          
+
     Q: make a new branch from current uncommitted/unstaged changes?
     A: git checkout -b <new-branch>
        And then, as in BEST PRACTICES section, commit staged (which is nothing):

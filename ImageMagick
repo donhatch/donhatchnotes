@@ -33,3 +33,8 @@ A: nope, they all suck-- I don't WANT blurry zoom-in!
 Q: how to specify a constant image?
 A: http://www.imagemagick.org/script/color.php
    convert -size 100x100 xc:red whatever.png
+
+Q: how to make a montage with minimal/no borders?
+A: lots of ways, but here's a simple one:
+   convert a.png b.png c.png +append abc.png
+
