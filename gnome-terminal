@@ -1,0 +1,95 @@
+Q: How to get a usable sequence of font sizes, for ctrl-minus, ctrl-plus?
+PA: It's rather frustrating.
+    What I've found:
+    - default (used when "Custom font" is off in the profile)
+      seems to be "Monospace regular 11".
+      Ctrl-minus goes through the following sizes:
+        11 9 7 6 5 4.5(?) 4 3 
+      The problem is: 7 is a bit too small, and 9 is a bit too big!
+      So I definitely want 8 to be in the sequence.
+    - can turn "Custom font" on, and choose a base,
+      then ctrl-minus goes through:
+      "Monospace regular 16":                     [16] 13 10   9 8 6.5 5 4.5
+      "Monospace regular 12":                     [12] 10 8    7  6 4.5 4 4dimmer
+      "Monospace regular 11":                     [11]  9 7    6  5 4.5 4 3
+      "Monospace regular 9.6":                     [9.6] 8 ...
+      "Monospace regular 8":   >18 16.5 14 12 9.5  [8]  7 5   4.5 4 3.5 3 2
+      "Monospace regular 7.5":                     [8]  6 4.5 4.5narrower 4dimmermaybe 3 3dimmer 2
+      "Monospace regular 7":   >18 17 14 11 9 8.5  [7]  6 4.5 4.5narrower 4dimmer 3 2 2dimmer
+    So it's a bit of a mystery.
+    Looking at gnome-terminal source code from github, what I see is:
+      terminalwindow.c
+        action_zoom_in_cb()
+        action_zoom_out_cb()
+        action_zoom_normal_cb()
+    They seem to be quite convoluted.  What is this "terminal_window_update_sensitivity" doing?
+
+    Ouch, it's working in doubles, which is worrisome.
+    Oh ok, I guess it's fine.  It always jumps to exactly the *next* zoom factor,
+    i.e. the zoom factor that's sufficiently larger (or smaller) than the current zoom factor.
+
+    There are exactly 15 zoom values:
+      TERMINAL_SCALE_MINIMUM,
+      TERMINAL_SCALE_XXXXX_SMALL,
+      TERMINAL_SCALE_XXXX_SMALL,
+      TERMINAL_SCALE_XXX_SMALL,
+      PANGO_SCALE_XX_SMALL,
+      PANGO_SCALE_X_SMALL,
+      PANGO_SCALE_SMALL,
+      PANGO_SCALE_MEDIUM,
+      PANGO_SCALE_LARGE,
+      PANGO_SCALE_X_LARGE,
+      PANGO_SCALE_XX_LARGE,
+      TERMINAL_SCALE_XXX_LARGE,
+      TERMINAL_SCALE_XXXX_LARGE,
+      TERMINAL_SCALE_XXXXX_LARGE,
+      TERMINAL_SCALE_MAXIMUM
+    Where those are from terminal-screen.h:
+      /* Allow scales a bit smaller and a bit larger than the usual pango ranges */
+      #define TERMINAL_SCALE_XXX_SMALL   (PANGO_SCALE_XX_SMALL/1.2)
+      #define TERMINAL_SCALE_XXXX_SMALL  (TERMINAL_SCALE_XXX_SMALL/1.2)
+      #define TERMINAL_SCALE_XXXXX_SMALL (TERMINAL_SCALE_XXXX_SMALL/1.2)
+      #define TERMINAL_SCALE_XXX_LARGE   (PANGO_SCALE_XX_LARGE*1.2)
+      #define TERMINAL_SCALE_XXXX_LARGE  (TERMINAL_SCALE_XXX_LARGE*1.2)
+      #define TERMINAL_SCALE_XXXXX_LARGE (TERMINAL_SCALE_XXXX_LARGE*1.2)
+      #define TERMINAL_SCALE_MINIMUM     (TERMINAL_SCALE_XXXXX_SMALL/1.2)
+      #define TERMINAL_SCALE_MAXIMUM     (TERMINAL_SCALE_XXXXX_LARGE*1.2)
+    And according to https://developer.gnome.org/pango/stable/pango-Text-Attributes.html :
+
+      #define PANGO_SCALE_XX_SMALL ((double)0.5787037037037) // The scale factor for three shrinking steps (1 / (1.2 * 1.2 * 1.2)).
+      // XXX see wtf below
+      #define PANGO_SCALE_X_SMALL  ((double)0.6944444444444)  // The scale factor for two shrinking steps (1 / (1.2 * 1.2)).
+      #define PANGO_SCALE_SMALL    ((double)0.8333333333333)  // The scale factor for one shrinking step (1 / 1.2).
+      #define PANGO_SCALE_MEDIUM   ((double)1.0)  // The scale factor for normal size (1.0).
+      #define PANGO_SCALE_LARGE    ((double)1.2)  // The scale factor for one magnification step (1.2).
+      #define PANGO_SCALE_X_LARGE  ((double)1.44)  // The scale factor for two magnification steps (1.2 * 1.2).
+      #define PANGO_SCALE_XX_LARGE ((double)1.728)  // The scale factor for three magnification steps (1.2 * 1.2 * 1.2).
+
+    WAIT WTF?  Looking at pango-font.h, PANGO_SCALE_X_SMALL is something else?  argh!  some versions of pang-font.h on the web have it as .694444, others have it as .644444 !  well, the correct value of 1/(1.2*1.2) is .694444.  Hmm.  And, in fact, this is exactly the one I'm unhappy about!  It chooses 7 when I would like it to choose 8.   11*.6444444 = 7.08888;  11*.69444444 = 7.638888 which looks like 8 !
+    Ok, I see that, in the official (https://github.com/GNOME/pango.git), it's .69444444.
+    But the version of gnome-terminal I'm running might have something else.
+    In the pango repo, it's: pango/pango-font.h .
+    And it was fixed June 27 2019, in commit 804d3530a159d44411d70b9cbdd7cda46dde533f,
+    which, it says, "closes #372".
+    Where can I find that??
+    Maybe here: https://gitlab.gnome.org/GNOME/pango/issues
+    omg what a mess!  Might be almost there, though.
+    Ok, found it. https://gitlab.gnome.org/GNOME/pango/-/issues/372
+
+    Oh, a nice related bug: https://gitlab.gnome.org/GNOME/gnome-terminal/-/issues/140
+    Argh, the proposal will make the step sizes coarser!
+    I think I need to weigh in.  Done.
+
+     
+
+
+  
+
+
+
+
+
+		
+
+
+
