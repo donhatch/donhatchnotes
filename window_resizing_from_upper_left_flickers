@@ -1,0 +1,18 @@
+Links:
+
+My question on stackoverflow (zero interest so far):
+  https://stackoverflow.com/questions/64084888/shakiness-when-resizing-a-window-by-dragging-left-or-top-border
+
+Mostly Windows-oriented, but very extensive discussion:
+  https://stackoverflow.com/questions/53000291/how-to-smooth-ugly-jitter-flicker-jumping-when-resizing-windows-especially-drag/53000292
+and extensive links:
+  https://stackoverflow.com/questions/53000291/how-to-smooth-ugly-jitter-flicker-jumping-when-resizing-windows-especially-drag/53000292#answer-53032927
+
+
+I think it's nothing that can be dealt witn at the java level.
+Something in X or window manager?
+Possibly relevant resources:
+  apt install xnee  (not much in it but a readme)
+    talks about command line progs xnee, gnee, pnee, none of which exit :-(
+  apt install cnee
+  apt install xtrace
