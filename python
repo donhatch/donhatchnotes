@@ -35,6 +35,24 @@ GOOD INTERESTING READING AND REFS:
             Python 2.2 or 2.3, so very old code may fail, or worse, silently do the
             wrong thing if you use "is True". 
 
+Output buffering summary:
+    python2.7:
+      +-----------------------------------------+
+      |        | tty           | file or pipe   |
+      |--------+--------------------------------|
+      | stdout | line buffered | fully buffered |
+      | stderr | unbuffered    | unbuffered     |
+      | other  | line buffered | fully buffered |
+      +-----------------------------------------+
+    python3.5:
+      +-----------------------------------------+
+      |        | tty           | file or pipe   |
+      |--------+--------------------------------|
+      | stdout | line buffered | fully buffered |
+      | stderr | line buffered | fully buffered |
+      | other  | line buffered | fully buffered |
+      +-----------------------------------------+
+
 GOTCHAS:
     - ** is relatively expensive for small exponents of small numbers!
       E.g. always use x*x instead of x**2, and even (x*x)*(x*x) instead of x*4,
