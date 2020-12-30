@@ -10,5 +10,6 @@ The thing to clear buffer cache on linux:
 
 And by the way, to make it swap in that swapped-out stuff so the machine is usable again
 after a swapping disaster:
-sudo swapoff -a
-(that actually permanently disables swap.  which I think I like anyway.)
+sudo swapoff -va
+(that actually permanently disables swap.  which I think I like anyway.
+to turn it back on: sudo swapon -va)
