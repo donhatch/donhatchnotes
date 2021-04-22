@@ -1,0 +1,144 @@
+Q: How to move and resize X11 windows from the command line?
+   I used to have a command xmoveresizewindow,
+   which was just a CLI for XMoveResizeWindow.
+
+   But then it became possible to do it using standard tools, e.g.
+     xdotool
+     wmctrl
+
+   But, now those tools stopped working (ubuntu / cinnamon).
+
+   Furthermore, I don't know whether to expect that XMoveResizeWindow
+   still works or not; see https://stackoverflow.com/questions/56407459/xlib-two-issues-with-call-to-xmoveresizewindow.
+
+   Note a complication: there is not a $WINDOWID variable
+   in gnome-terminal like there is in xterm and konsole :-(
+   So the only way I know to get a window id is `xwininfo` and click on it.
+
+PA:
+  Trying wmctrl:   g,x,y,w,h
+    Note that all windows seem to have gravity NorthWestGravity,
+    which is 1.
+
+    wmctrl -r 0x5ec3322 -e 1,0,0,500,500
+      Does nothing :-(
+    wmctrl -v -r 0x5ec3322 -e 1,0,0,500,500
+      envir_utf8: 1
+      Invalid type of WM_NAME property.
+      Invalid type of WM_NAME property.
+      Invalid type of WM_NAME property.
+      Invalid type of WM_NAME property.
+      Invalid type of WM_NAME property.
+      Invalid type of WM_NAME property.
+
+    :-(
+
+  Trying xdotool:
+
+    xdotool getactivewindow windowmove 0 0
+
+    Hey, that does something!
+    Hmm, it's relative to the current physical screen (right half of logical screen)
+    And if I move the upper-left corner of the window to the other screen,
+    I lose the window forever :-(
+    Trying to retrieve it:
+      xdotool windowmove 0x05ebe693 2000 200
+    It's being flaky and inscrutible :-(
+    I can see the icon for it in the desktop panel, and it moves around,
+    sort of, but I can no longer get to it.
+    Oh! I can get to it by maximizing and then restoring.  Hmm.
+    Oh! values other than 0 do the logical screen!  That's weird!
+    Actually the criterion seems to be:
+      y <= 20: physical screen
+      y >= 21: logical screen
+
+    Also maybe useful:
+      xdotool getactivewindow windowmove --relative 1 1
+    argh! that moves by a huge amount: https://stackoverflow.com/questions/53356562/wmctrl-xdotool-move-all-windows-by-just-1px
+    oh hmm, actuall doing it absolute gets it wrong by that much too.
+    I think it's wrong by the amount of window decoration:
+    it drifts by +11+60 each time.
+
+Q: Ok, now that I can sort of control window positions using xdotool,
+   can I recover from this annoying state I get into sometimes,
+   in which the displays go back to mirrored, and when I fix it in prefs,
+   all the windows have moved over to the left (laptop) phys screen,
+   when I want them all on the right (external monitor) one?
+
+PA:
+                 +-----------+
+     +-----------+           |
+     | 1920x1080 | 2560x1440 |
+     +-----------+-----------+
+   And logical size is 4480x1440:
+     xdotool getdisplaygeometry
+       2560 1440
+
+   I think I have to list all the positions first,
+   and then, for any whose left side corner seems to be on the left screen,
+   just move it over to the right by the size of that screen (1920).
+   For reference, the sizes are:
+
+   To list windows:
+     wmctrl -l
+
+   To list only gnome-terminal or chrome windows:
+     xdotool search -class gnome-terminal
+     xdotool search -class chrome
+   but why doesn't this work??
+     xdotool search --any --class gnome-terminal --class chrome
+   I guess I don't understand xdotool :-(
+   There is something from the author here that I don't understand:
+     https://askubuntu.com/questions/209784/xdotool-unknown-command-21043361#answer-210296
+  
+
+   To get current geometry:
+     xwininfo -id 0x5ec3322
+	xwininfo: Window id: 0x5ec3322 "  donhatch@donhatch-glaptop2: ~"
+
+	  Absolute upper-left X:  1982
+	  Absolute upper-left Y:  285
+	  Relative upper-left X:  10
+	  Relative upper-left Y:  34
+	  Width: 494
+	  Height: 561
+	  Depth: 24
+	  Visual: 0x5ab
+	  Visual Class: TrueColor
+	  Border width: 0
+	  Class: InputOutput
+	  Colormap: 0x5e00005 (installed)
+	  Bit Gravity State: NorthWestGravity
+	  Window Gravity State: NorthWestGravity
+	  Backing Store State: NotUseful
+	  Save Under State: no
+	  Map State: IsViewable
+	  Override Redirect State: no
+	  Corners:  +1982+285  -2004+285  -2004-594  +1982-594
+	  -geometry 80x43+1972+251
+
+     xdotool getwindowgeometry 0x5ec3322
+     xdotool search -class gnome-terminal getwindowgeometry %@
+
+  Can get whole tree as: xwininfo -root -tree
+  but that's too many, I don't want to move children.
+  I guess I want to move only things that are immediate children of the root?
+
+  And, need to be careful to move parent, not child, of frame vs internal window.
+
+  Ok let's keep it simple for starters, and move only gnome-terminal windows
+  and chrome windows.
+
+  windowids=$(xdotool search --class gnome-terminal; xdotool search -class chrome)
+  for windowid in $windowids; do
+    echo $windowid; (
+      eval $(xdotool getwindowgeometry --shell $windowid);
+      echo windowid=$windowid: WINDOW X=$X Y=$Y;
+      if (($X < 1920)); then
+        echo xdotool windowmove $windowid $(($X - 11 + 1920)) $(($Y - 60));
+             xdotool windowmove $windowid $(($X - 11 + 1920)) $(($Y - 60));
+      fi
+    );
+  done
+
+  Holy moly, it worked!!
