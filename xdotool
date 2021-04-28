@@ -1,0 +1,6 @@
+
+
+First use `--repeat 0` to confirm position:
+  xdotool mousemove 2200 620 click --delay 5 --repeat 0 1
+then:
+  xdotool mousemove 2200 620 click --delay 5 --repeat 1000 1

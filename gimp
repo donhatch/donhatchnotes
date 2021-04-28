@@ -95,6 +95,7 @@ A: the help for + (view->zoom release mouse, hover over '+', F1)
        A: oh fooey, they aren't really both +; one is + and the other is
           numeric-keyboard-+.
           Okay so I'll reassign the first one to be = instead.
+   Note: I also unchecked "save shortcuts on exit".  I like explicit.
 
 Q: how to see what rgb color is under the cursor?
 A: Pointer dialog

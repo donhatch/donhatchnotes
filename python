@@ -378,6 +378,13 @@ FEATURES TO KEEP IN MIND:
 
 QUESTIONS (most recent first):
 ====================================
+Q: simple iteration for this?
+     for i in indices_while_growing(list):
+       ...
+   or:
+     for item in while_growing(list):
+       ...
+
 Q: Technical reason for `pass` in Python?
 
 Is there a *technical* reason why `pass` must be used
@@ -730,5 +737,6 @@ PYTHON PROS AND CONS:
     CON: requiring \ at end of line when splitting lines
       is somewhat error prone-- extra space can get inserted
       when cutting and pasting or moving from unix to dos file systems
+
 
 
