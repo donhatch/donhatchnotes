@@ -1,0 +1,73 @@
+go/rocktree-to-3d-tiles-cheat-sheet
+ -> pdf is good, for starters:
+    https://github.com/CesiumGS/3d-tiles/blob/master/3d-tiles-overview.pdf
+
+    https://github.com/CesiumGS/3d-tiles/blob/afa1fa3815c3e3bb97fe26a5e5665186702743ba/README.md
+
+
+Q: In section 2 of pdf, it says:
+    "The `geometricError` property is used to quantify the visual error that woudl occur if the tileset was not rendered.   When the visual error exceeds a certain threshold, then the tileset and the tiles that it contains are considered for rendering.  Details of how the geometric error is used are given in Section 5, "Geometric Error".
+
+   But then in section 5 it says:
+    "Each tileset and each tile has a geometricError property that quantifies
+     the error of the simplified geometry compared to the actual
+     geometry."
+    - can be measured / translated into SSE "screen-space error";
+    - when SSE exceeds a certain threshold, the runtime will render
+      a higher level of detail.
+
+   These do not sound the same-- they sound complementary.
+   That is:
+     - the section 2 concept is comparing the tile's quality with rendering nothing.  (or, rendering the parent, without this child? or, rendering the next coarser available thing in a set of LODs?  not clear)
+     - the section 5 concept is comparing the tile's quality
+       with the real geometry, i.e. an infinitely-good version of it.
+
+PA: I think this may is key, in section 5:
+    - For a tileset, the geometric error is used to determine whether
+      the root tlle should be rendered.  (that sounds like section 2 concept)
+      For a tile, the geometric error is used to determine whether the
+      children of the tile should be renedered (that sounds like section
+      5 concept).
+PA: Ah, I think the blurb of section 2 says "is used" which should
+    be interpreted loosely-- that is, it's used along with other things,
+    it doesn't give a direct value of the visual error that would occur.
+    (except, maybe, at root).
+
+Q: what is the section 5 (tile) geometricError, conceptually?
+PA:  well, 5.1 shows the relationship beetwen it and sse:
+
+      sse = (geometricError*screenHeight) / (tileDistance * 2 * tan(fovy/2))
+
+    Oh!  It's actual max physical distance of error between
+    the representation and the reality, in some sense.
+
+    So it seems like section 5 gE for a tile
+    is related to the section 2 gE's of its children?
+    How, exactly?
+
+    Well, what happens when we remove a tile from being rendered?
+    *if* that tile was the single worst thing (i.e. load bearing) i.e. max sse,
+    then the worst thing becomes either:
+
+    AARGH this is complicated to think about!
+    Note that each tile can have several children, and also several LODs?
+    How are children and LODs related?  I'm totally confused.
+
+
+Q: in section 2 "Tilesets and tiles" picture,
+   it shows content at the leaves only.  That doesnt' seem right/useful;
+   I think there must be content at the internal nodes too?
+   Ah, yes, section 7 shows a better picture.
+   So, when relative error decides it
+
+   Ah cool!  So, a simple list of LODs
+   would be expressed as a parent/child/grandchild,
+   each with relative error.  Nice!
+   So, the decisions of whether to descend depend on both:
+   - would I do better by descending? and is the current quality
+     not acceptable?
+   - and is the child visible?
+
+   This is subtle!
+   TODO: write up the criterion and totally understand the optimized
+         rendering loop and how it accesses server!
