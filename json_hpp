@@ -1,0 +1,38 @@
+Q: I started to read up on json.hpp, this looks like an immediate dealbreaker:
+    https://json.nlohmann.me/home/faq/#number-precision
+   If it really were printing doubles with only 15 digits of precision, that would be inadequate: 17 is needed in general.
+A: Fortunately I think that doc is lying:  I tried printing some stuff out and it looks like it does some sort of smart adaptive thing that makes sure double->json->double is non-lossy.
+
+Q: So wait a minute, when I say, in c++:
+    json j = {{"a","b"},{"c","d"}};
+  How does it know whether I want this json string:
+    '[["a","b"],["c","d"]]'
+  or this other json string:
+    '{"a":"b", "c":"d"}' ?
+
+A: ah, that's one of the edge cases described in the doc
+  https://github.com/nlohmann/json. All the edge cases listed are:
+
+  // a way to express the empty array []
+  json empty_array_explicit = json::array();
+
+      // ways to express the empty object {}
+  json empty_object_implicit = json({});
+  json empty_object_explicit = json::object();
+
+  // a way to express an _array_ of key/value pairs [["currency", "USD"],
+  ["value", 42.99]] json array_not_object = json::array({ {"currency", "USD"},
+  {"value", 42.99} });
+
+Q: does json.hpp have copies of everything?  or refs?
+A: appears to be copies, as can be seen here.
+    json j1 = {{"a", "b"}};
+    json j2 = j1;
+    j1["c"] = "d";
+    j2["e"] = "f";
+    LOG(INFO) << "          j1.dump() = " << j1.dump();
+    LOG(INFO) << "          j2.dump() = " << j2.dump();
+
+Q: given that assigning a parent to a child is deep copy operation,
+   is creating a json structure from a ragged array horribly inefficient?
+   In particular, a long parent-child chain, say of length 100.

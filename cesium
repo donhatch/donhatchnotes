@@ -1,0 +1,116 @@
+Q: how do you build cesium?
+PA:
+  https://github.com/CesiumGS/cesium/blob/master/Documentation/Contributors/BuildGuide/README.md
+
+  NOTE: it recommends forking and then locally cloning my fork.
+  I'm just locally cloning the original, for now.
+
+    cd ~/gitrepos
+    git clone https://github.com/CesiumGS/cesium.git  # takes a long time
+    cd cesium
+
+    git config --global pull.rebase preserve
+    git config --global fetch.prune true
+
+  I added this step:
+    virtualenv venv
+    # and then in each new shell in which I want to run npm...
+    source venv/bin/activate
+  And proceeding with instructions from that page:
+    npm install
+       npm ERR! code ERESOLVE
+       npm ERR! ERESOLVE unable to resolve dependency tree
+       npm ERR! 
+       npm ERR! While resolving: cesium@1.81.0
+       npm ERR! Found: rollup@2.47.0
+       npm ERR! node_modules/rollup
+       npm ERR!   dev rollup@"^2.22.1" from the root project
+       npm ERR! 
+       npm ERR! Could not resolve dependency:
+       npm ERR! peer rollup@">=0.66.0 <2" from rollup-plugin-uglify@6.0.4
+       npm ERR! node_modules/rollup-plugin-uglify
+       npm ERR!   dev rollup-plugin-uglify@"^6.0.3" from the root project
+       npm ERR! 
+       npm ERR! Fix the upstream dependency conflict, or retry
+       npm ERR! this command with --force, or --legacy-peer-deps
+       npm ERR! to accept an incorrect (and potentially broken) dependency resolution.
+       npm ERR! 
+       npm ERR! See /home/donhatch/.npm/eresolve-report.txt for a full report.
+
+       npm ERR! A complete log of this run can be found in:
+       npm ERR!     /home/donhatch/.npm/_logs/2021-05-08T06_28_07_441Z-debug.log
+
+  Blech. Ok, trying --legacy-peer-deps first
+    npm install --legacy-peer-deps
+
+      npm WARN deprecated urix@0.1.0: Please see https://github.com/lydell/urix#deprecated
+      npm WARN deprecated har-validator@5.1.5: this library is no longer supported
+      npm WARN deprecated resolve-url@0.2.1: https://github.com/lydell/resolve-url#deprecated
+      npm WARN deprecated chokidar@2.1.8: Chokidar 2 will break on node v14+. Upgrade to chokidar 3 with 15x less dependencies.
+      npm WARN deprecated fsevents@1.2.13: fsevents 1 will break on node v14+ and could be using insecure binaries. Upgrade to fsevents 2.
+      npm WARN deprecated request@2.88.2: request has been deprecated, see https://github.com/request/request/issues/3142
+      npm WARN deprecated debug@4.1.1: Debug versions >=3.2.0 <3.2.7 || >=4 <4.3.1 have a low-severity ReDos regression when used in a Node.js environment. It is recommended you upgrade to 3.2.7 or 4.3.1. (https://github.com/visionmedia/debug/issues/797)
+      npm WARN deprecated debug@4.1.1: Debug versions >=3.2.0 <3.2.7 || >=4 <4.3.1 have a low-severity ReDos regression when used in a Node.js environment. It is recommended you upgrade to 3.2.7 or 4.3.1. (https://github.com/visionmedia/debug/issues/797)
+      npm WARN deprecated debug@4.1.1: Debug versions >=3.2.0 <3.2.7 || >=4 <4.3.1 have a low-severity ReDos regression when used in a Node.js environment. It is recommended you upgrade to 3.2.7 or 4.3.1. (https://github.com/visionmedia/debug/issues/797)
+
+      added 918 packages, and audited 919 packages in 37s
+
+      57 packages are looking for funding
+	run `npm fund` for details
+
+      10 vulnerabilities (4 low, 6 high)
+
+      To address all issues (including breaking changes), run:
+	npm audit fix --force
+
+      Run `npm audit` for details.
+
+    npm run build
+    npm run minifyRelease
+
+    npm start  # NOT --public
+
+      http://localhost:8080/
+        http://localhost:8080/Apps/CesiumViewer/index.html
+        http://localhost:8080/Apps/Sandcastle/index.html
+        http://localhost:8080/Build/Cesium/Cesium.js
+
+  And that's what I can use in other apps that need a local Cesium.js.
+  It's faster to develop by skipping the "npm run minify" step each time,
+  so point to CesumUnminified instead of Cesium.
+  E.g.:
+    <script src="http://localhost:8080/Build/CesiumUnminified/Cesium.js"></script>
+    <link href="http://localhost:8080/Build/CesiumUnminified/Widgets/widgets.css" rel="stylesheet">
+  TODO: but that still requirese "npm run combine", wtf?
+
+  Now, to edit files and make them get served by this server:
+    In another window:
+      cd ~/gitrepos/cesium
+      source venv/bin/activate
+      npm run build-watch
+        # hmm, not useful, doesn't produce CesiumUnminified/Cesium.js
+      npm run combine  # includes build
+        # this produces the CesiumUnminified/Cesium.js as desired.  how to skip this step?
+  Argh, painful!  It takes 46 seconds for each build.
+      # then edit files in Sources/Core/...
+
+Q: It's so slow to build.
+   Is there a way to temporarily hotwire instead, for a very quick compile/edit/run cycle?
+A: Yes, just edit Build/CesiumUnminified.js ; it's the one big file.
+   NOTE: but do *not* build again, or that will clobber the changes!!!
+
+Q: how to hook into the debug hooks that look like this?
+     //>>includeStart('debug', pragmas.debug);
+
+Q: How to load Cesium, as modules?  (That will be much quicker to build-- maybe 7s instead of 44s)
+   I just want "build" and then to use the AMD module.  How?
+   Hmm wait, it says they've migrated from AMD
+   to "ES6 JavaScript modules".
+PA: huh, CesiumViewer.js just imports stuff from "../../Source/Cesium.js" and it seems to work;
+    will it pick up changes??
+    YES, if I hard reload!  I think maybe this the way to develop!
+    In fact... didn't even need to hard reload?  Wow!
+
+   Ok do this:
+     import * as Cesium from "../../Source/Cesium.js";
+

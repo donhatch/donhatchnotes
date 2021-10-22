@@ -1,0 +1,119 @@
+https://swtch.com/~rsc/regexp/regexp1.html "Regular Expression Matching Can Be Simple And Fast
+(but is slow in Java, Perl, PHP, Python, Ruby, ...)"
+
+Tangent: It talks about backreferences.
+I was wondering, would it be possible to use backreferences to implement recursive bracket matching?
+E.g. the set:
+  {"" "[]" "[][]" "[[]]" "[][][]" "[][[]]" "[[]][]" "[[[]]]" ... }
+would be matched by:
+  /(|\[\1\])/
+  /(|\(\1\))/
+  /(|\{\1\})/
+or perhaps even:
+  /|\(\0\)/
+
+And then how about matching an arithmetic expression involving +,*, and parens?
+Well, the grammar is:
+  EXPR = TERM | EXPR '+' TERM
+  TERM = FACTOR | TERM '*' FACTOR
+  FACTOR = \d+ | '(' EXPR ')'
+or:
+  EXPR = TERM ( '+' TERM )*
+  TERM = FACTOR ( '*' FACTOR)*
+  FACTOR = \d+ | '(' EXPR ')'
+
+Backtracking regexes for the first:
+  /EXPR/
+  /(TERM)|\0\+\1/
+  /((FACTOR)|\1\*\2)|\0\+\1/
+  /((\d+|\(\0\))|\1\*\2)|\0\+\1/
+  |||FACTOR    |       |       |
+  ||TERM               |       |
+  |EXPR                        |
+
+Backtracking regexes for the second:
+  /EXPR/
+  /(TERM)(\+\1)*/
+  /((FACTOR)(\*\2)*)(\+\1)*/
+  /((\d+|\(\0\))(\*\2)*)(\+\1)*/
+  |||FACTOR    |       |       |
+  ||TERM               |       |
+  |EXPR                        |
+
+Q: can I have a notation that labels instead of numbers?
+   The following isn't quite feasible since it conflicts with existing syntax, but something like:
+  /EXPR:(TERM:(FACTOR:\d+|\(\EXPR\))|\TERM\*\FACTOR)|\EXPR\+\TERM/
+  /EXPR:(TERM:(FACTOR:\d+|\(\EXPR\))(\*\FACTOR)*)(\+\TERM)*/
+PA: perl actually has this: (?<name>...) or (?'name'...). The backreference may then be written as \g{name}... I think? (might not work for recursive?)
+  https://perldoc.perl.org/perlretut#Named-backreferences
+
+Q: is there a natural corresponding form for recursive backreferences on the RHS?
+
+
+Note, PCRE actually supports this (which means perl supports it I guess):
+  http://rachbelaid.com/recursive-regular-experession/
+The syntax is (?0), (?1), etc., or (?R) as a synonym for whole thing.
+So it's:
+  /((\d+|\((?0)\))|(?1)\*(?2))|(?0)\+(?1)/
+  /((\d+|\((?0)\))(\*(?2))*)(\+(?1))*/
+Wait what? This is silly.  It also supports \1 etc so why not just use that?  It's unambiguous, right?
+And it seems to be supported, too, so that doc is weird.
+
+Regarding its palindrome example r"(\w)((?R)|(\w?))\1" ,
+First of all, it says "is None" where it means "is not None".
+Second of all, it seems \0 can be used instead of the (?R).
+Third of all, it doesn't match a single char.
+If I try to fix that:
+  >>> regex.search(r"\w|(\w)(?R)\1", "rr") is not None
+  True
+  >>> regex.search(r"\w|(\w)(?R)\1", "r") is not None
+  True
+  >>> regex.search(r"\w|(\w)(?R)\1", "") is not None
+  False
+  >>> regex.search(r"\w|(\w)(?R)\1", "ab") is not None
+  True   WTF???
+same if I use \0 instead of (?R), I think:
+  regex.search(r"\w|(\w)\0\1", "ab") is not None
+OH! This is looking for it anywhere in the string.
+So, what if I add ^ and $?  Unfortunately I think that will ruin ability to use \0, hmm,
+so it will fail to match stuff that it should.
+  regex.search(r"^\w|(\w)\0\1$", "ab") is not None
+  True   WTF???
+  regex.search(r"^(\w|(\w)\1\2)$", "ab") is not None
+  regex._regex_core.error: cannot refer to an open group at position 11
+hmm that's weird. ok back to (?1) instead
+  regex.search(r"^(\w|(\w)(?1)\2)$", "ab") is not None
+  False
+  regex.search(r"^(\w|(\w)(?1)\2)$", "aa") is not None
+  False  WTF??
+well I think this is more correct, anyway, though.
+oh, I see.  the base case is 1 char, so it matches only odd.  Hmm.
+Fixing it:
+  regex.search(r"^(\w|(\w)(?:(?1)|)\2)$", "aa") is not None
+  True
+  regex.search(r"^(\w|(\w)(?1)?\2)$", "aa") is not None
+  True
+Or, if I want to match empty string, it's easier:
+  regex.search(r"^(|\w|(\w)(?1)\2)$", "aa") is not None
+  regex.search(r"^(\w?|(\w)(?1)\2)$", "aa") is not None
+
+(used playground to figure it out: https://regex101.com/r/cQ1uC9/1 )
+
+Balanced parens:
+  regex.search(r"^((\((?1)\))?)$", "") is not None
+
+
+
+Q: why does PCRE require separate syntax for recursive backreferences?
+
+[For example](https://www.regular-expressions.info/recurse.html),
+the regex `a(?0)?z` matches one or more `a`'s followed by the same number of `z`'s.
+Why is this separate syntax (`(?R)`, `(?0)`, `(?1)` necessary?
+That is, wouldn't it be simpler and more natural to use a backreference instead (`\0`, `\1`, etc.)?
+So the (recursive) regex for the above would be, simply, `a\0?z' .
+This wouldn't introduce any ambiguity, since such backreferences are otherwise illegal.
+
+XXX oh hey, that actually works?  But \1 doesn't work for some reason
+XXX oh wait, no, it doesn't work.
+I think maybe the answer is:  \0 means the character \0, it would be awkward to change that.
+And maybe the rest of the reason is a (still wrongheaded, I think) piggyback on that.
