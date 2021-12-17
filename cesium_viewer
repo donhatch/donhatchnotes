@@ -1,0 +1,13 @@
+Q: what are the mouse controls supposed to do, exactly?
+PA: https://cesium.com/learn/cesiumjs/ref-doc/ScreenSpaceCameraController.html
+    Not very helpful :-(
+
+  Empirically:
+    LMB:
+    - If looking straight at earth with north pole up:
+      - left/right: twirl earth around polar axis
+      - up/down: tilt north pole away from / towards camera
+    - If looking straight at earth with north pole not up:
+      - same, but rotated
+    Tilt/twirl earth.
+
