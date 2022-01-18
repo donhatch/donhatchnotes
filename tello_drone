@@ -12,17 +12,6 @@ References:
 - developer wiki
   https://tellopilots.com/wiki
 
-- wireshark dissectors here:
-     git clone https://bitbucket.org/PingguSoft/pytello.git
-  - it has tello.lua and tello2.lua
-  - don't install them both; they will get an error "/home/donhatch/.local/lib/wireshark/plugins/tello2.lua:24: attempt to call global 'message' (a nil value)"
-  - tello2.lua seems to be the more sophisticated one, but source code is harder to read,
-    and doesn't highlight the correspondences between specific bytes and fields correctly like tello.lua does
-  - its SIZE is in bits; divide it by 8 to get bytes
-     (all the protocol info pages are wrong; the size in bits is simply bytes 1-2 in little endian)
-  
-
-
 Describes the binary UDP protocol (reverse engineered):
   https://gobot.io/blog/2018/04/20/hello-tello-hacking-drones-with-go/
 
@@ -33,17 +22,44 @@ More complete details about the low-level protocol:
 High-level observations:
   - there isn't one api or way of doing things; there are several,
     and none of them works very well :-(
-  - the tello has a bug that makes it always send "ok"s to the first
-    port that sent it a command.  therefore always use an explicit port
+  - the tello has a bug that makes it always send "ok"s (and "error"s etc.) to the first
+    address/port that sent it a command.  Therefore, it's good to always use an explicit port
     to send commands from, and always use the same one.  I use 7777 in the examples below.
+  - motor shuts off when battery is down to 10%, but wifi and video still works til down to 2%
+  - tello shuts off when temperature too high (templ? temph? avg of the two): typical last temperature before shutdown is templ,temph = 93,96 or 92,96 or 93,96)
 
-Hints on controlling using socat:
+WIRESHARK:
+- note that tshark can be clearer and easier to use in some cases (tcpdump seems roughly equivalent but doesn't recognize the wireshark dissectors)
+  - I had to add myself to group wireshark, which takes effect on next X session I think
+    (and maybe not even that-- if for some reason I'm not in the group in this shell, use `sg wireshark wireshark` or `sg wireshark tshark`)
+  - wireshark dissectors here:
+       git clone https://bitbucket.org/PingguSoft/pytello.git
+    - it has tello.lua and tello2.lua
+    - put *one* of them into /home/donhatch/.local/lib/wireshark/plugins/._
+    - don't install them both; they will get an error "/home/donhatch/.local/lib/wireshark/plugins/tello2.lua:24: attempt to call global 'message' (a nil value)"
+    - tello2.lua seems to be the more sophisticated one, but source code is harder to read,
+      and doesn't highlight the correspondences between specific bytes and fields correctly like tello.lua does
+    - its SIZE is in bits; divide it by 8 to get bytes
+       (all the protocol info pages are wrong; bytes 1-2 little endian is simply the size *in bits*)
+
+NOTES ON CONTROLLING USING SOCAT (and other programs):
+
+  Note that all the programs and libraries are haphazard
+  (some connect from local port number 8889, same as tello port, wtf?
+   and some connect from local port 8890, which is the state recieving port, wtf? but luckily that's
+   what punched through the firewall initially so state packets can come through, which enabled me to see what's going on)
+  And none of them are cognizant of the bug that makes the tello send all replies to its first client connection.
+  So I try to not use any of them, and I try to do things more directly,
+  and always connect from a consistent port (I chose 7777).
+
   On my computer, I have to allow necessary traffic through the firewall
   (if I don't do this, I get bizarre haphazard behavior such as 8890 punches through firewall when a program binds to local 8890 for the outgoing command):
+    sudo ufw status
     sudo ufw allow 8890/udp
     sudo ufw allow 11111/udp
     sudo ufw status
   Then when done:
+    sudo ufw status
     sudo ufw delete allow 11111/udp
     sudo ufw delete allow 8890/udp
     sudo ufw status
@@ -414,8 +430,8 @@ PA:
     nmcli d wifi connect TELLO-F00179
     nmcli d wifi connect freeman
 Q: wtf, I can't set the wifi name password?  and I think that's necessary for video??  (no, it isn't, problem was firewall)
-Q: isn't UDP completely unsuitable for this? it's doing request/reply stuff, when a packet is dropped, recovery (if any) takes many seconds,
-   that seems unacceptable.
+Q: isn't UDP completely unsuitable for this? it's doing request/reply stuff, so when a packet is dropped, recovery (if any) takes many seconds;
+   that seems unacceptable. ??
 Q: using damiafuentes/DJITelloPy, sometimes it gets in a bad state where it
    just hangs trying to execute tello.connect();
    it says:
@@ -434,31 +450,15 @@ Q: using damiafuentes/DJITelloPy, sometimes it gets in a bad state where it
    How do I get it out of that state??
 PA: running the tello_state.py script from the Tello-Python github repo
 seems to get it out of that bad state so that this script works.
-Q: or, sometimes it doesn't even get the ok,
-   no idea what to do in this case.
-   switching off/on the wife connection to the drone usually works.
-   but sometimes it doesn't, in which case it's necessary to powercycle the drone.
-   and sometimes even that doesn't work... particularly when battery is low, in which case change it.
+A: that was because the firewall was rejecting the state packets which to to port 8890,
+   until some other program with its shoelaces tied together actually sent a request from port 8890,
+   which punched a hole through the firewall.
+   Just open ports 8890 and 11111 instead, and all is good.
+
 Q: (damiafuentes/DJITelloPy) for each of the query commands, it says "get_..." is usually faster.
    is that because the get commands read the cached value
    that's polled every .1s?
 A: yes, the source code says it just returns get_state_field(...)
-
-Q: how do I use the wireshark dissector djiuav?
-A: don't, it's not right.  but https://tellopilots.com/wiki/protocol/ says:
-   "PinguSoft has made a [wireshark dissector](https://bitbucket.org/PingguSoft/pytello/src/master/) which can be used to analyze the packets getting sent between the tello and your app."
-   it's one or both of the .lua files: tello.lua or tello2.lua
-     git clone https://bitbucket.org/PingguSoft/pytello.git
-     cd pytello
-     mkdir ~/.local/lib/wireshark
-     mkdir ~/.local/lib/wireshark/plugins
-     cp tello.lua tello2.lua ~/.local/lib/wireshark/plugins/.
-     wireshark
-	Lua: Error during loading:
-	/home/donhatch/.local/lib/wireshark/plugins/tello2.lua:24: attempt to call global 'message' (a nil value)
-	stack traceback:
-		/home/donhatch/.local/lib/wireshark/plugins/tello2.lua:24: in main chunk
-   (actually that happens whenever both tello.lua and tello2.lua in the plugins directory)
 
 Sun Jan 16 11:48:23 AM PST 2022
   using wireshark to see why my example0.py fails with that "raise Exception('Did not receive a state packet from the Tello')"
@@ -530,222 +530,4 @@ Sun Jan 16 11:48:23 AM PST 2022
       After any kind of traffic,
       tell starts sending state packets to port 8890 every .1 seconds-- strange!  Even if no program ever used port 8890.
 
-
-    - in example0.py, I think all the real commands (command, something,ok, command, ok, land, error,ok)
-      happen on port 8889/8889.  Hmm.
-      I guess that's because DJITelloPY/djitellopy/tello.py uses CONTROL_UDP_PORT=8889 for both;
-      if I change the local one to 7777, then it uses that instead.
-
-      Oh wow, I think the tello gets confused--
-      if it was talking to 7777,
-      then I do a fix0 on 7778, it sends the ok to 7777?
-      In fact it keeps sending it to 7777, forevermore!  Until the tello is restarted, I guess.
-
-      Hint: don't use local port 8889, it's unnecessarily confusing.
-      Hint: don't use local port 8890 either, it's very confusing: that's the port
-            the tello starts sending state to every .1 seconds,
-            triggered by "command" to tello port 8889 from any local port
-            (according to SDK manual)
-            (and sometimes it's happening even without me even doing that? weird)
-      Hint: don't try using two different ports, in same tello power cycle; it gets confused
-            and only ever replies to the first.
-
-    - between streamon and streamoff, it seems to be sending frames at 30fps, to port 11111.
-      (that means we can be getting video from at most one tello at a time)
-      But for some reason, the recvfrom gets stuck?? Similar to how it gets stuck when trying to recieve state, sometimes.
-
-    - when it's in a good state (after fix0), the following works
-      (assuming ifconfig says .3; it doesn't work with localhost unfortunately)
-      (without the -n, sometimes nc is in a state where it doesn't work at all: "nc: getnameinfo: Temporary failure in name resolution")
-      This is equivalent to the latter par of tello_state.py (it's missing the beginning part where it connects from local port 8890 and sends "command")
-          nc -kluvn 192.168.10.3 8890
-            pitch:-1;roll:0;yaw:0;vgx:0;vgy:0;vgz:0;templ:82;temph:84;tof:10;h:0;bat:92;baro:-41.39;time:2;agx:-16.00;agy:1.00;agz:-988.00;
-            pitch:-1;roll:0;yaw:0;vgx:0;vgy:0;vgz:0;templ:82;temph:84;tof:10;h:0;bat:92;baro:-41.38;time:2;agx:-19.00;agy:3.00;agz:-1001.00;
-            pitch:-1;roll:0;yaw:0;vgx:0;vgy:0;vgz:0;templ:82;temph:84;tof:10;h:0;bat:92;baro:-41.39;time:2;agx:-24.00;agy:3.00;agz:-997.00;
-            pitch:-1;roll:0;yaw:0;vgx:0;vgy:0;vgz:0;templ:82;temph:84;tof:10;h:0;bat:92;baro:-41.36;time:2;agx:-18.00;agy:3.00;agz:-998.00;
-            pitch:-1;roll:0;yaw:0;vgx:0;vgy:0;vgz:0;templ:82;temph:84;tof:10;h:0;bat:92;baro:-41.39;time:2;agx:-21.00;agy:3.00;agz:-999.00;
-            ...
-      that's the same weird behavior I'm getting on example0 !
-      that is, when in bad state, wireshark claims the state messages are getting sent,
-      but neither nc nor example0 can hear them when they do recfrom.  wtf?
-
-      Let's see, how do I do the first part?
-      That is, sending command "command" and maybe getting "ok".
-      So, how do I do that?
-      Trying:
-          nc -un -s192.168.10.3 -p8890 192.168.10.1 8889
-      and can send things like "command<ctrl-d>" "streamon<ctrl-d>" "streamoff<ctrl-d>"
-
-      So theoretically, could do these three netcats:
-      (note, do *not* use the -v option when in can-send mode; that sends extra 'X's on start and at various times, which we don't want)
-          nc -un -s192.168.10.3 -p7777 192.168.10.1 8889
-          nc -kluvn 192.168.10.3 8890
-          nc -kluvn 192.168.10.3 11111
-      and send "command<ctrl-d>" "streamon<ctrl-d>" "streamoff<ctrl-d>" to the first one, and stuff should come out on the second... but it's not working!
-      (that is, wireshark says the state and video packets are being sent, but the netcats listening on those ports aren't receiving them)
-
-      But if I change that 7777 to 8890, then it works, and furthermore makes the pure-listening netcat instance work too, from then on. ???
-      I guess something about sending the "command" kicks it into a better mode??
-
-Mon Jan 17 08:56:20 PM PST 2022
-  Wait wtf, can't fix using this like I was able to a moment ago,
-  even if I powercycle drone and stuff:
-      echo -n "command" | nc -un -s192.168.10.3 -p8890 192.168.10.1 8889
-  but tello_fix0 still works??  Dammit, I thought they were the same
-  (oh, answer is I was saying "connect", should have been "command")
-
-Mon Jan 17 09:21:47 PM PST 2022
-  hmm, looks like socat is better and more sophisticated than netcat.
-  lots of info here:  http://www.dest-unreach.org/socat/doc/socat.html
-  so let's translate the above into socat.
-  First, a simple server and client (just type into each):
-      socat STDIO UDP4-LISTEN:8890
-      socat STDIO UDP4:localhost:8890
-  or:
-      socat - UDP4-L:8890
-      socat - UDP4:localhost:8890
-  Ok now for real...
-  This starts it and starts recieving on same port:
-      echo -n "command" | socat - UDP4:192.168.10.1:8889,bind=:8890
-  This recieves and sends command, on 2 different ports:
-      socat - UDP4-L:8890
-      echo -n "command" | socat - UDP4:192.168.10.1:8889,bind=:8890
-  It works!
-  CBB: one binary packets and "ok" come back.  Should decode them.
-  
-  Ok now can we get the video stream too?
-  I think that should just be a question of listening on port 11111:
-      socat - UDP4-L:8890,fork
-      socat - UDP4-L:11111,fork
-      echo -n "command" | socat - UDP4:192.168.10.1:8889,bind=:7777
-      echo -n "streamon" | socat - UDP4:192.168.10.1:8889,bind=:7777
-      echo -n "streamoff" | socat - UDP4:192.168.10.1:8889,bind=:7777
-  Not working :-(  (wireshark says the streamon started packets to 11111,
-  but the listener isn't hearing them... and they are not generating "ICMP Port Unreachable" errors either??
-
-  ARGH! And, tello_fix0 is *more* reliable than the previous one!
-  This is terrible :-(
-  Q: does bind=:8890 make it more reliable, like tello_fix0 is?
-  A: yes!  argh, wtf?  (note that the "ok" still goes to whoever talked to it first)
-
-  Regarding failure to get the stuff that's coming to 11111:
-  That's this "server":
-      socat - UDP4-L:11111,fork
-  and I can talk to it using:
-      socat - UDP4:localhost:11111
-  (type stuff back and forth)
-  And to see the pids and ports connected:
-      lsof | grep 11111
-  So why is it not getting the stuff from the tello, coming to port 11111 ???
-
-  Is it some kind of firewall?
-
-Mon Jan 17 11:14:51 PM PST 2022
-  Oh cool tshark is easier for me to use than wireshark in some ways!
-
-Mon Jan 17 11:38:43 PM PST 2022
-  note, have to run example0 as:
-    PYTHONPATH=/home/donhatch/gitrepos/DJITelloPy:${PYTHONPATH} python3 ./example0.py
-  (I forget why.. something to do with port selection)
-
-  Q: how to tell whether the firewall (iptables) is dropping the packets to 11111?
-  PA: https://www.thegeekstuff.com/2012/08/iptables-log-packets
-
-      can grep for "IPTables-Dropped" from /var/log/messages or /var/log/kern.log
-
-  Hmm, it doesn't seem to be dropping any of the 11111's
-  well maybe a couple of them, but it's also saying it dropped some of the ones to 8890 too, hmm.
-
-  So, still no clue on why I'm not able to read the 11111's.
-
-Tue Jan 18 12:22:19 AM PST 2022
-  Let's try doing the "command" from lots of different ports,
-  and see which ones the "ok" comes back on.
-  Restarting the tello each time...
-    echo -n "command" | socat - UDP4:192.168.10.1:8889,bind=:7777
-      ok
-    echo -n "command" | socat - UDP4:192.168.10.1:8889,bind=:7778
-      ok
-    echo -n "command" | socat - UDP4:192.168.10.1:8889,bind=:10000
-      ok
-    echo -n "command" | socat - UDP4:192.168.10.1:8889,bind=:11110
-      ok
-    echo -n "command" | socat - UDP4:192.168.10.1:8889,bind=:11111
-      ok
-  WTF?  The ok *does* come back on that port??
-  But the packets don't??
-  
-  Note that the video packets come from tello port 62512, to local port 11111.
-
-Tue Jan 18 04:00:37 AM PST 2022
-  Trying:
-    sysctl net.ipv4.conf.all.rp_filter
-      1
-    sudo sysctl net.ipv4.conf.all.rp_filter=0
-    sysctl net.ipv4.conf.all.rp_filter
-      0
-  Nope, didn't help.
-
-  Trying (per https://jvns.ca/blog/2016/08/24/find-out-where-youre-dropping-packets/):
-    watch -n0.1 netstat -suna
-  nope, doesn't say anything is being dropped
-
-Tue Jan 18 04:16:34 AM PST 2022
-  oh wait!
-  https://support.google.com/techstop/answer/11030625?hl=en
-  says thaat laptops use ufw ("uncomplicated firewall")
-
-    sudo systemctl status ufw
-	● ufw.service - Uncomplicated firewall
-	     Loaded: loaded (/lib/systemd/system/ufw.service; enabled; vendor preset: enabled)
-	     Active: active (exited) since Mon 2022-01-17 23:24:57 PST; 4h 52min ago
-	       Docs: man:ufw(8)
-	    Process: 883 ExecStart=/lib/ufw/ufw-init start quiet (code=exited, status=0/SUCCESS)
-	   Main PID: 883 (code=exited, status=0/SUCCESS)
-		CPU: 159ms
-	Jan 17 23:24:56 donhatch-glaptop2 systemd[1]: Starting Uncomplicated firewall...
-	Jan 17 23:24:57 donhatch-glaptop2 systemd[1]: Finished Uncomplicated firewall.
-    sudo systemctl status ufw
-        (same output)
-
-  so how do I tell whether it's discarding packets??
-
-  well could just disable it temporarily...
-    sudo ufw disable
-    sudo ufw enable
-
-  ok weird, it's kind of the opposite of what I expected: when ufw is disabled, I don't get the "ok" messages to port 11111, and, in fact, state packets don't come through!
-  very specifically, disabling it and re-enabling it makes the state packets stop and then start again.  hmm!
-  so, maybe we're on to something here.
-  oh wait, there is a /var/log/ufw.log
-  and it is saying some stuff is blocked.
-
-  how do I allow?
-  maybe useful:
-    https://askubuntu.com/questions/397955/how-to-configure-ufw-on-ubuntu-and-still-retain-internet-connection?rq=1#answer-397958
-  this probably isn't it, but trying:
-    sudo ufw allow 11111/udp
-  HOLY HELL, IT WORKS!!! THAT'S IT!
-  and to undo that:
-    sudo ufw delete allow 11111/udp
-  whoa, wait a minute, and *sometimes* this helps too?? wtf?
-    sudo ufw allow 8890/udp
-  ah!  I think I have an inkling of what's going on:
-  if I don't explicitly allow 8890, then the firewall
-  tries to be smart and open up a hole in the firewall
-  for replies.  so, if I send from my 8890
-  to tello's 8889, that allows traffic
-  to come back from tello's 8889 to my 8890.
-  But, I can just open that up categorically, using the ufw
-  command above.
-
-  Ok, now how to actually play it?
-  Trying, per https://tellopilots.com/threads/tello-video-web-streaming.455/
-    ffplay -probesize 32 -i udp://@:11111 -framerate 30
-  and to turn on the video stream:
-    socat - UDP4:192.168.10.1:8889,bind=:7777
-      command<ctrl-d>
-      streamon<ctrl-d>
-      streamoff<ctrl-d>
-  hmm, about .5s delay (longer than the phone app)
 
